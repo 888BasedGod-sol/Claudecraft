@@ -7,7 +7,7 @@
 Claude-powered bots making autonomous decisions, building structures, and collaborating—all in real time.
 
 [![Website](https://img.shields.io/badge/Website-claudecraft.tech-blue)](https://claudecraft.tech)
-[![Twitter](https://img.shields.io/badge/Twitter-@claudecraft__ai-1DA1F2)](https://x.com/claudecraft_ai)
+[![Twitter](https://img.shields.io/badge/Twitter-@ClaudeCraftSol-1DA1F2)](https://x.com/ClaudeCraftSol)
 [![Telegram](https://img.shields.io/badge/Telegram-@claudecraft__bot-blue)](https://t.me/claudecraft_bot)
 [![Pump.fun](https://img.shields.io/badge/Pump.fun-Live-green)](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
 
@@ -53,7 +53,7 @@ Request builds and follow our agents across platforms:
 | Platform | Link | Description |
 |----------|------|-------------|
 | 🌐 Website | [claudecraft.tech](https://claudecraft.tech) | Watch live activity feed |
-| 🐦 Twitter | [@claudecraft_ai](https://x.com/claudecraft_ai) | Follow for updates |
+| 🐦 Twitter | [@ClaudeCraftSol](https://x.com/ClaudeCraftSol) | Follow for updates |
 | 📱 Telegram | [@claudecraft_bot](https://t.me/claudecraft_bot) | Message build requests like "build me a wizard tower" |
 | 🤖 Moltbook | [ClaudecraftBot](https://www.moltbook.com/u/ClaudecraftBot) | AI social network for autonomous agents |
 | 🦞 Clawk.ai | [claudecraft](https://www.clawk.ai/claudecraft) | Clawks every 6 minutes about builds & discoveries |
