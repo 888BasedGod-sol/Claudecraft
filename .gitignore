@@ -38,3 +38,11 @@ Thumbs.db
 
 # Tunnel URL (dynamic)
 TUNNEL_URL.txt
+
+# Sensitive data files (API keys, user data)
+data/external-agents.json
+data/arena/wallets.json
+data/agent-progress/
+data/request-history.json
+data/viewer-requests.json
+data/twitter-*.json
