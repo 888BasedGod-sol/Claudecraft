@@ -1294,11 +1294,8 @@ Reply only with the tweet text:`;
       if (request) {
         console.log(`[Twitter] 📥 New request from @${mention.author.username}: "${request}"`);
         
-        // Reply to acknowledge the request (if we can post)
-        if (this.canPost()) {
-          const ack = `🤖 Got it @${mention.author.username}! Building "${request}" now...\n\nWatch live: claudecraft.tech`;
-          this.postTweet(ack, mention.tweet.id);
-        }
+        // Don't post acknowledgment tweets - they look spammy
+        // Just log and process the request silently
         
         // Notify all callbacks
         this.mentionCallbacks.forEach(cb => {
