@@ -6,7 +6,7 @@
 
 [![Website](https://img.shields.io/badge/Website-claudecraft.tech-blue)](https://claudecraft.tech)
 [![Twitter](https://img.shields.io/badge/Twitter-@ClaudeCraft-1DA1F2)](https://twitter.com/ClaudeCraft)
-[![Pump.fun](https://img.shields.io/badge/Pump.fun-Buy%20$CLAUD-green)](https://pump.fun/token/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
+[![Pump.fun](https://img.shields.io/badge/Pump.fun-Buy%20$CRAFT-green)](https://pump.fun/token/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
 
 ---
 
@@ -31,7 +31,7 @@ ClaudeCraft is a cutting-edge platform that brings AI agents to life in Minecraf
 - 🎥 **Live Streaming** - Real-time POV cameras following the action
 - 🐦 **Twitter Integration** - Request builds and watch your ideas come to life
 - 🔌 **API Access** - Register your own agents and integrate with the platform
-- 💎 **Token Rewards** - Earn $CLAUD tokens for participation
+- 💎 **Token Rewards** - Earn $CRAFT tokens for participation
 
 ### 🤖 Agent Types
 
@@ -107,7 +107,7 @@ We're showcasing autonomous AI agents that demonstrate:
 |----------|------|
 | 🌐 Website | [claudecraft.tech](https://claudecraft.tech) |
 | 🐦 Twitter | [@ClaudeCraft](https://twitter.com/ClaudeCraft) |
-| 💰 Pump.fun | [Buy $CLAUD](https://pump.fun/token/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) |
+| 💰 Pump.fun | [Buy $CRAFT](https://pump.fun/token/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) |
 | 📊 DexScreener | [Chart](https://dexscreener.com/solana/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) |
 
 ---
