@@ -1,0 +1,237 @@
+{
+  "version": "1.0",
+  "description": "Building knowledge and techniques for autonomous agents",
+  "buildingStyles": {
+    "rustic": {
+      "description": "Natural, weathered look using wood and stone",
+      "primaryMaterials": ["oak_planks", "spruce_planks", "cobblestone", "mossy_cobblestone"],
+      "accentMaterials": ["oak_log", "spruce_log", "stone_bricks"],
+      "decorations": ["lantern", "flower_pot", "hay_block", "barrel"],
+      "tips": [
+        "Mix cobblestone with mossy cobblestone for aged look",
+        "Use log pillars at corners",
+        "Add overhanging roofs with stairs",
+        "Include small gardens and pathways"
+      ]
+    },
+    "medieval": {
+      "description": "Castle-like structures with stone and dark wood",
+      "primaryMaterials": ["stone_bricks", "cobblestone", "dark_oak_planks"],
+      "accentMaterials": ["chiseled_stone_bricks", "stone_brick_stairs", "iron_bars"],
+      "decorations": ["torch", "banner", "anvil", "chain"],
+      "tips": [
+        "Use crenellations (battlements) on walls",
+        "Add arrow slits with iron bars",
+        "Include towers at corners",
+        "Use dark oak for interior details"
+      ]
+    },
+    "modern": {
+      "description": "Clean lines with concrete and glass",
+      "primaryMaterials": ["white_concrete", "gray_concrete", "glass", "glass_pane"],
+      "accentMaterials": ["quartz_block", "smooth_stone", "black_concrete"],
+      "decorations": ["sea_lantern", "end_rod", "item_frame"],
+      "tips": [
+        "Use large glass windows",
+        "Keep roofs flat or slightly angled",
+        "Incorporate water features",
+        "Use minimal but impactful decorations"
+      ]
+    },
+    "fantasy": {
+      "description": "Magical and whimsical structures",
+      "primaryMaterials": ["prismarine", "purpur_block", "end_stone_bricks", "crying_obsidian"],
+      "accentMaterials": ["amethyst_block", "glowstone", "sea_lantern"],
+      "decorations": ["end_rod", "beacon", "enchanting_table", "brewing_stand"],
+      "tips": [
+        "Use floating elements if possible",
+        "Incorporate glowing blocks",
+        "Create spiraling towers",
+        "Add mystical gardens with chorus plants"
+      ]
+    },
+    "japanese": {
+      "description": "Traditional East Asian architecture",
+      "primaryMaterials": ["dark_oak_planks", "white_terracotta", "spruce_planks"],
+      "accentMaterials": ["dark_oak_stairs", "dark_oak_fence", "paper", "bamboo"],
+      "decorations": ["lantern", "flower_pot", "dead_bush", "bamboo"],
+      "tips": [
+        "Create curved roofs using stairs",
+        "Use sliding door patterns",
+        "Include zen gardens with gravel",
+        "Add cherry blossom trees nearby"
+      ]
+    },
+    "underground": {
+      "description": "Dwarf-style carved into mountains or underground",
+      "primaryMaterials": ["deepslate_bricks", "polished_deepslate", "stone_bricks"],
+      "accentMaterials": ["copper_block", "raw_copper_block", "gold_block"],
+      "decorations": ["lantern", "chain", "anvil", "blast_furnace"],
+      "tips": [
+        "Carve into existing terrain",
+        "Use pillars to support ceilings",
+        "Create grand halls with high ceilings",
+        "Add mining cart tracks for atmosphere"
+      ]
+    }
+  },
+  "buildingTypes": {
+    "shelter": {
+      "description": "Simple protective structure",
+      "minSize": { "width": 5, "length": 5, "height": 4 },
+      "maxSize": { "width": 7, "length": 7, "height": 5 },
+      "requiredFeatures": ["walls", "roof", "door"],
+      "optionalFeatures": ["windows", "torch", "bed", "crafting_table"]
+    },
+    "house": {
+      "description": "Comfortable living space",
+      "minSize": { "width": 7, "length": 9, "height": 5 },
+      "maxSize": { "width": 12, "length": 15, "height": 8 },
+      "requiredFeatures": ["walls", "roof", "door", "windows", "interior"],
+      "optionalFeatures": ["second_floor", "basement", "garden", "chimney"]
+    },
+    "tower": {
+      "description": "Tall vertical structure",
+      "minSize": { "width": 5, "length": 5, "height": 15 },
+      "maxSize": { "width": 9, "length": 9, "height": 30 },
+      "requiredFeatures": ["circular_or_square_base", "spiral_stairs", "top_platform"],
+      "optionalFeatures": ["beacon", "flags", "balconies", "arrow_slits"]
+    },
+    "bridge": {
+      "description": "Structure spanning a gap",
+      "minSize": { "width": 3, "length": 10, "height": 1 },
+      "maxSize": { "width": 7, "length": 50, "height": 5 },
+      "requiredFeatures": ["walkway", "supports"],
+      "optionalFeatures": ["railings", "arches", "covered_section", "decorative_pillars"]
+    },
+    "garden": {
+      "description": "Landscaped outdoor area",
+      "minSize": { "width": 5, "length": 5, "height": 1 },
+      "maxSize": { "width": 20, "length": 20, "height": 3 },
+      "requiredFeatures": ["plants", "pathways"],
+      "optionalFeatures": ["water_feature", "benches", "gazebo", "fencing", "lighting"]
+    },
+    "dock": {
+      "description": "Waterfront structure",
+      "minSize": { "width": 3, "length": 8, "height": 2 },
+      "maxSize": { "width": 10, "length": 20, "height": 4 },
+      "requiredFeatures": ["platform_over_water", "supports"],
+      "optionalFeatures": ["boat_storage", "warehouse", "fishing_spot", "lighthouse"]
+    },
+    "monument": {
+      "description": "Decorative landmark",
+      "minSize": { "width": 3, "length": 3, "height": 5 },
+      "maxSize": { "width": 15, "length": 15, "height": 30 },
+      "requiredFeatures": ["central_structure", "base"],
+      "optionalFeatures": ["inscription", "lighting", "surrounding_plaza", "water_feature"]
+    }
+  },
+  "biomeBuilding": {
+    "plains": {
+      "suggestedStyles": ["rustic", "medieval"],
+      "suggestedTypes": ["house", "tower", "garden"],
+      "localMaterials": ["oak_log", "wheat", "hay_block"],
+      "challenges": [],
+      "tips": ["Use hay bales for rustic charm", "Plant wheat fields nearby"]
+    },
+    "forest": {
+      "suggestedStyles": ["rustic", "fantasy"],
+      "suggestedTypes": ["house", "tower", "shelter"],
+      "localMaterials": ["oak_log", "birch_log", "leaves"],
+      "challenges": ["clearing_trees"],
+      "tips": ["Build treehouses", "Incorporate living trees into design"]
+    },
+    "desert": {
+      "suggestedStyles": ["modern", "underground"],
+      "suggestedTypes": ["house", "shelter", "monument"],
+      "localMaterials": ["sandstone", "smooth_sandstone", "terracotta"],
+      "challenges": ["lack_of_wood"],
+      "tips": ["Use sandstone variants", "Build underground for cooling", "Add oasis gardens"]
+    },
+    "mountains": {
+      "suggestedStyles": ["medieval", "underground"],
+      "suggestedTypes": ["tower", "house", "monument"],
+      "localMaterials": ["stone", "cobblestone", "emerald_ore"],
+      "challenges": ["uneven_terrain"],
+      "tips": ["Carve into mountainside", "Use cliffside for dramatic towers"]
+    },
+    "taiga": {
+      "suggestedStyles": ["rustic", "japanese"],
+      "suggestedTypes": ["house", "shelter"],
+      "localMaterials": ["spruce_log", "spruce_planks", "snow"],
+      "challenges": ["cold_weather"],
+      "tips": ["Add chimneys for warmth illusion", "Use spruce for cozy cabins"]
+    },
+    "jungle": {
+      "suggestedStyles": ["fantasy", "japanese"],
+      "suggestedTypes": ["house", "tower", "bridge"],
+      "localMaterials": ["jungle_log", "bamboo", "vines"],
+      "challenges": ["dense_vegetation"],
+      "tips": ["Build in trees", "Use vines for decoration", "Create suspension bridges"]
+    },
+    "ocean": {
+      "suggestedStyles": ["modern", "fantasy"],
+      "suggestedTypes": ["dock", "house", "monument"],
+      "localMaterials": ["prismarine", "sea_lantern", "coral"],
+      "challenges": ["water_building"],
+      "tips": ["Build on stilts", "Create underwater sections", "Use glass floors"]
+    },
+    "swamp": {
+      "suggestedStyles": ["rustic", "fantasy"],
+      "suggestedTypes": ["house", "dock", "shelter"],
+      "localMaterials": ["oak_log", "vines", "lily_pad"],
+      "challenges": ["uneven_water_level"],
+      "tips": ["Build on stilts", "Use dark wood for spooky feel", "Add witch hut vibes"]
+    }
+  },
+  "buildingTechniques": {
+    "foundations": {
+      "flat": "Clear area and place floor blocks directly",
+      "raised": "Build platform 1-3 blocks above ground",
+      "sunken": "Dig into ground and build down",
+      "stilts": "Use pillars to elevate structure above terrain or water"
+    },
+    "walls": {
+      "solid": "Full blocks for complete walls",
+      "windowed": "Alternate blocks with glass panes",
+      "halfWall": "Use stairs for half-height walls",
+      "pillared": "Columns at corners with different material fill"
+    },
+    "roofs": {
+      "flat": "Simple flat surface (good for modern)",
+      "peaked": "Use stairs in A-frame pattern",
+      "hipped": "Stairs on all four sides meeting at top",
+      "dome": "Curved using stairs in circular pattern",
+      "curved": "Use stairs to create wave or curve shapes"
+    },
+    "details": {
+      "depth": "Push or pull sections to add visual interest",
+      "contrast": "Use 2-3 materials that complement each other",
+      "lighting": "Add torches, lanterns, or glowstone strategically",
+      "greenery": "Include plants, leaves, and vines",
+      "water": "Add fountains, pools, or moats"
+    }
+  },
+  "inspirationalIdeas": [
+    "A treehouse village connected by rope bridges",
+    "A lighthouse on a cliff overlooking the ocean",
+    "A hobbit hole built into a hillside",
+    "A floating island with waterfalls",
+    "A grand library with enchanting tables",
+    "A market square with stalls and a fountain",
+    "A hidden garden behind a waterfall",
+    "A dwarven forge built into a mountain",
+    "A wizard's tower with a spiral staircase",
+    "A Japanese tea garden with a pagoda",
+    "A viking longhouse with dragon decorations",
+    "A greenhouse made entirely of glass",
+    "A fortress bridge spanning a ravine",
+    "A mushroom house in a dark forest",
+    "A seaside tavern with a ship-shaped bar",
+    "An ancient temple with trapped hallways",
+    "A cozy cottage with a vegetable garden",
+    "A clock tower in the center of a village",
+    "A secret underground base with redstone doors",
+    "A sky platform for stargazing"
+  ]
+}

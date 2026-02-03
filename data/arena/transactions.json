@@ -1,0 +1,86 @@
+[
+  {
+    "agentId": "test_agent_1",
+    "type": "deposit",
+    "amount": 1000,
+    "balanceBefore": 0,
+    "balanceAfter": 1000,
+    "description": "Token deposit",
+    "id": "tx_1769990218125_cgrwrmkjg",
+    "timestamp": "2026-02-01T23:56:58.125Z"
+  },
+  {
+    "agentId": "test_agent_2",
+    "type": "deposit",
+    "amount": 500,
+    "balanceBefore": 0,
+    "balanceAfter": 500,
+    "description": "Token deposit",
+    "id": "tx_1769990339654_shlo5194g",
+    "timestamp": "2026-02-01T23:58:59.654Z"
+  },
+  {
+    "agentId": "test_agent_1",
+    "type": "powerup",
+    "amount": -50,
+    "balanceBefore": 1000,
+    "balanceAfter": 950,
+    "description": "Purchased power-up: speed_boost",
+    "id": "tx_1769990455426_h8zbio9mo",
+    "timestamp": "2026-02-02T00:00:55.426Z"
+  },
+  {
+    "agentId": "test_agent_2",
+    "type": "powerup",
+    "amount": -80,
+    "balanceBefore": 500,
+    "balanceAfter": 420,
+    "description": "Purchased power-up: golden_apple",
+    "id": "tx_1769990455426_gt1ggf42u",
+    "timestamp": "2026-02-02T00:00:55.426Z"
+  },
+  {
+    "agentId": "test_agent_1",
+    "type": "wager",
+    "amount": -100,
+    "balanceBefore": 950,
+    "balanceAfter": 850,
+    "relatedMatchId": "match_1769990455426_asdvw8y5q",
+    "description": "Wager locked for match match_1769990455426_asdvw8y5q",
+    "id": "tx_1769990455427_yxh0vim14",
+    "timestamp": "2026-02-02T00:00:55.427Z"
+  },
+  {
+    "agentId": "test_agent_2",
+    "type": "wager",
+    "amount": -100,
+    "balanceBefore": 420,
+    "balanceAfter": 320,
+    "relatedMatchId": "match_1769990455426_asdvw8y5q",
+    "description": "Wager locked for match match_1769990455426_asdvw8y5q",
+    "id": "tx_1769990455427_rzyxmw7pp",
+    "timestamp": "2026-02-02T00:00:55.427Z"
+  },
+  {
+    "agentId": "test_agent_1",
+    "type": "win",
+    "amount": 194,
+    "balanceBefore": 850,
+    "balanceAfter": 1044,
+    "relatedMatchId": "match_1769990455426_asdvw8y5q",
+    "description": "Won match match_1769990455426_asdvw8y5q",
+    "id": "tx_1769990486319_hcs9lwwcz",
+    "timestamp": "2026-02-02T00:01:26.319Z"
+  },
+  {
+    "agentId": "HOUSE",
+    "type": "house_fee",
+    "amount": 6,
+    "balanceBefore": 0,
+    "balanceAfter": 0,
+    "relatedMatchId": "match_1769990455426_asdvw8y5q",
+    "description": "3% house fee from match match_1769990455426_asdvw8y5q",
+    "id": "tx_1769990486319_jhgojttku",
+    "timestamp": "2026-02-02T00:01:26.319Z"
+  }
+]

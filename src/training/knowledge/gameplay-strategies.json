@@ -1,0 +1,136 @@
+{
+  "version": "1.0",
+  "description": "General gameplay strategies and decision-making heuristics for smarter agents",
+  "decisionPriorities": {
+    "survival": {
+      "priority": 10,
+      "triggers": ["health < 8", "food < 4", "night without shelter", "hostiles nearby"],
+      "description": "Staying alive is always the top priority. Flee, eat, seek shelter."
+    },
+    "basicNeeds": {
+      "priority": 8,
+      "triggers": ["no tools", "no food source", "no shelter"],
+      "description": "Establish basic survival infrastructure before anything else."
+    },
+    "progression": {
+      "priority": 6,
+      "triggers": ["have shelter", "have tools", "daytime"],
+      "description": "Mine better materials, upgrade tools, expand capabilities."
+    },
+    "building": {
+      "priority": 5,
+      "triggers": ["have excess materials", "safe area", "creative goal"],
+      "description": "Build structures, improve base, create aesthetic builds."
+    },
+    "exploration": {
+      "priority": 4,
+      "triggers": ["bored", "need new resources", "curiosity"],
+      "description": "Discover new biomes, structures, resources."
+    },
+    "social": {
+      "priority": 3,
+      "triggers": ["player nearby", "collaboration request", "lonely"],
+      "description": "Interact with other players or agents."
+    }
+  },
+  "timeManagement": {
+    "dawn": {
+      "duration": "~1 minute",
+      "advice": "Best time to leave shelter and start outdoor activities"
+    },
+    "day": {
+      "duration": "~10 minutes",
+      "advice": "Maximum outdoor productivity. Mine, build, farm, explore."
+    },
+    "dusk": {
+      "duration": "~1 minute",
+      "advice": "Return to shelter or prepare for night"
+    },
+    "night": {
+      "duration": "~7 minutes",
+      "advice": "Stay in lit areas, underground mining, indoor crafting"
+    }
+  },
+  "progressionPath": {
+    "phase1_wood": {
+      "goals": ["Punch tree", "Craft planks", "Make crafting table", "Craft wooden pickaxe"],
+      "duration": "~2 minutes",
+      "nextPhase": "phase2_stone"
+    },
+    "phase2_stone": {
+      "goals": ["Mine cobblestone", "Craft stone tools", "Craft furnace"],
+      "duration": "~3 minutes",
+      "nextPhase": "phase3_shelter"
+    },
+    "phase3_shelter": {
+      "goals": ["Build basic shelter", "Craft bed", "Place torches"],
+      "duration": "~5 minutes",
+      "nextPhase": "phase4_iron"
+    },
+    "phase4_iron": {
+      "goals": ["Find iron ore", "Smelt iron ingots", "Craft iron pickaxe", "Craft iron armor"],
+      "duration": "~10 minutes",
+      "nextPhase": "phase5_diamond"
+    },
+    "phase5_diamond": {
+      "goals": ["Dig to Y=-59", "Branch mine for diamonds", "Craft diamond tools"],
+      "duration": "~20 minutes",
+      "nextPhase": "phase6_nether"
+    },
+    "phase6_nether": {
+      "goals": ["Build nether portal", "Gather nether resources", "Get blaze rods"],
+      "duration": "~30 minutes",
+      "nextPhase": "phase7_end"
+    }
+  },
+  "resourcePriorities": {
+    "wood": { "priority": 10, "minAmount": 32, "description": "Foundation of everything" },
+    "cobblestone": { "priority": 9, "minAmount": 64, "description": "Building and tools" },
+    "coal": { "priority": 8, "minAmount": 32, "description": "Torches and smelting" },
+    "iron": { "priority": 7, "minAmount": 24, "description": "Better tools and armor" },
+    "food": { "priority": 7, "minAmount": 20, "description": "Survival essential" },
+    "diamond": { "priority": 6, "minAmount": 11, "description": "Best tools and enchanting" },
+    "gold": { "priority": 4, "minAmount": 8, "description": "Powered rails, piglin trading" },
+    "redstone": { "priority": 3, "minAmount": 16, "description": "Mechanisms and enchanting" }
+  },
+  "efficiencyTips": [
+    "Always carry a water bucket - prevents fall damage, puts out fires, creates obsidian",
+    "Place torches on left wall when exploring caves to find way back",
+    "Crouch to avoid falling off edges",
+    "Use shields against skeleton arrows",
+    "Smelt while doing other tasks - don't wait for furnace",
+    "Strip mine at Y=-59 for diamonds, Y=16 for iron",
+    "Keep one of each tool on hotbar for quick switching",
+    "Use beds to skip night and reset spawn point",
+    "Kill passive mobs during day for food",
+    "Always have an exit strategy when mining"
+  ],
+  "commonDeathCauses": [
+    { "cause": "Fall damage", "prevention": "Water bucket, feather falling, watch edges", "frequency": "very common" },
+    { "cause": "Creeper explosion", "prevention": "Listen for hiss, sprint away, shields", "frequency": "common" },
+    { "cause": "Mob swarm", "prevention": "Don't fight multiple mobs, light areas", "frequency": "common" },
+    { "cause": "Lava", "prevention": "Fire resistance potion, never dig straight down", "frequency": "moderate" },
+    { "cause": "Drowning", "prevention": "Watch air bubbles, carry door for air pocket", "frequency": "rare" },
+    { "cause": "Starvation", "prevention": "Always keep food above 6", "frequency": "rare" }
+  ],
+  "buildingHeuristics": [
+    "Start small and expand - 5x5 is a good first room",
+    "Light everything - torch every 7 blocks prevents spawns",
+    "Multiple exits prevent getting trapped",
+    "Walls before roof - prioritize protection",
+    "Mix materials for visual interest",
+    "Add depth to walls with stairs and slabs",
+    "Windows should be 2 high for good view",
+    "Roofs with overhang look more natural",
+    "Use terrain features as part of builds",
+    "Always leave room for expansion"
+  ],
+  "collaborationStrategies": [
+    "Divide tasks by specialty - one mines, one builds",
+    "Share discovered locations via chat",
+    "Don't duplicate tool crafting - trade instead",
+    "Build bases near each other for defense",
+    "Coordinate mining operations at different Y levels",
+    "Assign building roles: foundation, walls, roof, interior"
+  ]
+}

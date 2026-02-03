@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables (contains secrets)
+.env
+
+# Logs
+logs/
+*.log
+castle_build.log
+
+# Cache
+cache/
+.cache/
+
+# Minecraft server files (large binaries and world data)
+minecraft-server/
+libraries/
+versions/
+plugins/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+/tmp/
+*.tmp
+
+# Tunnel URL (dynamic)
+TUNNEL_URL.txt

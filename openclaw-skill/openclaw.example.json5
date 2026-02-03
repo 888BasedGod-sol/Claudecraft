@@ -1,0 +1,58 @@
+{
+  // OpenClaw Configuration for Claudecraft Integration
+  // Copy this to ~/.openclaw/openclaw.json and customize
+  
+  "agent": {
+    "model": "anthropic/claude-opus-4-5"
+  },
+  
+  "channels": {
+    "telegram": {
+      // Set your Telegram bot token
+      // Create a bot via @BotFather on Telegram
+      "botToken": "YOUR_TELEGRAM_BOT_TOKEN",
+      
+      // Allow messages from your group
+      "groups": {
+        "*": {
+          "requireMention": false
+        }
+      },
+      
+      // Optional: restrict to specific users
+      // "allowFrom": ["+15551234567", "@yourusername"]
+    }
+  },
+  
+  // Gateway settings
+  "gateway": {
+    "bind": "loopback",
+    "port": 18789
+  },
+  
+  // Skills configuration
+  "skills": {
+    "entries": {
+      "claudecraft": {
+        "enabled": true
+      }
+    }
+  },
+  
+  // Webhook configuration for external triggers
+  "hooks": {
+    "enabled": true,
+    "path": "/hooks",
+    "mappings": [
+      {
+        "match": { "path": "minecraft" },
+        "action": "agent",
+        "wakeMode": "now",
+        "name": "Minecraft",
+        "messageTemplate": "{{message}}",
+        "deliver": true,
+        "channel": "telegram"
+      }
+    ]
+  }
+}

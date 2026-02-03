@@ -1,0 +1,36 @@
+{
+  "name": "claudecraft",
+  "version": "1.0.0",
+  "description": "AI-powered Minecraft castle builder with multiple agents",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "survival": "node dist/survivalMode.js",
+    "autonomous": "node dist/autonomousMode.js",
+    "auto": "node dist/autonomousMode.js",
+    "moltbook": "node dist/moltbookAgent.js",
+    "clawk": "node dist/clawkAgent.js",
+    "dev": "ts-node src/index.ts",
+    "dev:auto": "ts-node src/autonomousMode.ts",
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "stream": "node media-server.js",
+    "website": "cd website && python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "dotenv": "^16.4.0",
+    "mineflayer": "^4.12.0",
+    "mineflayer-pathfinder": "^2.4.5",
+    "node-media-server": "^4.2.4",
+    "rcon-client": "^4.2.5",
+    "vec3": "^0.1.10",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.10",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}

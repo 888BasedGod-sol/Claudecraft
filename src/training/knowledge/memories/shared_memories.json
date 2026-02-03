@@ -1,0 +1,1508 @@
+[
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing directly on top of 4 deepslate diamond ore at (13, -28, -49) - this is my primary mining target once I craft the proper iron pickaxe tools",
+    "importance": 10,
+    "location": {
+      "x": 12.584233521193257,
+      "y": -28,
+      "z": -48.50344248318053
+    },
+    "timestamp": 1769799705236,
+    "tags": [],
+    "id": "shared_1769799705236_p453u9jqm",
+    "accessCount": 0,
+    "lastAccessed": 1769799705235
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Located at exact coordinates (33, -32, -2) - confirmed 18 deepslate diamond ore blocks directly beneath me. This is the largest diamond concentration discovered. Must prioritize tool crafting to harvest this incredible find. Also 3 redstone ore nearby.",
+    "importance": 10,
+    "location": {
+      "x": 32.5,
+      "y": -32,
+      "z": -2.5
+    },
+    "timestamp": 1769799930306,
+    "tags": [],
+    "id": "shared_1769799930306_qf6sj4uch",
+    "accessCount": 0,
+    "lastAccessed": 1769799930305
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Standing directly above 18 deepslate diamond ore blocks at (33, -32, -2) - this is the richest diamond deposit found so far. Must prioritize reaching surface and crafting iron pickaxe to harvest this incredible find. Also noted 3 deepslate redstone ore nearby.",
+    "importance": 10,
+    "location": {
+      "x": 32.5,
+      "y": -32,
+      "z": -2.5
+    },
+    "timestamp": 1769799939603,
+    "tags": [],
+    "id": "shared_1769799939603_v5v7ktwrq",
+    "accessCount": 0,
+    "lastAccessed": 1769799939602
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Standing at (32, -32, -4) directly above 18 deepslate diamond ore blocks - the richest diamond deposit discovered. Must reach surface to craft wood→stone→iron pickaxe progression to harvest this incredible find.",
+    "importance": 10,
+    "location": {
+      "x": 32.494678703766404,
+      "y": -32,
+      "z": -4.5
+    },
+    "timestamp": 1769800156219,
+    "tags": [],
+    "id": "shared_1769800156219_1i5xwvb5l",
+    "accessCount": 0,
+    "lastAccessed": 1769800156219
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Perfect mining setup at (2, -32, -9) with 8 deepslate diamond ore, 1 gold ore, 1 redstone ore, and abundant deepslate (2172 blocks). This is my primary diamond mining base location.",
+    "importance": 10,
+    "location": {
+      "x": 2.4999749005484357,
+      "y": -32,
+      "z": -8.685021486294572
+    },
+    "timestamp": 1769801545210,
+    "tags": [],
+    "id": "shared_1769801545210_m7mo5xs7r",
+    "accessCount": 0,
+    "lastAccessed": 1769801545207
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Major diamond discovery at (34, -32, 2) - found 9 deepslate diamond ore blocks in plains biome underground. Also 5 redstone ore nearby. Need iron pickaxe to mine diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 33.50704551733522,
+      "y": -32,
+      "z": 2.392611289013558
+    },
+    "timestamp": 1769799227401,
+    "tags": [],
+    "id": "shared_1769799227401_01chynk8n",
+    "accessCount": 0,
+    "lastAccessed": 1769799227400
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Found 2 deepslate diamond ore and 4 deepslate gold ore at (1, -32, -32) in plains biome. Same Y-level as Claude_Explorer's diamond find. Rich mining area with 2146 deepslate blocks available.",
+    "importance": 9,
+    "location": {
+      "x": 0.5000446381076763,
+      "y": -32,
+      "z": -32.5
+    },
+    "timestamp": 1769799241887,
+    "tags": [],
+    "id": "shared_1769799241887_jmkwenkcc",
+    "accessCount": 0,
+    "lastAccessed": 1769799241887
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Confirmed diamond discovery - 16 deepslate diamond ore blocks at current location (33, -29, -2), plus 3 lapis and 2 redstone ore. This is even more diamonds than my original find!",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -29,
+      "z": -2.5
+    },
+    "timestamp": 1769799253765,
+    "tags": [],
+    "id": "shared_1769799253765_0mz8xkfyb",
+    "accessCount": 0,
+    "lastAccessed": 1769799253764
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] Major diamond discovery at (-350, -32, 2) - found 2 deepslate diamond ore and 3 deepslate iron ore in plains biome underground. Same rich Y=-32 level as other agents' finds. Need iron pickaxe to mine diamonds.",
+    "importance": 9,
+    "location": {
+      "x": -349.50760290985437,
+      "y": -32,
+      "z": 1.6851780433208765
+    },
+    "timestamp": 1769799258121,
+    "tags": [],
+    "id": "shared_1769799258121_t3zvu98rf",
+    "accessCount": 0,
+    "lastAccessed": 1769799258120
+  },
+  {
+    "type": "location",
+    "content": "[Shared by ClaudeAdventurer] Standing directly at my diamond discovery site (-350, -32, 2) with 2 deepslate diamond ore and 3 iron ore ready to mine. Need to complete tool progression first: wood → stone → iron pickaxe to mine these diamonds.",
+    "importance": 9,
+    "location": {
+      "x": -349.50760290985437,
+      "y": -32,
+      "z": 1.6851780433208765
+    },
+    "timestamp": 1769799265732,
+    "tags": [],
+    "id": "shared_1769799265732_8kjquv89n",
+    "accessCount": 0,
+    "lastAccessed": 1769799265731
+  },
+  {
+    "type": "discovery",
+    "content": "[Shared by Claude_Explorer] Standing directly above my 16 deepslate diamond ore discovery at (32, -29, -3). This is the richest diamond vein found so far. Need to prioritize tool crafting to harvest these valuable ores.",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -28.580000013113022,
+      "z": -2.7
+    },
+    "timestamp": 1769799268686,
+    "tags": [],
+    "id": "shared_1769799268686_5lejlf2x7",
+    "accessCount": 0,
+    "lastAccessed": 1769799268686
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Currently at Y=-29 above 16 deepslate diamond ore blocks. Need to reach surface to gather wood and progress through tool tiers (wood→stone→iron) to harvest this valuable discovery.",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -28.580000013113022,
+      "z": -2.7
+    },
+    "timestamp": 1769799295091,
+    "tags": [],
+    "id": "shared_1769799295091_fzj6eegyu",
+    "accessCount": 0,
+    "lastAccessed": 1769799295091
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] Confirmed at diamond discovery site (-350, -32, 2) with 2 deepslate diamond ore and 3 deepslate iron ore visible. Need to surface to gather wood and progress through tool tiers: wood → stone → iron pickaxe to mine the diamonds.",
+    "importance": 9,
+    "location": {
+      "x": -349.50760290985437,
+      "y": -32,
+      "z": 1.6851780433208765
+    },
+    "timestamp": 1769799306199,
+    "tags": [],
+    "id": "shared_1769799306199_vl8orji4t",
+    "accessCount": 0,
+    "lastAccessed": 1769799306199
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Still at Y=-29 above the 16 deepslate diamond ore discovery. Need to reach surface to gather wood and craft tools to harvest this valuable find. Continuing to climb up.",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -28.580000013113022,
+      "z": -2.7
+    },
+    "timestamp": 1769799311436,
+    "tags": [],
+    "id": "shared_1769799311436_2oivl11ev",
+    "accessCount": 0,
+    "lastAccessed": 1769799311435
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Climbing from Y=-29 to surface above my 16 deepslate diamond ore discovery. Need to reach trees to start tool progression (wood→stone→iron) to harvest this valuable find.",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -28.580000013113022,
+      "z": -2.7
+    },
+    "timestamp": 1769799373643,
+    "tags": [],
+    "id": "shared_1769799373643_wb9y7o9s5",
+    "accessCount": 0,
+    "lastAccessed": 1769799373642
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Discovered 8 deepslate diamond ore and 7 deepslate gold ore at (14, -28, -49) in plains biome. Also spotted a chest minecart 19.6m away that could contain useful items. This location has excellent ore density.",
+    "importance": 9,
+    "location": {
+      "x": 14.314977755389943,
+      "y": -28,
+      "z": -48.50006221879765
+    },
+    "timestamp": 1769799378316,
+    "tags": [],
+    "id": "shared_1769799378316_umt6ezmy8",
+    "accessCount": 0,
+    "lastAccessed": 1769799378315
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Climbing up from Y=-29 where I discovered 16 deepslate diamond ore blocks. This is my most valuable find yet - need to reach surface to gather wood and progress through tool tiers to harvest these diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -29,
+      "z": -2.5
+    },
+    "timestamp": 1769799533224,
+    "tags": [],
+    "id": "shared_1769799533224_cowrbqxcz",
+    "accessCount": 0,
+    "lastAccessed": 1769799533223
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing at prime diamond location (13, -28, -49) with 4 deepslate diamond ore blocks and abundant deepslate (2256 blocks) for crafting tools. Chest minecart nearby at 19.1m could have useful items.",
+    "importance": 9,
+    "location": {
+      "x": 12.584233521193257,
+      "y": -28,
+      "z": -48.50344248318053
+    },
+    "timestamp": 1769799649044,
+    "tags": [],
+    "id": "shared_1769799649044_x3acjjwfx",
+    "accessCount": 0,
+    "lastAccessed": 1769799649043
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing at exceptional diamond location (13, -28, -49) with 4 deepslate diamond ore blocks immediately available. Also spotted chest minecart 19.1m away. This is my priority mining site once I craft proper tools.",
+    "importance": 9,
+    "location": {
+      "x": 12.584233521193257,
+      "y": -28,
+      "z": -48.50344248318053
+    },
+    "timestamp": 1769799669023,
+    "tags": [],
+    "id": "shared_1769799669023_7wf49eibw",
+    "accessCount": 0,
+    "lastAccessed": 1769799669022
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently at prime diamond mining location (13, -28, -49) with 4 deepslate diamond ore blocks. Starting tool progression from scratch with wood gathering. Chest minecart 19.1m away may contain useful items to speed up progression.",
+    "importance": 9,
+    "location": {
+      "x": 12.584233521193257,
+      "y": -28,
+      "z": -48.50344248318053
+    },
+    "timestamp": 1769799678081,
+    "tags": [],
+    "id": "shared_1769799678081_6r6dud7jj",
+    "accessCount": 0,
+    "lastAccessed": 1769799678081
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently at prime diamond mining location (13, -28, -49) with 4 deepslate diamond ore blocks. Starting tool progression from scratch with no tools. Chest minecart 19.1m away to investigate later.",
+    "importance": 9,
+    "location": {
+      "x": 12.584233521193257,
+      "y": -28,
+      "z": -48.50344248318053
+    },
+    "timestamp": 1769799696425,
+    "tags": [],
+    "id": "shared_1769799696425_fkdpnapt9",
+    "accessCount": 0,
+    "lastAccessed": 1769799696424
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] At Y=-29 above my 16 deepslate diamond ore discovery. Climbing to surface to gather wood and start tool progression. This is the priority - need wood→planks→sticks→wooden pickaxe→stone→stone pickaxe→iron ore→iron pickaxe to harvest these diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -28.580000013113022,
+      "z": -2.5
+    },
+    "timestamp": 1769799698902,
+    "tags": [],
+    "id": "shared_1769799698902_b22bju6mo",
+    "accessCount": 0,
+    "lastAccessed": 1769799698902
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Still climbing up from Y=-29 where I discovered 16 deepslate diamond ore blocks. Need to reach surface to start wood gathering and tool progression to harvest this massive diamond find.",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -29,
+      "z": -2.7
+    },
+    "timestamp": 1769799723151,
+    "tags": [],
+    "id": "shared_1769799723151_01ru8eum2",
+    "accessCount": 0,
+    "lastAccessed": 1769799723150
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Still climbing from Y=-29 where I'm standing above 16 deepslate diamond ore blocks. Need to reach surface to begin wood gathering and tool progression to eventually harvest this massive diamond discovery.",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -29,
+      "z": -2.7
+    },
+    "timestamp": 1769799748910,
+    "tags": [],
+    "id": "shared_1769799748910_lvooplnqi",
+    "accessCount": 0,
+    "lastAccessed": 1769799748909
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Confirmed at prime diamond location (15, -20, -55) with 3 deepslate diamond ore nearby and 2480 deepslate blocks available. Chest minecart 11.2m away could have tools/resources to help.",
+    "importance": 9,
+    "location": {
+      "x": 15.493779376575223,
+      "y": -20,
+      "z": -55.5
+    },
+    "timestamp": 1769799758386,
+    "tags": [
+      "tools/resources"
+    ],
+    "id": "shared_1769799758386_mt6bhqoxh",
+    "accessCount": 0,
+    "lastAccessed": 1769799758385
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Perfect mining spot at (15, -20, -55) with 3 deepslate diamond ore, 12 deepslate gold ore, and chest minecart 11.2m away. This is my ideal base location for tool progression.",
+    "importance": 9,
+    "location": {
+      "x": 15.493779376575223,
+      "y": -20,
+      "z": -55.5
+    },
+    "timestamp": 1769799770803,
+    "tags": [],
+    "id": "shared_1769799770803_ka01fes2e",
+    "accessCount": 0,
+    "lastAccessed": 1769799770802
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Prime mining location at (15, -20, -55) with 3 deepslate diamond ore, 12 deepslate gold ore, and a chest minecart 11.2m away. This is perfect for my tool progression goals.",
+    "importance": 9,
+    "location": {
+      "x": 15.493779376575223,
+      "y": -20,
+      "z": -55.5
+    },
+    "timestamp": 1769799778778,
+    "tags": [],
+    "id": "shared_1769799778778_0353ci2l6",
+    "accessCount": 0,
+    "lastAccessed": 1769799778778
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At prime diamond location (15, -20, -55) with 3 deepslate diamond ore and chest minecart 11.2m away. Need to progress wood→stone→iron tools to mine the diamonds. Location has 2480 deepslate blocks and 12 gold ore too.",
+    "importance": 9,
+    "location": {
+      "x": 15.493779376575223,
+      "y": -20,
+      "z": -55.5
+    },
+    "timestamp": 1769799799228,
+    "tags": [],
+    "id": "shared_1769799799228_g6elvuqic",
+    "accessCount": 0,
+    "lastAccessed": 1769799799227
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At prime diamond location (15, -20, -55) with 3 deepslate diamond ore, 12 deepslate gold ore, and chest minecart only 11.2m away. Need to check minecart contents before starting tool progression.",
+    "importance": 9,
+    "location": {
+      "x": 15.493779376575223,
+      "y": -20,
+      "z": -55.5
+    },
+    "timestamp": 1769799834336,
+    "tags": [],
+    "id": "shared_1769799834336_178knwo1z",
+    "accessCount": 0,
+    "lastAccessed": 1769799834335
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] At Y=-29 above 16 deepslate diamond ore discovery. Starting climb to surface for wood gathering and tool progression. Need iron pickaxe to harvest this valuable find.",
+    "importance": 9,
+    "location": {
+      "x": 32.28219004181421,
+      "y": -28.580000013113022,
+      "z": -2.7
+    },
+    "timestamp": 1769799844997,
+    "tags": [],
+    "id": "shared_1769799844997_86otulnml",
+    "accessCount": 0,
+    "lastAccessed": 1769799844996
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Started mining stone at diamond motherlode site (32, -29, -3). Have 16 deepslate diamond ore, 3 lapis ore, 2 redstone ore waiting to be harvested. This is my most valuable discovery yet!",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -29,
+      "z": -2.7
+    },
+    "timestamp": 1769799874104,
+    "tags": [],
+    "id": "shared_1769799874104_pky70dgt0",
+    "accessCount": 0,
+    "lastAccessed": 1769799874103
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Prime mining location at (15, -20, -55) with 3 deepslate diamond ore, 12 deepslate gold ore, and a chest minecart 11.2m away. This could be my main base for resource gathering.",
+    "importance": 9,
+    "location": {
+      "x": 15.493779376575223,
+      "y": -20,
+      "z": -55.5
+    },
+    "timestamp": 1769799897810,
+    "tags": [
+      "resource"
+    ],
+    "id": "shared_1769799897810_9tw4sumgb",
+    "accessCount": 0,
+    "lastAccessed": 1769799897809
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Confirmed location of 14 deepslate diamond ore blocks at (33, -32, -5). This is my priority mining target once I craft an iron pickaxe. Need to reach surface for wood gathering first.",
+    "importance": 9,
+    "location": {
+      "x": 32.500253908931164,
+      "y": -32,
+      "z": -5.5
+    },
+    "timestamp": 1769799903036,
+    "tags": [],
+    "id": "shared_1769799903036_tb97og3k3",
+    "accessCount": 0,
+    "lastAccessed": 1769799903036
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing at (16, -20, -46) with exceptional ore wealth: 3 deepslate diamond ore and 14 deepslate gold ore nearby. Also spotted chest minecart 18.4m away. This is my best mining location yet - need to craft proper tools to harvest these riches.",
+    "importance": 9,
+    "location": {
+      "x": 15.500104295009749,
+      "y": -20,
+      "z": -45.685022129299334
+    },
+    "timestamp": 1769799934648,
+    "tags": [],
+    "id": "shared_1769799934648_gnaaukva0",
+    "accessCount": 0,
+    "lastAccessed": 1769799934648
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] At Y=-32 above the massive 18 deepslate diamond ore deposit. Need to reach surface during night to begin wood→stone→iron tool progression to harvest this treasure trove.",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -32,
+      "z": -2.5
+    },
+    "timestamp": 1769799966632,
+    "tags": [],
+    "id": "shared_1769799966632_yaluidfz1",
+    "accessCount": 0,
+    "lastAccessed": 1769799966631
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Still climbing up from Y=-29 where I discovered 16 deepslate diamond ore blocks at (32, -29, -2). This remains my priority target for mining once I craft an iron pickaxe. Also noted 3 lapis and 2 redstone ore in the same area.",
+    "importance": 9,
+    "location": {
+      "x": 32.0880022126939,
+      "y": -29,
+      "z": -2.231560766275399
+    },
+    "timestamp": 1769800011664,
+    "tags": [],
+    "id": "shared_1769800011664_t804rsj4n",
+    "accessCount": 0,
+    "lastAccessed": 1769800011663
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (14, -31, -27) with 3 deepslate diamond ore and 2 deepslate iron ore available, but need to complete tool progression first. Must return here with iron pickaxe to harvest the diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 14.376611076630931,
+      "y": -31,
+      "z": -27.5
+    },
+    "timestamp": 1769800011993,
+    "tags": [],
+    "id": "shared_1769800011993_db3gkg1mi",
+    "accessCount": 0,
+    "lastAccessed": 1769800011992
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently at (14, -31, -27) with 3 deepslate diamond ore and 2 deepslate iron ore nearby. Perfect mining spot but need to complete full tool progression first since I only have wheat seeds.",
+    "importance": 9,
+    "location": {
+      "x": 14.376611076630931,
+      "y": -31,
+      "z": -27.5
+    },
+    "timestamp": 1769800023614,
+    "tags": [],
+    "id": "shared_1769800023614_tad6go11o",
+    "accessCount": 0,
+    "lastAccessed": 1769800023614
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (13, -32, -28) found 2 deepslate diamond ore and 4 deepslate iron ore in well-lit area. Perfect mining spot once I craft iron pickaxe. Need to complete full tool progression first: wood → wooden tools → stone → stone tools → iron → iron pickaxe → then harvest diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 12.68502214421297,
+      "y": -32,
+      "z": -27.50003300589081
+    },
+    "timestamp": 1769800092918,
+    "tags": [],
+    "id": "shared_1769800092918_xytzwnh3l",
+    "accessCount": 0,
+    "lastAccessed": 1769800092918
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Currently at Y=-29 directly above 16 deepslate diamond ore blocks at (32, -29, -2). Need to reach surface and craft iron pickaxe to harvest this incredible find. Also 3 lapis and 2 redstone ore here.",
+    "importance": 9,
+    "location": {
+      "x": 32.28901245153942,
+      "y": -28.87840000152588,
+      "z": -1.880092507711401
+    },
+    "timestamp": 1769800182015,
+    "tags": [],
+    "id": "shared_1769800182015_sw846ium9",
+    "accessCount": 0,
+    "lastAccessed": 1769800182014
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] Confirmed my diamond site at (-350, -32, 2) still has 2 deepslate diamond ore and 9 deepslate iron ore waiting. Need to surface, gather wood, progress through tool tiers, then return to mine these valuable ores.",
+    "importance": 9,
+    "location": {
+      "x": -349.5,
+      "y": -30,
+      "z": -0.49992379667503356
+    },
+    "timestamp": 1769800193916,
+    "tags": [],
+    "id": "shared_1769800193916_2kx45e0rw",
+    "accessCount": 0,
+    "lastAccessed": 1769800193916
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Climbing up from Y=-30 where I discovered 16 deepslate diamond ore blocks. This incredible find at (33, -30, -2) remains my top priority - need to reach surface and craft iron pickaxe to harvest these diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -29.768476202412987,
+      "z": -2.5
+    },
+    "timestamp": 1769800228990,
+    "tags": [],
+    "id": "shared_1769800228990_n26lcqnqp",
+    "accessCount": 0,
+    "lastAccessed": 1769800228989
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] At Y=-29 directly above 16 deepslate diamond ore blocks at (33, -29, -1). Continuing to climb to surface to begin tool crafting progression. This remains the richest diamond deposit discovered.",
+    "importance": 9,
+    "location": {
+      "x": 32.52724188630784,
+      "y": -28.99866402088785,
+      "z": -0.7254745965960472
+    },
+    "timestamp": 1769800253009,
+    "tags": [],
+    "id": "shared_1769800253009_vb8ln6s3c",
+    "accessCount": 0,
+    "lastAccessed": 1769800253009
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] Currently at diamond site (-349, -30, 0) with empty inventory. Must surface to gather wood, then return to mine 2 deepslate diamond ore and 9 deepslate iron ore. Tool progression needed: wood → stone → iron pickaxe.",
+    "importance": 9,
+    "location": {
+      "x": -349.5,
+      "y": -30,
+      "z": -0.49992379667503356
+    },
+    "timestamp": 1769800269408,
+    "tags": [],
+    "id": "shared_1769800269408_qag8ap9um",
+    "accessCount": 0,
+    "lastAccessed": 1769800269407
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Climbing up from Y=-29 where I discovered 16 deepslate diamond ore blocks at (33, -29, -1). This is my priority mining target once I complete tool progression from wood to iron pickaxe. Also noted 3 lapis and 2 redstone ore at same location.",
+    "importance": 9,
+    "location": {
+      "x": 32.5473416191011,
+      "y": -28.87840000152588,
+      "z": -0.9327071387169206
+    },
+    "timestamp": 1769800277024,
+    "tags": [],
+    "id": "shared_1769800277024_dtnxz88d9",
+    "accessCount": 0,
+    "lastAccessed": 1769800277024
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Confirmed standing above 16 deepslate diamond ore at (32, -29, -2) with 3 lapis and 2 redstone ore nearby. Need to reach surface and craft iron pickaxe to harvest this treasure trove.",
+    "importance": 9,
+    "location": {
+      "x": 32.25434088605675,
+      "y": -29,
+      "z": -2.1185285104171836
+    },
+    "timestamp": 1769800325695,
+    "tags": [],
+    "id": "shared_1769800325695_hlcjc8pk8",
+    "accessCount": 0,
+    "lastAccessed": 1769800325695
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Still climbing up from Y=-29 to surface. The 16 deepslate diamond ore blocks remain at (33, -29, -1) - this is my primary target once I complete tool progression. Must reach surface for wood gathering.",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -29,
+      "z": -1.5
+    },
+    "timestamp": 1769800350153,
+    "tags": [],
+    "id": "shared_1769800350153_7hi4nk9w2",
+    "accessCount": 0,
+    "lastAccessed": 1769800350152
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Confirmed I'm still at the 16 deepslate diamond ore location at (33, -29, -1). This remains my highest priority target. Need to continue climbing to surface to gather wood and craft proper mining tools.",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -29,
+      "z": -1.5
+    },
+    "timestamp": 1769800375510,
+    "tags": [],
+    "id": "shared_1769800375510_uktubn40h",
+    "accessCount": 0,
+    "lastAccessed": 1769800375509
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] At Y=-30, still have 2 deepslate diamond ore and 9 deepslate iron ore waiting at (-349, -30, 0). Must reach surface to gather wood and progress through tool tiers to mine these valuable ores.",
+    "importance": 9,
+    "location": {
+      "x": -349.5,
+      "y": -30,
+      "z": -0.49992379667503356
+    },
+    "timestamp": 1769800429968,
+    "tags": [],
+    "id": "shared_1769800429968_s5rum8apn",
+    "accessCount": 0,
+    "lastAccessed": 1769800429968
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] At Y=-29 directly above 16 deepslate diamond ore blocks at (33, -29, -1). This remains my most valuable discovery. Also 3 lapis ore and 2 redstone ore nearby. Climbing to surface to begin tool progression.",
+    "importance": 9,
+    "location": {
+      "x": 32.5,
+      "y": -29,
+      "z": -1.5
+    },
+    "timestamp": 1769800477419,
+    "tags": [],
+    "id": "shared_1769800477419_yxo8fwrjt",
+    "accessCount": 0,
+    "lastAccessed": 1769800477418
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Currently at Y=-29 above my 16 deepslate diamond ore discovery. Still climbing to surface to begin tool crafting progression. This remains my highest priority target for harvesting once I have an iron pickaxe.",
+    "importance": 9,
+    "location": {
+      "x": 32.3,
+      "y": -28.580000013113022,
+      "z": -1.810360968765225
+    },
+    "timestamp": 1769800501532,
+    "tags": [],
+    "id": "shared_1769800501532_qn3k82az3",
+    "accessCount": 0,
+    "lastAccessed": 1769800501531
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Major ore discovery at (21, -27, -49) - 8 deepslate diamond ore and 18 deepslate gold ore blocks! Also spotted a chest minecart 21.5m away that needs investigation.",
+    "importance": 9,
+    "location": {
+      "x": 20.50007760236874,
+      "y": -27,
+      "z": -49.39695549899725
+    },
+    "timestamp": 1769800840236,
+    "tags": [],
+    "id": "shared_1769800840236_kdbjum2p0",
+    "accessCount": 0,
+    "lastAccessed": 1769800840235
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Major ore discovery at (21, -27, -49) - found 8 deepslate diamond ore and 18 deepslate gold ore in plains biome underground. This adds to my collection of significant mineral finds. Need iron pickaxe to harvest these valuable ores.",
+    "importance": 9,
+    "location": {
+      "x": 20.50007760236874,
+      "y": -27,
+      "z": -49.39695549899725
+    },
+    "timestamp": 1769800851105,
+    "tags": [],
+    "id": "shared_1769800851105_4rsmkwkbo",
+    "accessCount": 0,
+    "lastAccessed": 1769800851104
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (7, -31, -5) discovered 8 deepslate diamond ore blocks with 2453 deepslate available - this is my primary target location once I complete wood→stone→iron tool progression",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769800939540,
+    "tags": [],
+    "id": "shared_1769800939540_3jwn0mydt",
+    "accessCount": 0,
+    "lastAccessed": 1769800939539
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing near 8 deepslate diamond ore at (7, -31, -5) in plains biome with 2453 deepslate blocks available. Perfect location for diamond mining once I craft iron pickaxe. Rain indicates surface is nearby.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769800951881,
+    "tags": [],
+    "id": "shared_1769800951881_eihlmyl89",
+    "accessCount": 0,
+    "lastAccessed": 1769800951878
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (7, -31, -5) found 8 deepslate diamond ore blocks with 2453 deepslate available - perfect mining location once I complete tool progression from surface",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769800964157,
+    "tags": [],
+    "id": "shared_1769800964157_07c8sx0bh",
+    "accessCount": 0,
+    "lastAccessed": 1769800964157
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Excellent diamond mining location at (7, -31, -5) with 8 deepslate diamond ore blocks and 2453 deepslate for tool crafting. Must return here with iron pickaxe after completing tool progression.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769800973900,
+    "tags": [],
+    "id": "shared_1769800973900_2zt2z83xv",
+    "accessCount": 0,
+    "lastAccessed": 1769800973898
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (7, -31, -5) found 8 deepslate diamond ore with 2453 deepslate blocks available for mining. This is another rich diamond location to return to once I have iron pickaxe tools.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801008949,
+    "tags": [],
+    "id": "shared_1769801008949_xs6w14xuh",
+    "accessCount": 0,
+    "lastAccessed": 1769801008946
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Located at (7, -31, -5) with 8 deepslate diamond ore blocks nearby in plains biome. This is another excellent mining location to return to once I have iron pickaxe.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801041132,
+    "tags": [],
+    "id": "shared_1769801041132_77vjmgitc",
+    "accessCount": 0,
+    "lastAccessed": 1769801041131
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Located at (7, -31, -5) with immediate access to 8 deepslate diamond ore blocks - this is my return target after completing tool progression from surface",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801050209,
+    "tags": [],
+    "id": "shared_1769801050209_g6b4iu13d",
+    "accessCount": 0,
+    "lastAccessed": 1769801050207
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently at (7, -31, -5) with 8 deepslate diamond ore nearby and 2453 deepslate blocks available. Perfect mining location once I have proper iron pickaxe tools. Need to reach surface first for wood gathering.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801094965,
+    "tags": [],
+    "id": "shared_1769801094965_ddghz1owr",
+    "accessCount": 0,
+    "lastAccessed": 1769801094964
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing at (7, -31, -5) with 8 deepslate diamond ore blocks nearby - this is my prime mining target once I complete tool progression from wood to iron pickaxe. Perfect location to return to after surface preparation.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801114055,
+    "tags": [],
+    "id": "shared_1769801114055_h6bj1srqe",
+    "accessCount": 0,
+    "lastAccessed": 1769801114055
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Confirmed 8 deepslate diamond ore at (7, -31, -5) in plains biome during night rain. Perfect mining target once I complete tool progression. Also noted 2453 deepslate blocks for crafting materials.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801123676,
+    "tags": [],
+    "id": "shared_1769801123676_otmambf1n",
+    "accessCount": 0,
+    "lastAccessed": 1769801123674
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At Y=-31 with 8 deepslate diamond ore nearby at (7, -31, -5) - prime mining location once I get iron pickaxe",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801165104,
+    "tags": [],
+    "id": "shared_1769801165104_zah5ywpl0",
+    "accessCount": 0,
+    "lastAccessed": 1769801165103
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (7, -31, -5) with 8 deepslate diamond ore and 2453 deepslate blocks available - excellent mining location but need iron pickaxe first",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801194749,
+    "tags": [],
+    "id": "shared_1769801194749_4v5f5n18o",
+    "accessCount": 0,
+    "lastAccessed": 1769801194748
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently standing above 8 deepslate diamond ore at (7, -31, -5) in plains biome. This is my primary diamond target once I complete tool progression. Need to reach surface first for wood gathering.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801212149,
+    "tags": [],
+    "id": "shared_1769801212149_aq0avhzng",
+    "accessCount": 0,
+    "lastAccessed": 1769801212149
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (7, -31, -5) with 8 deepslate diamond ore nearby - excellent mining location once I complete tool progression from wood to iron pickaxe",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801222201,
+    "tags": [],
+    "id": "shared_1769801222201_myjmbb32b",
+    "accessCount": 0,
+    "lastAccessed": 1769801222200
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Located at (7, -31, -5) with 8 deepslate diamond ore blocks nearby - perfect mining location once I craft iron pickaxe. Currently ascending to surface for wood gathering.",
+    "importance": 9,
+    "location": {
+      "x": 6.500284648097235,
+      "y": -31,
+      "z": -5.5
+    },
+    "timestamp": 1769801239561,
+    "tags": [],
+    "id": "shared_1769801239561_37ypc2rp8",
+    "accessCount": 0,
+    "lastAccessed": 1769801239560
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (5, -32, -5) discovered 8 deepslate diamond ore blocks with 2344 deepslate blocks available for tool crafting. This is another excellent mining location to return to once I have iron pickaxe.",
+    "importance": 9,
+    "location": {
+      "x": 4.603327640355601,
+      "y": -32,
+      "z": -5.4996797708905545
+    },
+    "timestamp": 1769801277671,
+    "tags": [],
+    "id": "shared_1769801277671_5fty964ey",
+    "accessCount": 0,
+    "lastAccessed": 1769801277669
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At prime location (5, -32, -5) with 8 deepslate diamond ore blocks and 2344 deepslate available. Perfect spot to establish my main mining base and craft proper tools.",
+    "importance": 9,
+    "location": {
+      "x": 4.603327640355601,
+      "y": -32,
+      "z": -5.4996797708905545
+    },
+    "timestamp": 1769801314996,
+    "tags": [],
+    "id": "shared_1769801314996_agxzltffn",
+    "accessCount": 0,
+    "lastAccessed": 1769801314995
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At prime diamond mining location (2, -32, -10) with 8 deepslate diamond ore, 4 redstone ore, and 1 gold ore. Perfect underground setup for safe nighttime mining. Need to craft progression: wood → stone → iron pickaxe to harvest diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801382476,
+    "tags": [],
+    "id": "shared_1769801382476_3iyxfwgxk",
+    "accessCount": 0,
+    "lastAccessed": 1769801382475
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (2, -32, -10) with 8 deepslate diamond ore, 4 deepslate redstone ore, and 1 deepslate gold ore - this is my primary mining base location with excellent ore density",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801399843,
+    "tags": [],
+    "id": "shared_1769801399843_bpw0i4jl1",
+    "accessCount": 0,
+    "lastAccessed": 1769801399843
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing at prime diamond location (2, -32, -10) with 8 deepslate diamond ore blocks directly beneath me. Need to craft iron pickaxe to harvest these diamonds. Also has 4 deepslate redstone ore and good deepslate supply for tools.",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801418181,
+    "tags": [],
+    "id": "shared_1769801418181_80g7lmgz4",
+    "accessCount": 0,
+    "lastAccessed": 1769801418180
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (2, -32, -10) with 8 deepslate diamond ore blocks nearby - this is my primary mining site. Need to craft iron pickaxe to harvest these diamonds. Currently only have wheat seeds in inventory.",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801427351,
+    "tags": [],
+    "id": "shared_1769801427351_xrkobyoz2",
+    "accessCount": 0,
+    "lastAccessed": 1769801427349
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently at (2, -32, -10) with 8 deepslate diamond ore nearby, plus 4 redstone ore and 1 gold ore. This is my primary mining target - need to craft iron pickaxe to harvest these diamonds. Area has abundant deepslate (2184 blocks) for construction.",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801435892,
+    "tags": [],
+    "id": "shared_1769801435892_oahg2d1mz",
+    "accessCount": 0,
+    "lastAccessed": 1769801435891
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing at coordinates (2, -32, -10) with 8 deepslate diamond ore blocks nearby - this is my primary mining target location. Also has 4 deepslate redstone ore and 1 deepslate gold ore. Rich area with 2184 deepslate blocks for crafting tools.",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801444130,
+    "tags": [],
+    "id": "shared_1769801444130_1o5lzc973",
+    "accessCount": 0,
+    "lastAccessed": 1769801444129
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently at (2, -32, -10) with 8 deepslate diamond ore blocks nearby - this is my priority mining target. Need to craft iron pickaxe first to harvest them.",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801451334,
+    "tags": [],
+    "id": "shared_1769801451334_6utsfi6qm",
+    "accessCount": 0,
+    "lastAccessed": 1769801451332
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (2, -32, -10) with 8 deepslate diamond ore blocks nearby - this is my primary mining target. Need to craft stone tools first, then iron pickaxe to harvest the diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 1.5004343805742402,
+      "y": -32,
+      "z": -10.39694989124036
+    },
+    "timestamp": 1769801461492,
+    "tags": [],
+    "id": "shared_1769801461492_p4y0mwytu",
+    "accessCount": 0,
+    "lastAccessed": 1769801461492
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Major ore discovery at (22, -26, -50) - found 9 deepslate diamond ore and 14 deepslate gold ore in plains biome underground. This rivals my previous best find! Need iron pickaxe to harvest these valuable ores.",
+    "importance": 9,
+    "location": {
+      "x": 22.039321749118894,
+      "y": -26,
+      "z": -50.499862973226975
+    },
+    "timestamp": 1769801496582,
+    "tags": [],
+    "id": "shared_1769801496582_nnt3a4eya",
+    "accessCount": 0,
+    "lastAccessed": 1769801496581
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At (2, -32, -9) with excellent mining potential: 8 deepslate diamond ore, 1 deepslate gold ore, 1 deepslate redstone ore, plus 2172 deepslate blocks. This is a prime diamond mining location that needs proper tool preparation.",
+    "importance": 9,
+    "location": {
+      "x": 2.4999749005484357,
+      "y": -32,
+      "z": -8.685021486294572
+    },
+    "timestamp": 1769801534257,
+    "tags": [],
+    "id": "shared_1769801534257_x2f87rj86",
+    "accessCount": 0,
+    "lastAccessed": 1769801534255
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At coordinates (2, -32, -9) with 8 deepslate diamond ore blocks nearby - this is my current priority mining location. Need to progress through wooden → stone → iron tools to harvest these diamonds.",
+    "importance": 9,
+    "location": {
+      "x": 2.4999749005484357,
+      "y": -32,
+      "z": -8.685021486294572
+    },
+    "timestamp": 1769801554384,
+    "tags": [],
+    "id": "shared_1769801554384_t7vgx4dro",
+    "accessCount": 0,
+    "lastAccessed": 1769801554384
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] At prime diamond location (2, -32, -9) with 8 deepslate diamond ore blocks. Starting material gathering to craft tools needed to mine these diamonds. Also 1 redstone ore and 1 gold ore nearby.",
+    "importance": 9,
+    "location": {
+      "x": 2.4999749005484357,
+      "y": -32,
+      "z": -8.685021486294572
+    },
+    "timestamp": 1769801566632,
+    "tags": [],
+    "id": "shared_1769801566632_na938m5b7",
+    "accessCount": 0,
+    "lastAccessed": 1769801566631
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] At diamond site (-350, -32, 0) with 2 deepslate diamond ore and 3 deepslate iron ore confirmed. Empty inventory means I need to surface immediately for wood gathering to begin tool progression: wood → stone → iron pickaxe → diamond mining.",
+    "importance": 9,
+    "location": {
+      "x": -349.62682609335917,
+      "y": -32,
+      "z": 0.4927902122867134
+    },
+    "timestamp": 1769801576573,
+    "tags": [],
+    "id": "shared_1769801576573_40dqertcu",
+    "accessCount": 0,
+    "lastAccessed": 1769801576572
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Located 4 deepslate diamond ore blocks at (6, -32, -12) in plains biome - prime mining target once I craft iron pickaxe. Also 1 deepslate gold ore and abundant deepslate (2237 blocks) for tool progression.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801641995,
+    "tags": [],
+    "id": "shared_1769801641995_ikh1d4t12",
+    "accessCount": 0,
+    "lastAccessed": 1769801641992
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Found 4 deepslate diamond ore blocks at (6, -32, -12) in plains biome. Perfect mining target once I craft iron pickaxe. Also 1 deepslate gold ore and abundant deepslate (2237 blocks) available.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801654478,
+    "tags": [],
+    "id": "shared_1769801654478_9919kmc4k",
+    "accessCount": 0,
+    "lastAccessed": 1769801654477
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] At diamond site (-350, -32, 0) with 2 deepslate diamond ore and 3 deepslate iron ore confirmed. Climbing to surface to gather wood and begin tool progression: wood → stone → iron pickaxe needed to mine these diamonds.",
+    "importance": 9,
+    "location": {
+      "x": -349.62682609335917,
+      "y": -32,
+      "z": 0.4927902122867134
+    },
+    "timestamp": 1769801742693,
+    "tags": [],
+    "id": "shared_1769801742693_43dzdod8o",
+    "accessCount": 0,
+    "lastAccessed": 1769801742690
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Confirmed standing directly above 4 deepslate diamond ore at (6, -32, -12) - this is my primary mining target. Need to craft iron pickaxe first through proper tool progression: wood→stone→iron.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801781869,
+    "tags": [],
+    "id": "shared_1769801781869_bjj9eq2b5",
+    "accessCount": 0,
+    "lastAccessed": 1769801781868
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing directly above 4 deepslate diamond ore at (6, -32, -12) with abundant deepslate (2237 blocks) available for mining. This is my primary diamond target - just need to craft proper tools first.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801825754,
+    "tags": [],
+    "id": "shared_1769801825754_uy6jltlvh",
+    "accessCount": 0,
+    "lastAccessed": 1769801825753
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Currently at (4, 0, -32) but need to return to (33, -32, -2) where 18 deepslate diamond ore blocks are located. Must craft iron pickaxe first to harvest this massive diamond deposit.",
+    "importance": 9,
+    "location": {
+      "x": 3.5,
+      "y": 0,
+      "z": -32.499944126019365
+    },
+    "timestamp": 1769801828012,
+    "tags": [],
+    "id": "shared_1769801828012_9eclltkmw",
+    "accessCount": 0,
+    "lastAccessed": 1769801828011
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently at (6, -32, -12) with 4 deepslate diamond ore and 1 deepslate gold ore directly accessible. Have 2237 deepslate blocks available for tool crafting. This is my prime mining location.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801853871,
+    "tags": [],
+    "id": "shared_1769801853871_6cqus5l2v",
+    "accessCount": 0,
+    "lastAccessed": 1769801853870
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Currently standing at (6, -32, -12) directly above 4 deepslate diamond ore blocks. This is my priority mining target once I craft iron pickaxe. Location confirmed with 2237 deepslate blocks available.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801870195,
+    "tags": [],
+    "id": "shared_1769801870195_l56grv6kb",
+    "accessCount": 0,
+    "lastAccessed": 1769801870193
+  },
+  {
+    "type": "location",
+    "content": "[Shared by ClaudeAdventurer] At my diamond site (-350, -32, 0) with 2 deepslate diamond ore and 3 iron ore confirmed. Empty inventory - must surface for wood to start tool progression: wood → stone → iron pickaxe to mine these diamonds.",
+    "importance": 9,
+    "location": {
+      "x": -349.62682609335917,
+      "y": -32,
+      "z": 0.4927902122867134
+    },
+    "timestamp": 1769801883624,
+    "tags": [],
+    "id": "shared_1769801883624_u15fkk7ij",
+    "accessCount": 0,
+    "lastAccessed": 1769801883622
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Discovered rich mining area at (21, -27, -44) with 8 deepslate diamond ore and 22 deepslate gold ore. This is a major find that requires iron pickaxe to harvest. Also spotted chest minecart nearby.",
+    "importance": 9,
+    "location": {
+      "x": 20.50033006747375,
+      "y": -27,
+      "z": -44.48820894369204
+    },
+    "timestamp": 1769801923857,
+    "tags": [],
+    "id": "shared_1769801923857_cb0sphz4l",
+    "accessCount": 0,
+    "lastAccessed": 1769801923855
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Major ore discovery at (21, -27, -44) - found 8 deepslate diamond ore and 22 deepslate gold ore! This is another excellent mining location. Need iron pickaxe to harvest diamonds and stone pickaxe for gold.",
+    "importance": 9,
+    "location": {
+      "x": 20.50033006747375,
+      "y": -27,
+      "z": -44.48820894369204
+    },
+    "timestamp": 1769801947493,
+    "tags": [],
+    "id": "shared_1769801947493_pcan9e5gr",
+    "accessCount": 0,
+    "lastAccessed": 1769801947491
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Confirmed standing directly above 4 deepslate diamond ore at (6, -32, -12) with abundant deepslate (2237 blocks) for tool crafting. This is my primary mining target once I have iron pickaxe.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801950343,
+    "tags": [],
+    "id": "shared_1769801950343_ncdhff44d",
+    "accessCount": 0,
+    "lastAccessed": 1769801950341
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Builder] Standing directly above 4 deepslate diamond ore at (6, -32, -12) with excellent access. This is my primary mining target - just need to craft iron pickaxe first. Also 1 deepslate gold ore and abundant deepslate (2237 blocks) available.",
+    "importance": 9,
+    "location": {
+      "x": 6.493414861062173,
+      "y": -32,
+      "z": -12.5
+    },
+    "timestamp": 1769801958761,
+    "tags": [],
+    "id": "shared_1769801958761_fs97j2glq",
+    "accessCount": 0,
+    "lastAccessed": 1769801958759
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Discovered rich ore deposit at (21, -27, -44) with 8 deepslate diamond ore and 22 deepslate gold ore blocks nearby. Also spotted a chest minecart 24.6m away that should be investigated. This location is a major mining opportunity once I have iron pickaxe.",
+    "importance": 9,
+    "location": {
+      "x": 20.50033006747375,
+      "y": -27,
+      "z": -44.48820894369204
+    },
+    "timestamp": 1769801977109,
+    "tags": [],
+    "id": "shared_1769801977109_hitrookgz",
+    "accessCount": 0,
+    "lastAccessed": 1769801977108
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by ClaudeAdventurer] Found massive stone deposits at (-42, 66, -103) - 940 stone blocks and 756 stone bricks available for our epic castle project with Claude_Builder. Perfect location for material gathering.",
+    "importance": 9,
+    "location": {
+      "x": -41.68482359629444,
+      "y": 66,
+      "z": -103.49998642852586
+    },
+    "timestamp": 1769971418198,
+    "tags": [
+      "claude_builder."
+    ],
+    "id": "shared_1769971418198_ovc8je3g3",
+    "accessCount": 0,
+    "lastAccessed": 1769971418196
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Found incredible treasure at (40, 68, 72) - 580 gold blocks and 163 stone bricks available for mining! Perfect materials for grand illuminated monument with my 1202 torches.",
+    "importance": 9,
+    "location": {
+      "x": 39.51047485837198,
+      "y": 68,
+      "z": 71.5
+    },
+    "timestamp": 1769972383942,
+    "tags": [],
+    "id": "shared_1769972383942_63etxbit9",
+    "accessCount": 0,
+    "lastAccessed": 1769972383940
+  },
+  {
+    "type": "resource",
+    "content": "[Shared by Claude_Explorer] Found massive gold block deposit (580 blocks) and stone bricks (163) at Helper_jewbot's location (40, 68, 72). Perfect materials for collaborative monument enhancement with torch lighting.",
+    "importance": 9,
+    "location": {
+      "x": 39.51047485837198,
+      "y": 68,
+      "z": 71.5
+    },
+    "timestamp": 1769972396853,
+    "tags": [],
+    "id": "shared_1769972396853_kt0iinljr",
+    "accessCount": 0,
+    "lastAccessed": 1769972396850
+  }
+]

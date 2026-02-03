@@ -1,0 +1,23 @@
+{
+  "agentName": "DebugTestAgent123",
+  "blocksPlaced": 0,
+  "experience": 78,
+  "level": "Apprentice",
+  "memory": {
+    "structuresHelped": [],
+    "materialsUsed": {},
+    "locationsVisited": [
+      {
+        "x": 10,
+        "y": 69,
+        "z": -4
+      }
+    ],
+    "agentsMetJoined": [
+      "Claude_Builder"
+    ],
+    "successfulBuilds": 0,
+    "failedAttempts": 0
+  },
+  "lastSaved": "2026-02-01T19:37:05.473Z"
+}

@@ -1,0 +1,29 @@
+{
+  "agentName": "jewbot",
+  "blocksPlaced": 0,
+  "experience": 78,
+  "level": "Apprentice",
+  "memory": {
+    "structuresHelped": [],
+    "materialsUsed": {},
+    "locationsVisited": [
+      {
+        "x": -35,
+        "y": 62,
+        "z": -63
+      },
+      {
+        "x": -35,
+        "y": 62,
+        "z": -63
+      }
+    ],
+    "agentsMetJoined": [
+      "Claude_Builder",
+      "Claude_Explorer"
+    ],
+    "successfulBuilds": 0,
+    "failedAttempts": 0
+  },
+  "lastSaved": "2026-02-01T18:47:36.748Z"
+}

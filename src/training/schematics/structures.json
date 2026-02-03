@@ -1,0 +1,551 @@
+{
+  "version": "1.0",
+  "description": "Step-by-step building blueprints for agent training",
+  "structures": {
+    "watchtower": {
+      "name": "Medieval Watchtower",
+      "description": "A tall stone watchtower with lookout platform",
+      "difficulty": "easy",
+      "estimatedBlocks": 200,
+      "style": "medieval",
+      "dimensions": { "width": 5, "length": 5, "height": 15 },
+      "materials": {
+        "primary": "stone_bricks",
+        "accent": "dark_oak_planks",
+        "detail": "stone_brick_stairs"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x5 stone brick foundation",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "stone_bricks", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build 4 corner pillars 12 blocks high",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "stone_bricks", "size": 12 }
+        },
+        {
+          "step": 3,
+          "description": "Build walls between pillars",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "stone_bricks", "size": 12 }
+        },
+        {
+          "step": 4,
+          "description": "Build lookout platform at top",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "dark_oak_planks", "size": 7 }
+        },
+        {
+          "step": 5,
+          "description": "Add crenellations on edges",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "stone_bricks", "size": 2 }
+        }
+      ]
+    },
+    "cottage": {
+      "name": "Cozy Cottage",
+      "description": "A small rustic home with chimney",
+      "difficulty": "easy",
+      "estimatedBlocks": 150,
+      "style": "rustic",
+      "dimensions": { "width": 7, "length": 9, "height": 6 },
+      "materials": {
+        "primary": "oak_planks",
+        "accent": "cobblestone",
+        "detail": "oak_log"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Lay cobblestone foundation 7x9",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "cobblestone", "size": 7 }
+        },
+        {
+          "step": 2,
+          "description": "Build oak plank walls 4 blocks high",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "oak_planks", "size": 4 }
+        },
+        {
+          "step": 3,
+          "description": "Add oak log corner pillars",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "oak_log", "size": 5 }
+        },
+        {
+          "step": 4,
+          "description": "Build triangular roof",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "spruce_planks", "size": 9 }
+        },
+        {
+          "step": 5,
+          "description": "Add cobblestone chimney",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "cobblestone", "size": 8 }
+        }
+      ]
+    },
+    "grandCastle": {
+      "name": "Grand Castle",
+      "description": "An impressive castle with towers and walls",
+      "difficulty": "hard",
+      "estimatedBlocks": 1500,
+      "style": "medieval",
+      "dimensions": { "width": 30, "length": 30, "height": 25 },
+      "materials": {
+        "primary": "stone_bricks",
+        "accent": "polished_andesite",
+        "detail": "dark_oak_planks"
+      },
+      "collaborationRoles": {
+        "builder1": ["foundation", "main_keep"],
+        "builder2": ["corner_towers", "walls"],
+        "builder3": ["gatehouse", "decorations"]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build massive 30x30 foundation",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "stone_bricks", "size": 30 },
+          "assignedTo": "builder1"
+        },
+        {
+          "step": 2,
+          "description": "Build 4 corner towers 20 blocks tall",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "stone_bricks", "size": 20 },
+          "assignedTo": "builder2"
+        },
+        {
+          "step": 3,
+          "description": "Connect towers with 15-block high walls",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "stone_bricks", "size": 15 },
+          "assignedTo": "builder2"
+        },
+        {
+          "step": 4,
+          "description": "Build central keep 25 blocks tall",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "stone_bricks", "size": 12 },
+          "assignedTo": "builder1"
+        },
+        {
+          "step": 5,
+          "description": "Build gatehouse with archway",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "polished_andesite", "size": 10 },
+          "assignedTo": "builder3"
+        },
+        {
+          "step": 6,
+          "description": "Add battlements and crenellations",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "stone_bricks", "size": 3 },
+          "assignedTo": "builder3"
+        }
+      ]
+    },
+    "pyramid": {
+      "name": "Great Pyramid",
+      "description": "A massive pyramid monument",
+      "difficulty": "medium",
+      "estimatedBlocks": 800,
+      "style": "ancient",
+      "dimensions": { "width": 25, "length": 25, "height": 13 },
+      "materials": {
+        "primary": "sandstone",
+        "accent": "gold_block",
+        "detail": "smooth_sandstone"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build sandstone pyramid base 25 wide",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "sandstone", "size": 25 }
+        },
+        {
+          "step": 2,
+          "description": "Add gold block cap at the top",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "gold_block", "size": 3 }
+        }
+      ]
+    },
+    "lighthouse": {
+      "name": "Coastal Lighthouse",
+      "description": "A tall lighthouse with beacon",
+      "difficulty": "medium",
+      "estimatedBlocks": 300,
+      "style": "nautical",
+      "dimensions": { "width": 7, "length": 7, "height": 20 },
+      "materials": {
+        "primary": "white_concrete",
+        "accent": "red_concrete",
+        "detail": "glass"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build circular base 7 wide",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "stone_bricks", "size": 7 }
+        },
+        {
+          "step": 2,
+          "description": "Build white concrete tower 18 blocks",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "white_concrete", "size": 18 }
+        },
+        {
+          "step": 3,
+          "description": "Add red stripe bands",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "red_concrete", "size": 5 }
+        },
+        {
+          "step": 4,
+          "description": "Build glass lantern room at top",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "glass", "size": 5 }
+        },
+        {
+          "step": 5,
+          "description": "Add glowstone beacon light",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "glowstone", "size": 2 }
+        }
+      ]
+    },
+    "monument": {
+      "name": "Monument to Exploration",
+      "description": "A tall monument celebrating discovery",
+      "difficulty": "medium",
+      "estimatedBlocks": 400,
+      "style": "classical",
+      "dimensions": { "width": 15, "length": 15, "height": 25 },
+      "materials": {
+        "primary": "quartz_block",
+        "accent": "gold_block",
+        "detail": "smooth_quartz"
+      },
+      "collaborationRoles": {
+        "builder1": ["foundation", "main_pillar"],
+        "builder2": ["platform", "decorations"]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 15x15 quartz foundation",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "quartz_block", "size": 15 },
+          "assignedTo": "builder1"
+        },
+        {
+          "step": 2,
+          "description": "Build 4 corner columns 10 blocks high",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "quartz_block", "size": 10 },
+          "assignedTo": "builder2"
+        },
+        {
+          "step": 3,
+          "description": "Build central obelisk 25 blocks tall",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "smooth_quartz", "size": 25 },
+          "assignedTo": "builder1"
+        },
+        {
+          "step": 4,
+          "description": "Add gold cap pyramid on top",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "gold_block", "size": 5 },
+          "assignedTo": "builder2"
+        },
+        {
+          "step": 5,
+          "description": "Add decorative platform",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "quartz_block", "size": 9 },
+          "assignedTo": "builder2"
+        }
+      ]
+    },
+    "wizardTower": {
+      "name": "Wizard's Tower",
+      "description": "A mystical spiral tower",
+      "difficulty": "hard",
+      "estimatedBlocks": 500,
+      "style": "fantasy",
+      "dimensions": { "width": 9, "length": 9, "height": 30 },
+      "materials": {
+        "primary": "deepslate_bricks",
+        "accent": "amethyst_block",
+        "detail": "crying_obsidian"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build deepslate brick base 9x9",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "deepslate_bricks", "size": 9 }
+        },
+        {
+          "step": 2,
+          "description": "Build main tower 25 blocks",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "deepslate_bricks", "size": 25 }
+        },
+        {
+          "step": 3,
+          "description": "Add amethyst crystal spire",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "amethyst_block", "size": 7 }
+        },
+        {
+          "step": 4,
+          "description": "Add crying obsidian accents",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "crying_obsidian", "size": 5 }
+        }
+      ]
+    },
+    "japaneseGate": {
+      "name": "Torii Gate",
+      "description": "A traditional Japanese shrine gate",
+      "difficulty": "easy",
+      "estimatedBlocks": 50,
+      "style": "japanese",
+      "dimensions": { "width": 7, "length": 1, "height": 8 },
+      "materials": {
+        "primary": "red_concrete",
+        "accent": "dark_oak_planks",
+        "detail": "dark_oak_slab"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build two 6-high red pillars 5 blocks apart",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "red_concrete", "size": 6 }
+        },
+        {
+          "step": 2,
+          "description": "Place horizontal beam across top extending 1 block past pillars",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "dark_oak_planks", "size": 7 }
+        },
+        {
+          "step": 3,
+          "description": "Add curved roof element with slabs",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "dark_oak_slab", "size": 2 }
+        }
+      ]
+    },
+    "dockPier": {
+      "name": "Fishing Dock",
+      "description": "A simple wooden pier over water",
+      "difficulty": "easy",
+      "estimatedBlocks": 80,
+      "style": "rustic",
+      "dimensions": { "width": 3, "length": 12, "height": 3 },
+      "materials": {
+        "primary": "oak_planks",
+        "accent": "oak_fence",
+        "detail": "oak_log"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Place log pillars into water every 3 blocks",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "oak_log", "size": 4 }
+        },
+        {
+          "step": 2,
+          "description": "Build 3-wide plank walkway on top of pillars",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "oak_planks", "size": 3 }
+        },
+        {
+          "step": 3,
+          "description": "Add fence railings on both sides",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "oak_fence", "size": 1 }
+        }
+      ]
+    },
+    "undergroundVault": {
+      "name": "Underground Storage Vault",
+      "description": "Secure underground storage room",
+      "difficulty": "medium",
+      "estimatedBlocks": 200,
+      "style": "underground",
+      "dimensions": { "width": 9, "length": 9, "height": 5 },
+      "materials": {
+        "primary": "deepslate_bricks",
+        "accent": "polished_deepslate",
+        "detail": "iron_bars"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Dig 9x9x5 room underground",
+          "action": "digRoom",
+          "params": { "width": 9, "length": 9, "height": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Line walls with deepslate bricks",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "deepslate_bricks", "size": 5 }
+        },
+        {
+          "step": 3,
+          "description": "Add polished deepslate floor",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "polished_deepslate", "size": 9 }
+        },
+        {
+          "step": 4,
+          "description": "Place iron bar windows in entrance",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "iron_bars", "size": 2 }
+        }
+      ]
+    },
+    "gardenPergola": {
+      "name": "Garden Pergola",
+      "description": "An open garden structure with vine covering",
+      "difficulty": "easy",
+      "estimatedBlocks": 60,
+      "style": "rustic",
+      "dimensions": { "width": 5, "length": 7, "height": 4 },
+      "materials": {
+        "primary": "oak_fence",
+        "accent": "oak_slab",
+        "detail": "vine"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Place 4 fence post pillars at corners, 3 blocks high",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "oak_fence", "size": 3 }
+        },
+        {
+          "step": 2,
+          "description": "Connect tops with horizontal slabs",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "oak_slab", "size": 5 }
+        },
+        {
+          "step": 3,
+          "description": "Add crisscross slab pattern on roof",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "oak_slab", "size": 5 }
+        },
+        {
+          "step": 4,
+          "description": "Drape vines from edges",
+          "action": "placeBlock",
+          "params": { "block": "vine", "count": 12 }
+        }
+      ]
+    },
+    "stoneBridge": {
+      "name": "Arched Stone Bridge",
+      "description": "An elegant bridge with arched supports",
+      "difficulty": "medium",
+      "estimatedBlocks": 150,
+      "style": "medieval",
+      "dimensions": { "width": 5, "length": 20, "height": 8 },
+      "materials": {
+        "primary": "stone_bricks",
+        "accent": "stone_brick_stairs",
+        "detail": "stone_brick_wall"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build arch support pillars on each bank",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "stone_bricks", "size": 6 }
+        },
+        {
+          "step": 2,
+          "description": "Create arch using stairs stepping pattern",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "stone_brick_stairs", "size": 8 }
+        },
+        {
+          "step": 3,
+          "description": "Build 5-wide walkway across",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "stone_bricks", "size": 5 }
+        },
+        {
+          "step": 4,
+          "description": "Add low walls as railings on sides",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "stone_brick_wall", "size": 1 }
+        }
+      ]
+    },
+    "farmhouseBasic": {
+      "name": "Farmhouse with Barn",
+      "description": "A rustic farmhouse with attached small barn",
+      "difficulty": "medium",
+      "estimatedBlocks": 350,
+      "style": "rustic",
+      "dimensions": { "width": 12, "length": 18, "height": 8 },
+      "materials": {
+        "primary": "oak_planks",
+        "accent": "spruce_log",
+        "detail": "hay_block"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build cobblestone foundation 8x10",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "cobblestone", "size": 8 }
+        },
+        {
+          "step": 2,
+          "description": "Build oak plank walls 5 high with spruce log corners",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "oak_planks", "size": 5 }
+        },
+        {
+          "step": 3,
+          "description": "Add sloped roof with spruce stairs",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "spruce_stairs", "size": 10 }
+        },
+        {
+          "step": 4,
+          "description": "Attach small barn section with hay loft",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "oak_planks", "size": 4 }
+        },
+        {
+          "step": 5,
+          "description": "Fill barn loft with hay blocks",
+          "action": "placeBlock",
+          "params": { "block": "hay_block", "count": 16 }
+        }
+      ]
+    }
+  }
+}

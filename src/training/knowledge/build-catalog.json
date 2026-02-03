@@ -1,0 +1,185 @@
+{
+  "version": "1.0",
+  "description": "Catalog of successful builds for agent learning - patterns that work well",
+  "successfulBuilds": [
+    {
+      "id": "starter_base_001",
+      "name": "Efficient Starter Base",
+      "style": "rustic",
+      "difficulty": "easy",
+      "timeToComplete": "5-10 minutes",
+      "materials": {
+        "cobblestone": 64,
+        "oak_planks": 32,
+        "oak_door": 1,
+        "glass_pane": 8,
+        "torch": 4
+      },
+      "steps": [
+        "Dig 2 blocks into hillside for quick shelter",
+        "Expand to 5x5x3 interior space",
+        "Place crafting table and furnace immediately",
+        "Add door and 2 glass panes for light",
+        "Place 4 torches on walls"
+      ],
+      "lessonsLearned": [
+        "Building into terrain is faster than building walls",
+        "Light prevents mob spawns inside",
+        "Small space is better than no space at night"
+      ]
+    },
+    {
+      "id": "watchtower_basic",
+      "name": "Simple Watchtower",
+      "style": "medieval",
+      "difficulty": "medium",
+      "timeToComplete": "15-20 minutes",
+      "materials": {
+        "stone_bricks": 128,
+        "oak_planks": 24,
+        "ladder": 15,
+        "torch": 8
+      },
+      "steps": [
+        "Build 4x4 stone brick base",
+        "Raise walls 12 blocks high",
+        "Add interior ladder for access",
+        "Create 6x6 viewing platform at top",
+        "Add 2-high crenellations around edge"
+      ],
+      "lessonsLearned": [
+        "Start small and build up",
+        "Interior access is essential",
+        "Overhang at top looks better"
+      ]
+    },
+    {
+      "id": "farm_efficient",
+      "name": "Compact Efficient Farm",
+      "style": "functional",
+      "difficulty": "easy",
+      "timeToComplete": "10-15 minutes",
+      "materials": {
+        "water_bucket": 1,
+        "wheat_seeds": 36,
+        "oak_fence": 16,
+        "torch": 4
+      },
+      "steps": [
+        "Dig 1-block deep 9x9 area",
+        "Place water in center block",
+        "Hoe all surrounding dirt",
+        "Plant seeds in all 80 farmable blocks",
+        "Fence perimeter and add torches"
+      ],
+      "lessonsLearned": [
+        "One water block hydrates 4 blocks in each direction",
+        "Torches let crops grow at night",
+        "Fencing keeps mobs from trampling"
+      ]
+    },
+    {
+      "id": "mineshaft_safe",
+      "name": "Safe Mining Shaft",
+      "style": "functional",
+      "difficulty": "easy",
+      "timeToComplete": "10 minutes",
+      "materials": {
+        "torch": 32,
+        "ladder": 50,
+        "cobblestone": 20
+      },
+      "steps": [
+        "Dig 2x1 shaft straight down (stand on edge)",
+        "Place ladders every block",
+        "At Y=-59, dig 2-block high horizontal tunnel",
+        "Branch mine every 3 blocks",
+        "Light everything thoroughly"
+      ],
+      "lessonsLearned": [
+        "Y=-59 is optimal for diamonds in 1.21",
+        "Never dig straight down without ladder backup",
+        "Torches on left wall helps navigation"
+      ]
+    },
+    {
+      "id": "bridge_simple",
+      "name": "Ravine Bridge",
+      "style": "rustic",
+      "difficulty": "easy",
+      "timeToComplete": "5 minutes",
+      "materials": {
+        "cobblestone": 48,
+        "oak_fence": 24
+      },
+      "steps": [
+        "Build 3-wide cobblestone path across gap",
+        "Add fence railings on both sides",
+        "For spans over 10 blocks, add support pillars"
+      ],
+      "lessonsLearned": [
+        "3 blocks wide is comfortable",
+        "Railings prevent accidental falls",
+        "Crouch while building over void"
+      ]
+    }
+  ],
+  "buildingPatterns": {
+    "walls": {
+      "basic": "Place blocks in a line, 3+ high",
+      "pillared": "Place corner pillars first, fill between with different material",
+      "windowed": "Leave 1x2 gaps every 3 blocks for glass",
+      "layered": "Alternate materials every 2 rows for texture"
+    },
+    "roofs": {
+      "flat": "Simple slab layer on top",
+      "sloped": "Use stairs stepping inward",
+      "peaked": "Stairs meeting at center ridge",
+      "curved": "Multiple stair types for dome effect"
+    },
+    "foundations": {
+      "ground": "Clear grass, place floor directly",
+      "raised": "Build 1-3 block platform first",
+      "dug": "Dig into terrain, builds faster",
+      "stilts": "Pillars in water or uneven terrain"
+    },
+    "decorations": {
+      "lighting": "Lanterns hanging from fences, torches on walls",
+      "greenery": "Flower pots, leaves, vines on exteriors",
+      "furniture": "Stairs as chairs, slabs as tables",
+      "storage": "Chest rooms with signs for organization"
+    }
+  },
+  "commonMistakes": [
+    {
+      "mistake": "Building too big without resources",
+      "solution": "Start small (5x5), expand later",
+      "importance": 9
+    },
+    {
+      "mistake": "Forgetting lighting inside",
+      "solution": "Place torches every 7 blocks minimum",
+      "importance": 8
+    },
+    {
+      "mistake": "No door on first night",
+      "solution": "Place blocks to seal entrance if no door",
+      "importance": 10
+    },
+    {
+      "mistake": "Flat boring walls",
+      "solution": "Add depth with stairs, slabs, pillars",
+      "importance": 5
+    },
+    {
+      "mistake": "Building in dangerous location",
+      "solution": "Check surroundings for caves, cliffs first",
+      "importance": 7
+    },
+    {
+      "mistake": "Using wrong tool for material",
+      "solution": "Stone pickaxe for stone, axe for wood",
+      "importance": 6
+    }
+  ]
+}

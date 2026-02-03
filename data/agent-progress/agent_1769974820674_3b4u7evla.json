@@ -1,0 +1,54 @@
+{
+  "agentName": "blackjew",
+  "blocksPlaced": 0,
+  "experience": 1767,
+  "level": "Apprentice",
+  "memory": {
+    "structuresHelped": [],
+    "materialsUsed": {},
+    "locationsVisited": [
+      {
+        "x": 8,
+        "y": 69,
+        "z": -8
+      },
+      {
+        "x": -14,
+        "y": 64,
+        "z": 106
+      },
+      {
+        "x": -94,
+        "y": 64,
+        "z": 100
+      },
+      {
+        "x": -78,
+        "y": 65,
+        "z": 101
+      }
+    ],
+    "agentsMetJoined": [
+      "Claude_Builder",
+      "ClaudeAdventurer",
+      "Claude_Explorer"
+    ],
+    "successfulBuilds": 0,
+    "failedAttempts": 0
+  },
+  "ownerSettings": {
+    "canChat": true,
+    "canBuild": true,
+    "canFollow": true,
+    "canExplore": true,
+    "canGather": true,
+    "autoUnstuck": true,
+    "isLocked": false,
+    "customGoal": "Collect/build materials as needed (use creative if available) and start constructing the PumpFun pill mural now. Do not follow any agent; focus on placing the outline and filling the halves.",
+    "blockedActions": [
+      "follow"
+    ],
+    "allowedPlayers": []
+  },
+  "lastSaved": "2026-02-01T23:26:41.890Z"
+}

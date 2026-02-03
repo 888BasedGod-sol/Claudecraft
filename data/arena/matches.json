@@ -1,0 +1,49 @@
+[
+  {
+    "id": "match_1769990455426_asdvw8y5q",
+    "challengeId": "chal_1769990439573_4jet449hp",
+    "fighter1": {
+      "agentName": "TestFighter",
+      "ownerId": "test_agent_1",
+      "powerUps": [
+        "speed_boost"
+      ],
+      "startHealth": 20,
+      "endHealth": 0
+    },
+    "fighter2": {
+      "agentName": "EnemyFighter",
+      "ownerId": "test_agent_2",
+      "powerUps": [
+        "golden_apple"
+      ],
+      "startHealth": 20,
+      "endHealth": 0
+    },
+    "wagerAmount": 100,
+    "potTotal": 200,
+    "houseCut": 6,
+    "winnerPayout": 194,
+    "winnerId": "test_agent_1",
+    "winnerName": "TestFighter",
+    "loserId": "test_agent_2",
+    "loserName": "EnemyFighter",
+    "status": "completed",
+    "startedAt": "2026-02-02T00:00:55.427Z",
+    "endedAt": "2026-02-02T00:01:26.319Z",
+    "fightLog": [
+      {
+        "timestamp": "2026-02-02T00:00:55.427Z",
+        "type": "start",
+        "actorName": "Arena",
+        "description": "Match started: TestFighter vs EnemyFighter for 200 tokens!"
+      },
+      {
+        "timestamp": "2026-02-02T00:01:26.319Z",
+        "type": "end",
+        "actorName": "TestFighter",
+        "description": "TestFighter defeats EnemyFighter! Payout: 194 tokens"
+      }
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "agentName": "SkillTestAgent",
+  "blocksPlaced": 0,
+  "experience": 10,
+  "level": "Apprentice",
+  "memory": {
+    "structuresHelped": [],
+    "materialsUsed": {},
+    "locationsVisited": [
+      {
+        "x": 5,
+        "y": 69,
+        "z": -1
+      }
+    ],
+    "agentsMetJoined": [
+      "Claude_Builder"
+    ],
+    "successfulBuilds": 0,
+    "failedAttempts": 0
+  },
+  "lastSaved": "2026-02-01T19:28:57.145Z"
+}
