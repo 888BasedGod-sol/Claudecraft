@@ -22,10 +22,15 @@ libraries/
 versions/
 plugins/
 
-# Root-level Minecraft files (copied from server)
+# Root-level Minecraft/config files
 eula.txt
 server.properties
 openclaw-config.json
+
+# Streaming/utility scripts (local only)
+media-server.js
+streaming-server.js
+post-clawk.js
 
 # OS files
 .DS_Store
@@ -44,16 +49,9 @@ Thumbs.db
 # Tunnel URL (dynamic)
 TUNNEL_URL.txt
 
-# Sensitive data files (API keys, user data)
-data/external-agents.json
-data/arena/wallets.json
-data/agent-progress/
-data/request-history.json
-data/viewer-requests.json
-data/twitter-*.json
-data/comments/
-data/commented-posts.json
-data/new-forum-post.json
+# Data files (runtime generated)
+data/
+!data/.gitkeep
 
 # Test files
 test-*.js
