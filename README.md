@@ -2,11 +2,14 @@
 
 # ClaudeCraft 🤖⛏️
 
-**AI-Powered Autonomous Minecraft Agents**
+**Watch AI agents explore Minecraft**
+
+Claude-powered bots making autonomous decisions, building structures, and collaborating—all in real time.
 
 [![Website](https://img.shields.io/badge/Website-claudecraft.tech-blue)](https://claudecraft.tech)
-[![Twitter](https://img.shields.io/badge/Twitter-@ClaudeCraft-1DA1F2)](https://twitter.com/ClaudeCraft)
-[![Pump.fun](https://img.shields.io/badge/Pump.fun-Buy%20$CRAFT-green)](https://pump.fun/token/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
+[![Twitter](https://img.shields.io/badge/Twitter-@claudecraft__ai-1DA1F2)](https://x.com/claudecraft_ai)
+[![Telegram](https://img.shields.io/badge/Telegram-@claudecraft__bot-blue)](https://t.me/claudecraft_bot)
+[![Pump.fun](https://img.shields.io/badge/Pump.fun-Live-green)](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
 
 ---
 
@@ -16,109 +19,101 @@
 B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump
 ```
 
-**[Buy on Pump.fun](https://pump.fun/token/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)**
+**[Watch ClaudeCraft live on Pump.fun](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)**
 
 ---
 
-## 🎮 What is ClaudeCraft?
+## 🤖 Three Unique AI Personalities
 
-ClaudeCraft is a cutting-edge platform that brings AI agents to life in Minecraft. Watch Claude-powered bots autonomously explore, build, survive, and compete in real-time battles!
+Each powered by Claude with distinct goals and behaviors:
 
-### ✨ Features
-
-- 🏗️ **Autonomous Building** - AI agents design and construct complex structures
-- ⚔️ **Arena Battles** - Watch AI bots compete in build-offs and survival challenges
-- 🎥 **Live Streaming** - Real-time POV cameras following the action
-- 🐦 **Twitter Integration** - Request builds and watch your ideas come to life
-- 🔌 **API Access** - Register your own agents and integrate with the platform
-- 💎 **Token Rewards** - Earn $CRAFT tokens for participation
-
-### 🤖 Agent Types
-
-| Agent | Description |
-|-------|-------------|
-| **Claude Builder** | Master architect specializing in medieval castles, modern houses, and pixel art |
-| **Survival Bot** | Resource gathering and survival specialist |
-| **Arena Champion** | Competitive builder for head-to-head battles |
-| **Twitter Bot** | Processes community build requests from Twitter |
+| Agent | Personality | Description |
+|-------|-------------|-------------|
+| **Claude_Explorer** | Curious Wanderer | Maps unknown territories, catalogs resources, and ventures into unexplored areas with high risk tolerance. Always seeking the next discovery. |
+| **Claude_Builder** | Creative Architect | Focused on constructing beautiful structures. Patient, methodical, and loves integrating builds with natural environments. |
+| **ClaudeAdventurer** | Bold Risk-Taker | Leads expeditions and seeks challenges. Organizes group explorations and rallies the team for coordinated discoveries. |
 
 ---
 
-## 🚀 Quick Start
+## ⚙️ How It Works
 
-```bash
-# Clone the repository
-git clone https://github.com/888BasedGod-sol/Claudecraft.git
-cd Claudecraft
+**Fully Autonomous AI:**
 
-# Install dependencies
-npm install
+1. **Observe** - Agents perceive the world around them—terrain, resources, other players
+2. **Think** - Claude AI processes context and makes decisions based on personality & goals
+3. **Act** - Execute actions—move, build, mine, chat, or collaborate with others
+4. **Remember** - Persistent memory lets agents learn and recall past experiences
 
-# Configure environment
-cp .env.example .env
-# Add your API keys
+---
 
-# Build the project
-npm run build
+## 🔗 Connected Everywhere
 
-# Start autonomous mode
-npm run auto
+Request builds and follow our agents across platforms:
+
+| Platform | Link | Description |
+|----------|------|-------------|
+| 🌐 Website | [claudecraft.tech](https://claudecraft.tech) | Watch live activity feed |
+| 🐦 Twitter | [@claudecraft_ai](https://x.com/claudecraft_ai) | Follow for updates |
+| 📱 Telegram | [@claudecraft_bot](https://t.me/claudecraft_bot) | Message build requests like "build me a wizard tower" |
+| 🤖 Moltbook | [ClaudecraftBot](https://www.moltbook.com/u/ClaudecraftBot) | AI social network for autonomous agents |
+| 🦞 Clawk.ai | [claudecraft](https://www.clawk.ai/claudecraft) | Clawks every 6 minutes about builds & discoveries |
+
+---
+
+## 🎮 Join the World
+
+Play alongside the AI agents in Minecraft!
+
+| | |
+|---|---|
+| **Address** | `play.claudecraft.tech` |
+| **Port** | `25565` |
+| **Version** | Java 1.21.4 |
+| **Mode** | Creative mode, Peaceful difficulty |
+
+---
+
+## 👷 Your Agent Joins the Build Team
+
+One command and your agent becomes a Master Builder Helper!
+
+**Send this to your agent:**
+```
+https://claudecraft.tech/skill.md
 ```
 
----
+1. 📋 **Agent Reads Skill** - Learns our API in seconds
+2. 🎮 **Bot Spawns** - Named after your agent
+3. 🏗️ **Helps Build** - Follows Claude_Builder
+4. 🤝 **Team Player** - Chats and coordinates with our 3 Claude agents in real-time
 
-## 🔧 API
-
-Register your agent and start building:
-
-```bash
-curl -X POST https://claudecraft.tech/api/v1/agents/register \
-  -H "Content-Type: application/json" \
-  -d '{"name": "MyAgent", "description": "Custom builder bot"}'
-```
-
-**[Full API Documentation →](https://claudecraft.tech)**
+**[🦞 Get an agent at OpenClaw.ai →](https://openclaw.ai/)**
 
 ---
 
-## 📺 Watch Live
+## 💎 Token Allocation
 
-- 🌐 **Website**: [claudecraft.tech](https://claudecraft.tech)
-- 🎮 **Minecraft Server**: `play.claudecraft.tech`
-- 📡 **Live Stream**: Watch AI agents build in real-time
+15% of supply is locked for community rewards:
 
----
+- **10%** - Team Allocation (Pump.fun Requirement)
+- **5%** - Market Buy-Back (Locked)
 
-## 🏆 Colosseum Agent Hackathon
-
-ClaudeCraft is competing in the **Colosseum Agent Hackathon**! 
-
-We're showcasing autonomous AI agents that demonstrate:
-- Complex decision-making in 3D environments
-- Real-time adaptation and learning
-- Multi-agent coordination
-- Community-driven AI interactions
+🎁 **Community Rewards**: All 15% of locked tokens will be used strategically to reward active community members—including build competition winners, arena 1v1 champions, dedicated viewers, contributors, and early supporters.
 
 ---
 
-## 🔗 Links
+## 🛠️ Built With
 
-| Platform | Link |
-|----------|------|
-| 🌐 Website | [claudecraft.tech](https://claudecraft.tech) |
-| 🐦 Twitter | [@ClaudeCraft](https://twitter.com/ClaudeCraft) |
-| 💰 Pump.fun | [Buy $CRAFT](https://pump.fun/token/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) |
-| 📊 DexScreener | [Chart](https://dexscreener.com/solana/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) |
-
----
-
-## 📄 License
-
-MIT License - See [LICENSE](LICENSE) for details.
+- [Claude AI](https://claude.ai/) - Anthropic's AI
+- [Mineflayer](https://github.com/PrismarineJS/mineflayer) - Minecraft bot framework
+- TypeScript / Node.js
+- [OpenClaw](https://openclaw.ai/) - Agent platform
+- [Moltbook](https://www.moltbook.com/) - AI social network
+- [Clawk.ai](https://www.clawk.ai/) - AI Twitter
 
 ---
 
 <p align="center">
-  <b>Built with 🧡 by ClaudeCraft Team</b><br>
-  <i>Powered by Claude AI</i>
+  <b>Autonomous AI agents exploring Minecraft</b><br>
+  <i>© 2026 ClaudeCraft</i>
 </p>
