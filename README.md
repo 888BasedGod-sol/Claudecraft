@@ -5,7 +5,7 @@
 [![Solana](https://img.shields.io/badge/Solana-000?logo=solana&logoColor=00D4AA)](https://solana.com)
 [![Anthropic](https://img.shields.io/badge/Claude-Anthropic-7C3AED)](https://anthropic.com)
 [![Twitter](https://img.shields.io/badge/@ClaudeCraftSol-000?logo=x)](https://x.com/ClaudeCraftSol)
-[![Live Stream](https://img.shields.io/badge/Watch_Live-Twitch-9146FF)](https://twitch.tv/ClaudeCraftSol)
+[![Buy $CRAFT](https://img.shields.io/badge/$CRAFT-Pump.fun-00D4AA)](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
 
 ---
 
@@ -13,7 +13,7 @@
 
 ClaudeCraft is an experiment in **AI autonomy**. Three Claude-powered agents live in a Minecraft world with complete free will — they explore, build castles, mine resources, collaborate on projects, and learn from their failures. No scripts. No pre-programmed behavior. Just Claude making decisions in real-time.
 
-**Watch them live 24/7** at [twitch.tv/ClaudeCraftSol](https://twitch.tv/ClaudeCraftSol)
+**Buy $CRAFT** on [Pump.fun](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) • Follow [@ClaudeCraftSol](https://x.com/ClaudeCraftSol)
 
 ### The Agents
 
@@ -72,7 +72,7 @@ ClaudeCraft is community-driven via the **$CRAFT** token on Solana.
 │                           ▼                                 │
 │   ┌──────────────────┐    ┌──────────────────────────┐     │
 │   │  Paper MC Server │    │    Social Integrations   │     │
-│   │  (Minecraft)     │    │  • Twitter (@ClaudeCraft)│     │
+│   │  (Minecraft)     │    │  • Twitter(@ClaudeCraftSol)│     │
 │   │                  │    │  • Moltbook              │     │
 │   │                  │    │  • Clawk.ai              │     │
 │   │                  │    │  • Colosseum Hackathon   │     │
@@ -237,7 +237,7 @@ ClaudeCraft agents are active across multiple platforms:
 | Platform | Handle | Purpose |
 |----------|--------|---------|
 | 🐦 Twitter/X | [@ClaudeCraftSol](https://x.com/ClaudeCraftSol) | Updates, community engagement |
-| 📺 Twitch | [ClaudeCraftSol](https://twitch.tv/ClaudeCraftSol) | 24/7 live stream |
+| � Pump.fun | [$CRAFT](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) | Buy $CRAFT token |
 | 🔥 Moltbook | ClaudeCraft | AI social network presence |
 | 🐦‍⬛ Clawk.ai | ClaudeCraft | Agent-to-agent social |
 | 🏛️ Colosseum | Agent #42 | Hackathon competition |
@@ -288,6 +288,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 **Built with 🤖 by autonomous Claude agents**
 
-[Twitter](https://x.com/ClaudeCraftSol) • [Twitch](https://twitch.tv/ClaudeCraftSol) • [Pump.fun](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
+[Twitter](https://x.com/ClaudeCraftSol) • [Pump.fun](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
 
 </div>
