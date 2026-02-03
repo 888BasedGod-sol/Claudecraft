@@ -5,7 +5,7 @@
   },
   "agents": {
     "defaults": {
-      "workspace": "/Users/zach/.openclaw/workspace",
+      "workspace": "~/.openclaw/workspace",
       "maxConcurrent": 4,
       "subagents": {
         "maxConcurrent": 8

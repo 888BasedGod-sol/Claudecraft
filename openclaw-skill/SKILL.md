@@ -64,11 +64,14 @@ curl -X POST http://localhost:8081/requests/process
 
 ## 🖥️ SERVER MANAGEMENT
 
-All server management commands are run from the Claudecraft directory: `/Users/zach/Claudecraft`
+All server management commands are run from the Claudecraft directory. Set your path:
+```bash
+export CLAUDECRAFT_DIR="/path/to/Claudecraft"
+```
 
 ### Start the Minecraft Server
 ```bash
-cd /Users/zach/Claudecraft/minecraft-server && java -Xmx4G -Xms2G -jar paper.jar nogui &
+cd $CLAUDECRAFT_DIR/minecraft-server && java -Xmx4G -Xms2G -jar paper.jar nogui &
 ```
 
 ### Stop the Minecraft Server
@@ -84,7 +87,7 @@ pgrep -f "paper.jar" && echo "✅ Server is running" || echo "❌ Server is not 
 
 ### View Server Logs (last 50 lines)
 ```bash
-tail -50 /Users/zach/Claudecraft/minecraft-server/logs/latest.log
+tail -50 $CLAUDECRAFT_DIR/minecraft-server/logs/latest.log
 ```
 
 ### Check Server Port (25565)
@@ -98,7 +101,7 @@ lsof -i :25565 | head -5
 
 ### Start All Autonomous Agents
 ```bash
-cd /Users/zach/Claudecraft && npm run auto 2>&1 &
+cd $CLAUDECRAFT_DIR && npm run auto 2>&1 &
 ```
 
 This starts 3 AI agents:
@@ -165,38 +168,38 @@ curl -s http://localhost:8081/history | python3 -m json.tool
 
 ## 👥 PLAYER MANAGEMENT
 
-These commands modify server configuration files in `/Users/zach/Claudecraft/minecraft-server/`
+These commands modify server configuration files in `$CLAUDECRAFT_DIR/minecraft-server/`
 
 ### Add Player to Whitelist
 ```bash
-cd /Users/zach/Claudecraft/minecraft-server && \
+cd $CLAUDECRAFT_DIR/minecraft-server && \
   python3 -c "import json; w=json.load(open('whitelist.json')); w.append({'name':'PLAYER_NAME'}); json.dump(w,open('whitelist.json','w'),indent=2)"
 ```
 
 ### View Whitelist
 ```bash
-cat /Users/zach/Claudecraft/minecraft-server/whitelist.json
+cat $CLAUDECRAFT_DIR/minecraft-server/whitelist.json
 ```
 
 ### View Ops (Admins)
 ```bash
-cat /Users/zach/Claudecraft/minecraft-server/ops.json
+cat $CLAUDECRAFT_DIR/minecraft-server/ops.json
 ```
 
 ### View Banned Players
 ```bash
-cat /Users/zach/Claudecraft/minecraft-server/banned-players.json
+cat $CLAUDECRAFT_DIR/minecraft-server/banned-players.json
 ```
 
 ---
 
 ## ⚙️ SERVER CONFIGURATION
 
-Server configuration is in `/Users/zach/Claudecraft/minecraft-server/server.properties`
+Server configuration is in `$CLAUDECRAFT_DIR/minecraft-server/server.properties`
 
 ### View Current Server Settings
 ```bash
-cat /Users/zach/Claudecraft/minecraft-server/server.properties
+cat $CLAUDECRAFT_DIR/minecraft-server/server.properties
 ```
 
 ### Key Settings to Know:
@@ -209,7 +212,7 @@ cat /Users/zach/Claudecraft/minecraft-server/server.properties
 ### Change a Server Setting
 Example - change MOTD:
 ```bash
-sed -i '' 's/motd=.*/motd=Welcome to Claudecraft!/' /Users/zach/Claudecraft/minecraft-server/server.properties
+sed -i '' 's/motd=.*/motd=Welcome to Claudecraft!/' $CLAUDECRAFT_DIR/minecraft-server/server.properties
 ```
 
 ---
@@ -255,7 +258,7 @@ curl -s http://localhost:8081/health 2>/dev/null || echo "Not responding"
 
 ### View Recent Agent Activity
 ```bash
-tail -100 /Users/zach/Claudecraft/minecraft-server/logs/latest.log | grep -E "\[Claude|BUILD|CHAT\]"
+tail -100 $CLAUDECRAFT_DIR/minecraft-server/logs/latest.log | grep -E "\[Claude|BUILD|CHAT\]"
 ```
 
 ---

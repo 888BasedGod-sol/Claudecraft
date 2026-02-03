@@ -2,8 +2,9 @@
 # Arena Builder Script
 # Executes arena build commands via Minecraft server console
 
-# Read commands from JSON
-COMMANDS_FILE="/Users/zach/Claudecraft/data/arena/build-commands.json"
+# Read commands from JSON - uses script directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+COMMANDS_FILE="${SCRIPT_DIR}/../data/arena/build-commands.json"
 
 # Check if jq is available
 if ! command -v jq &> /dev/null; then

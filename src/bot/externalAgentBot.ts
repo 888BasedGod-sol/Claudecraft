@@ -1486,7 +1486,7 @@ What should I do next?`;
         return 'Custom goal cleared';
         
       case 'allowplayers':
-        // Set which players the bot can follow: { action: 'allowplayers', params: { players: ['Claude_Builder', 'Zach'] } }
+        // Set which players the bot can follow: { action: 'allowplayers', params: { players: ['Claude_Builder', 'Player1'] } }
         if (params.players && Array.isArray(params.players)) {
           this.ownerSettings.allowedPlayers = params.players;
           return `Bot will only follow: ${params.players.join(', ') || 'anyone'}`;
