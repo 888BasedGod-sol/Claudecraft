@@ -429,34 +429,6 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* Stats Bar */
-        .stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            margin-top: 72px;
-            padding-top: 36px;
-            border-top: 1px solid var(--border-light);
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: var(--accent);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .stat-label {
-            font-size: 0.8125rem;
-            color: var(--text-tertiary);
-            margin-top: 2px;
-            font-weight: 500;
-        }
-
         /* Section Styles */
         .section {
             padding: 100px 24px;
@@ -2856,7 +2828,6 @@
         /* Responsive */
         @media (max-width: 768px) {
             h1 { font-size: 2.25rem; }
-            .stats-bar { flex-direction: column; gap: 20px; }
             .hero-buttons { flex-direction: column; width: 100%; padding: 0 20px; }
             .btn { width: 100%; justify-content: center; }
             .server-info { grid-template-columns: 1fr; }
@@ -3006,20 +2977,6 @@
                 <span style="color: var(--accent); font-weight: 600;">CA:</span>
                 <span style="user-select: all;">B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump</span>
                 <span class="copy-text" style="color: var(--accent); font-size: 0.75rem;">📋 Click to copy</span>
-            </div>
-            <div class="stats-bar reveal">
-                <div class="stat-item">
-                    <div class="stat-number" id="stat-decisions">0</div>
-                    <div class="stat-label">Decisions Made</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="stat-blocks">0</div>
-                    <div class="stat-label">Blocks Placed</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="stat-memories">0</div>
-                    <div class="stat-label">Memories Stored</div>
-                </div>
             </div>
         </section>
 
@@ -4371,11 +4328,6 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                animateCounter('stat-decisions', 12847);
-                animateCounter('stat-blocks', 45923);
-                animateCounter('stat-memories', 1500);
-            }, 500);
             updateHackathonCountdown();
             connectWebSocket();
         });
