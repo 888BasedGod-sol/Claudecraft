@@ -1460,76 +1460,88 @@ export class CinematicCamera {
   /**
    * Start the cinematic camera
    */
-  public async start(host: string, port: number): Promise<void> {
+  public async start(host: string, port: number, maxRetries: number = 3): Promise<void> {
     if (this.isRunning) return;
 
     this.log('🎥 Starting professional cinematic camera...');
 
-    try {
-      this.bot = mineflayer.createBot({
-        host,
-        port,
-        username: 'CameraBot',
-        hideErrors: false,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Connection timeout')), 30000);
-        
-        this.bot!.once('spawn', () => {
-          clearTimeout(timeout);
-          resolve();
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        this.bot = mineflayer.createBot({
+          host,
+          port,
+          username: 'CameraBot',
+          hideErrors: false,
         });
-        
-        this.bot!.once('error', (err) => {
-          clearTimeout(timeout);
-          reject(err);
+
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(() => reject(new Error('Connection timeout')), 30000);
+          
+          this.bot!.once('spawn', () => {
+            clearTimeout(timeout);
+            resolve();
+          });
+          
+          this.bot!.once('error', (err) => {
+            clearTimeout(timeout);
+            reject(err);
+          });
         });
-      });
 
-      this.isRunning = true;
-      this.log('📷 Camera bot connected!');
+        this.isRunning = true;
+        this.log('📷 Camera bot connected!');
 
-      // Set up spectator mode
-      setTimeout(() => {
-        if (this.bot) {
-          this.bot.chat('/gamemode spectator');
-          this.log('🎬 Spectator mode enabled');
-        }
-      }, 1000);
-
-      // Set up chat handler for event detection
-      this.bot.on('message', (message) => {
-        const text = message.toString();
-        const match = text.match(/\[(\w+)\]/);
-        if (match) {
-          const username = match[1];
-          if (this.targetAgents.has(username)) {
-            this.updateAgentActivity(username, text);
+        // Set up spectator mode
+        setTimeout(() => {
+          if (this.bot) {
+            this.bot.chat('/gamemode spectator');
+            this.log('🎬 Spectator mode enabled');
           }
+        }, 1000);
+
+        // Set up chat handler for event detection
+        this.bot.on('message', (message) => {
+          const text = message.toString();
+          const match = text.match(/\[(\w+)\]/);
+          if (match) {
+            const username = match[1];
+            if (this.targetAgents.has(username)) {
+              this.updateAgentActivity(username, text);
+            }
+          }
+        });
+
+        // Start the 30fps update loop
+        this.updateInterval = setInterval(() => {
+          this.updateCamera();
+        }, CAMERA_SETTINGS.POSITION_UPDATE_INTERVAL);
+
+        // Start shot change timer
+        this.shotChangeInterval = setInterval(() => {
+          this.changeShot();
+        }, CAMERA_SETTINGS.SHOT_CHANGE_INTERVAL);
+
+        // Start anti-AFK system
+        if (CAMERA_SETTINGS.ANTI_AFK.ENABLED) {
+          this.startAntiAfk();
         }
-      });
 
-      // Start the 30fps update loop
-      this.updateInterval = setInterval(() => {
-        this.updateCamera();
-      }, CAMERA_SETTINGS.POSITION_UPDATE_INTERVAL);
+        this.log('✨ Professional cinematic camera ready!');
+        return; // Success - exit the retry loop
 
-      // Start shot change timer
-      this.shotChangeInterval = setInterval(() => {
-        this.changeShot();
-      }, CAMERA_SETTINGS.SHOT_CHANGE_INTERVAL);
-
-      // Start anti-AFK system
-      if (CAMERA_SETTINGS.ANTI_AFK.ENABLED) {
-        this.startAntiAfk();
+      } catch (error) {
+        this.logError(`Connection attempt ${attempt}/${maxRetries} failed: ${error}`);
+        if (this.bot) {
+          try { this.bot.quit(); } catch (e) { /* ignore */ }
+          this.bot = null;
+        }
+        if (attempt < maxRetries) {
+          this.log(`⏳ Retrying in 5 seconds...`);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        } else {
+          throw error;
+        }
       }
-
-      this.log('✨ Professional cinematic camera ready!');
-
-    } catch (error) {
-      this.logError(`Failed to start camera: ${error}`);
-      throw error;
     }
   }
 

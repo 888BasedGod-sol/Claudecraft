@@ -4,6 +4,7 @@
  */
 
 export * from './types';
+export * from './gameTypes';
 export { walletManager } from './walletManager';
 export { duelSystem } from './duelSystem';
 export { leaderboard } from './leaderboard';
@@ -12,3 +13,5 @@ export { handleArenaRoute } from './arenaRoutes';
 export { POWER_UPS, getPowerUp, calculatePowerUpCost, validatePowerUps } from './powerUps';
 export { generateKitCommands, generatePowerUpEffectCommands, generatePreFightCommands, generatePostFightCommands, BASE_KIT } from './combatKit';
 export { buildArena, buildArenaWithExecutor, generateArenaBuildCommands } from './arenaBuilder';
+export { gameEngine } from './gameEngine';
+export { solanaService } from './solanaService';

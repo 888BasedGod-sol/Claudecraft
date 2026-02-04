@@ -1,9 +1,12 @@
 /**
- * Solana Service
+ * Solana Service (Updated Jan 2026)
  * Handles Solana blockchain integration for the arena system
  * - Generates deposit addresses for agents
  * - Verifies SOL deposits
  * - Processes payouts
+ * 
+ * Stack: @solana/web3.js with modern confirmation patterns
+ * See: https://solana.com/SKILL.md for best practices
  */
 
 import {
@@ -15,6 +18,11 @@ import {
   SystemProgram,
   sendAndConfirmTransaction,
   ParsedTransactionWithMeta,
+  ComputeBudgetProgram,
+  Commitment,
+  TransactionConfirmationStrategy,
+  VersionedTransaction,
+  TransactionMessage,
 } from '@solana/web3.js';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -24,12 +32,36 @@ const DATA_DIR = path.join(process.cwd(), 'data', 'arena');
 const SOLANA_DATA_FILE = path.join(DATA_DIR, 'solana-wallets.json');
 const DEPOSITS_FILE = path.join(DATA_DIR, 'deposits.json');
 
-// Use devnet for testing, mainnet-beta for production
+// ============================================================================
+// NETWORK CONFIGURATION
+// ============================================================================
+
+// Network selection: devnet (testing) or mainnet-beta (production)
 const NETWORK = process.env.SOLANA_NETWORK || 'devnet';
-const RPC_URL = process.env.SOLANA_RPC_URL || 
-  (NETWORK === 'mainnet-beta' 
-    ? 'https://api.mainnet-beta.solana.com'
-    : 'https://api.devnet.solana.com');
+
+// RPC endpoints - prefer dedicated RPC for production
+const RPC_ENDPOINTS: Record<string, { http: string; ws: string }> = {
+  'mainnet-beta': {
+    http: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
+    ws: process.env.SOLANA_WS_URL || 'wss://api.mainnet-beta.solana.com',
+  },
+  'devnet': {
+    http: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+    ws: process.env.SOLANA_WS_URL || 'wss://api.devnet.solana.com',
+  },
+};
+
+const RPC_URL = RPC_ENDPOINTS[NETWORK]?.http || RPC_ENDPOINTS['devnet'].http;
+const WS_URL = RPC_ENDPOINTS[NETWORK]?.ws || RPC_ENDPOINTS['devnet'].ws;
+
+// Transaction confirmation settings
+const COMMITMENT: Commitment = 'confirmed';
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
+// Compute budget for mainnet (prioritization fees)
+const COMPUTE_UNIT_PRICE_MICROLAMPORTS = NETWORK === 'mainnet-beta' ? 50000 : 0; // 0.05 lamports/CU
+const COMPUTE_UNIT_LIMIT = 200_000;
 
 // Minimum deposit in SOL
 const MIN_DEPOSIT_SOL = 0.01;
@@ -63,7 +95,12 @@ class SolanaService {
   private isInitialized = false;
 
   constructor() {
-    this.connection = new Connection(RPC_URL, 'confirmed');
+    // Connection with websocket for better subscription support
+    this.connection = new Connection(RPC_URL, {
+      commitment: COMMITMENT,
+      wsEndpoint: WS_URL,
+      confirmTransactionInitialTimeout: 60000,
+    });
     this.ensureDataDir();
   }
 
@@ -71,6 +108,13 @@ class SolanaService {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
+  }
+
+  /**
+   * Sleep utility for retries
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -103,13 +147,28 @@ class SolanaService {
       this.loadWallets();
       this.loadDeposits();
 
-      // Test connection
-      const version = await this.connection.getVersion();
-      console.log(`[SOLANA] Connected to ${NETWORK} (version: ${version['solana-core']})`);
+      // Test connection with retry
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          const version = await this.connection.getVersion();
+          console.log(`[SOLANA] Connected to ${NETWORK} (version: ${version['solana-core']})`);
+          console.log(`[SOLANA] RPC: ${RPC_URL}`);
+          console.log(`[SOLANA] WS: ${WS_URL}`);
+          break;
+        } catch (e) {
+          if (attempt === MAX_RETRIES) throw e;
+          console.log(`[SOLANA] Connection attempt ${attempt} failed, retrying...`);
+          await this.sleep(RETRY_DELAY_MS);
+        }
+      }
       
       if (this.serverWallet) {
         const balance = await this.connection.getBalance(this.serverWallet.publicKey);
         console.log(`[SOLANA] Server balance: ${balance / LAMPORTS_PER_SOL} SOL`);
+        
+        if (NETWORK === 'mainnet-beta' && COMPUTE_UNIT_PRICE_MICROLAMPORTS > 0) {
+          console.log(`[SOLANA] Priority fee: ${COMPUTE_UNIT_PRICE_MICROLAMPORTS} microlamports/CU`);
+        }
       }
 
       this.isInitialized = true;
@@ -299,6 +358,79 @@ class SolanaService {
   }
 
   /**
+   * Build transaction with compute budget (for mainnet prioritization)
+   */
+  private buildTransactionWithComputeBudget(
+    instructions: any[],
+    feePayer: PublicKey
+  ): Transaction {
+    const tx = new Transaction();
+    
+    // Add compute budget instructions for mainnet (priority fees)
+    if (NETWORK === 'mainnet-beta' && COMPUTE_UNIT_PRICE_MICROLAMPORTS > 0) {
+      tx.add(
+        ComputeBudgetProgram.setComputeUnitLimit({ units: COMPUTE_UNIT_LIMIT }),
+        ComputeBudgetProgram.setComputeUnitPrice({ microLamports: COMPUTE_UNIT_PRICE_MICROLAMPORTS })
+      );
+    }
+    
+    // Add the actual instructions
+    for (const ix of instructions) {
+      tx.add(ix);
+    }
+    
+    tx.feePayer = feePayer;
+    return tx;
+  }
+
+  /**
+   * Send and confirm transaction with retry logic
+   */
+  private async sendAndConfirmWithRetry(
+    transaction: Transaction,
+    signers: Keypair[],
+    description: string
+  ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        // Get fresh blockhash for each attempt
+        const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash(COMMITMENT);
+        transaction.recentBlockhash = blockhash;
+        
+        const signature = await sendAndConfirmTransaction(
+          this.connection,
+          transaction,
+          signers,
+          {
+            commitment: COMMITMENT,
+            maxRetries: 3,
+          }
+        );
+
+        console.log(`[SOLANA] ${description} confirmed: ${signature.substring(0, 16)}...`);
+        return { success: true, signature };
+      } catch (error: any) {
+        const errorMsg = error.message || String(error);
+        console.error(`[SOLANA] ${description} attempt ${attempt}/${MAX_RETRIES} failed: ${errorMsg}`);
+        
+        // Don't retry on certain errors
+        if (errorMsg.includes('insufficient funds') || 
+            errorMsg.includes('invalid account') ||
+            errorMsg.includes('already been processed')) {
+          return { success: false, error: errorMsg };
+        }
+        
+        if (attempt < MAX_RETRIES) {
+          await this.sleep(RETRY_DELAY_MS * attempt); // Exponential backoff
+        } else {
+          return { success: false, error: errorMsg };
+        }
+      }
+    }
+    return { success: false, error: 'Max retries exceeded' };
+  }
+
+  /**
    * Get balance of agent's deposit address (in SOL)
    */
   async getDepositBalance(ownerId: string): Promise<number> {
@@ -341,24 +473,25 @@ class SolanaService {
         return { success: false, error: 'Insufficient balance' };
       }
 
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: keypair.publicKey,
-          toPubkey: this.serverWallet.publicKey,
-          lamports: amountToSend,
-        })
-      );
+      const transferIx = SystemProgram.transfer({
+        fromPubkey: keypair.publicKey,
+        toPubkey: this.serverWallet.publicKey,
+        lamports: amountToSend,
+      });
 
-      const signature = await sendAndConfirmTransaction(
-        this.connection,
-        transaction,
-        [keypair]
-      );
-
+      const transaction = this.buildTransactionWithComputeBudget([transferIx], keypair.publicKey);
       const amountSol = amountToSend / LAMPORTS_PER_SOL;
-      console.log(`[SOLANA] Swept ${amountSol} SOL from ${ownerId} to server (${signature})`);
 
-      return { success: true, amountSol, signature };
+      const result = await this.sendAndConfirmWithRetry(
+        transaction,
+        [keypair],
+        `Sweep ${amountSol} SOL from ${ownerId}`
+      );
+
+      if (result.success) {
+        return { success: true, amountSol, signature: result.signature };
+      }
+      return result;
     } catch (error: any) {
       console.error(`[SOLANA] Sweep failed for ${ownerId}:`, error);
       return { success: false, error: error.message };
@@ -382,22 +515,19 @@ class SolanaService {
       
       const lamports = Math.floor(amountSol * LAMPORTS_PER_SOL);
 
-      const transaction = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: this.serverWallet.publicKey,
-          toPubkey,
-          lamports,
-        })
-      );
+      const transferIx = SystemProgram.transfer({
+        fromPubkey: this.serverWallet.publicKey,
+        toPubkey,
+        lamports,
+      });
 
-      const signature = await sendAndConfirmTransaction(
-        this.connection,
+      const transaction = this.buildTransactionWithComputeBudget([transferIx], this.serverWallet.publicKey);
+
+      return await this.sendAndConfirmWithRetry(
         transaction,
-        [this.serverWallet]
+        [this.serverWallet],
+        `Payout ${amountSol} SOL to ${toAddress.substring(0, 8)}...`
       );
-
-      console.log(`[SOLANA] Sent ${amountSol} SOL payout to ${toAddress} (${signature})`);
-      return { success: true, signature };
     } catch (error: any) {
       console.error('[SOLANA] Payout failed:', error);
       return { success: false, error: error.message };
@@ -473,6 +603,155 @@ class SolanaService {
   solToTokens(sol: number): number {
     return Math.floor(sol * SOL_TO_TOKENS);
   }
+
+  /**
+   * Escrow SOL for a game wager
+   * Transfers SOL from agent's deposit address to server wallet
+   */
+  async escrowGameWager(
+    ownerId: string, 
+    amountSol: number
+  ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    const wallet = this.wallets.get(ownerId);
+    if (!wallet || !this.serverWallet) {
+      return { success: false, error: 'Wallet not found' };
+    }
+
+    try {
+      const keypair = Keypair.fromSecretKey(bs58.decode(wallet.privateKey));
+      const balance = await this.connection.getBalance(keypair.publicKey);
+      const requiredLamports = Math.floor(amountSol * LAMPORTS_PER_SOL);
+      
+      // Check sufficient balance (include tx fee buffer + priority fee)
+      const feeBuffer = NETWORK === 'mainnet-beta' ? 50000 : 5000;
+      if (balance < requiredLamports + feeBuffer) {
+        return { 
+          success: false, 
+          error: `Insufficient SOL. Have: ${(balance / LAMPORTS_PER_SOL).toFixed(4)}, Need: ${amountSol}` 
+        };
+      }
+
+      const transferIx = SystemProgram.transfer({
+        fromPubkey: keypair.publicKey,
+        toPubkey: this.serverWallet.publicKey,
+        lamports: requiredLamports,
+      });
+
+      const transaction = this.buildTransactionWithComputeBudget([transferIx], keypair.publicKey);
+
+      return await this.sendAndConfirmWithRetry(
+        transaction,
+        [keypair],
+        `Escrow ${amountSol} SOL from ${ownerId}`
+      );
+    } catch (error: any) {
+      console.error(`[SOLANA] Escrow failed for ${ownerId}:`, error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Pay out game winnings in SOL
+   * Sends SOL from server wallet to winner's deposit address
+   */
+  async payoutGameWinner(
+    winnerId: string,
+    amountSol: number
+  ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    const wallet = this.wallets.get(winnerId);
+    if (!wallet || !this.serverWallet) {
+      return { success: false, error: 'Wallet not found' };
+    }
+
+    try {
+      const lamports = Math.floor(amountSol * LAMPORTS_PER_SOL);
+
+      const transferIx = SystemProgram.transfer({
+        fromPubkey: this.serverWallet.publicKey,
+        toPubkey: new PublicKey(wallet.depositAddress),
+        lamports,
+      });
+
+      const transaction = this.buildTransactionWithComputeBudget([transferIx], this.serverWallet.publicKey);
+
+      return await this.sendAndConfirmWithRetry(
+        transaction,
+        [this.serverWallet],
+        `Game payout ${amountSol} SOL to ${winnerId}`
+      );
+    } catch (error: any) {
+      console.error('[SOLANA] Game payout failed:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get external wallet address for payouts (from agent profile)
+   */
+  getAgentDepositAddress(ownerId: string): string | null {
+    const wallet = this.wallets.get(ownerId);
+    return wallet?.depositAddress || null;
+  }
+
+  /**
+   * Get network configuration info
+   */
+  getNetworkInfo(): {
+    network: string;
+    rpcUrl: string;
+    wsUrl: string;
+    commitment: string;
+    priorityFee: number;
+  } {
+    return {
+      network: NETWORK,
+      rpcUrl: RPC_URL,
+      wsUrl: WS_URL,
+      commitment: COMMITMENT,
+      priorityFee: COMPUTE_UNIT_PRICE_MICROLAMPORTS,
+    };
+  }
+
+  /**
+   * Get total deposits for an agent
+   */
+  getTotalDeposits(ownerId: string): { count: number; totalSol: number; totalTokens: number } {
+    const agentDeposits = this.deposits.filter(d => d.ownerId === ownerId);
+    const totalSol = agentDeposits.reduce((sum, d) => sum + d.amountSol, 0);
+    const totalTokens = agentDeposits.reduce((sum, d) => sum + d.amountTokens, 0);
+    return {
+      count: agentDeposits.length,
+      totalSol,
+      totalTokens,
+    };
+  }
+
+  /**
+   * Validate a Solana address
+   */
+  isValidAddress(address: string): boolean {
+    try {
+      new PublicKey(address);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get transaction explorer URL
+   */
+  getExplorerUrl(signature: string): string {
+    const baseUrl = NETWORK === 'mainnet-beta'
+      ? 'https://explorer.solana.com/tx/'
+      : `https://explorer.solana.com/tx/${signature}?cluster=${NETWORK}`;
+    return NETWORK === 'mainnet-beta'
+      ? `https://explorer.solana.com/tx/${signature}`
+      : `https://explorer.solana.com/tx/${signature}?cluster=${NETWORK}`;
+  }
 }
 
 export const solanaService = new SolanaService();
+
+// Export constants for use elsewhere
+export { NETWORK, SOL_TO_TOKENS, MIN_DEPOSIT_SOL };

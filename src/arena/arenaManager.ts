@@ -138,6 +138,32 @@ class ArenaManager {
   }
 
   /**
+   * Withdraw tokens (for game wagers, etc.)
+   */
+  withdraw(ownerId: string, amount: number): { success: boolean; newBalance?: number; error?: string } {
+    const agent = walletManager.getAgent(ownerId);
+    if (!agent) {
+      return { success: false, error: 'Agent not registered for arena' };
+    }
+
+    if (amount <= 0) {
+      return { success: false, error: 'Amount must be positive' };
+    }
+
+    const balance = walletManager.getBalance(ownerId);
+    if (balance < amount) {
+      return { success: false, error: `Insufficient balance. Have: ${balance}, Need: ${amount}` };
+    }
+
+    const success = walletManager.withdraw(ownerId, amount, 'Game wager');
+    if (success) {
+      const newBalance = walletManager.getBalance(ownerId);
+      return { success: true, newBalance };
+    }
+    return { success: false, error: 'Withdrawal failed' };
+  }
+
+  /**
    * Create a challenge
    */
   createChallenge(

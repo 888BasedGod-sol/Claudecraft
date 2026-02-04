@@ -1441,8 +1441,8 @@ Reply only with the tweet text:`;
       }
 
       // Check for deploy request FIRST (takes priority)
-      // TEMPORARILY DISABLED - set to true to enable deployments
-      const DEPLOY_ENABLED = false;
+      // ENABLED - deploy command is LIVE!
+      const DEPLOY_ENABLED = true;
       
       const deployRequest = this.extractDeployRequest(mention.tweet.text);
       if (deployRequest) {

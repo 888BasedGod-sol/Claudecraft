@@ -1005,8 +1005,14 @@ export class AutonomousBotController {
   }
 
   // Helper for delays in creative mode
+  // Minecraft servers kick for "spamming" if commands are sent too quickly
+  // Use a minimum of 80ms between commands to stay safe
+  private static readonly CREATIVE_COMMAND_DELAY_MS = 80;
+  
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    // Enforce minimum delay to prevent server kick for spam
+    const safeDelay = Math.max(ms, AutonomousBotController.CREATIVE_COMMAND_DELAY_MS);
+    return new Promise(resolve => setTimeout(resolve, safeDelay));
   }
 
   // Creative mode building using /setblock commands - unlimited resources!
@@ -1189,9 +1195,10 @@ export class AutonomousBotController {
             const left = pos.offset(0, y, 0);
             const right = pos.offset(archWidth - 1, y, 0);
             this.bot.chat(`/setblock ${left.x} ${left.y} ${left.z} ${blockName}`);
+            await this.delay(80);
             this.bot.chat(`/setblock ${right.x} ${right.y} ${right.z} ${blockName}`);
             blocksPlaced += 2;
-            await this.delay(30);
+            await this.delay(80);
           }
           // Curved top
           for (let x = 0; x < archWidth; x++) {
@@ -1199,7 +1206,7 @@ export class AutonomousBotController {
             const target = pos.offset(x, archHeight - 2 + heightOffset, 0);
             this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} ${blockName}`);
             blocksPlaced++;
-            await this.delay(30);
+            await this.delay(80);
           }
           break;
 
@@ -1244,6 +1251,7 @@ export class AutonomousBotController {
           const doorBottom = pos.offset(0, 0, 1);
           const doorTop = pos.offset(0, 1, 1);
           this.bot.chat(`/setblock ${doorBottom.x} ${doorBottom.y} ${doorBottom.z} minecraft:oak_door[half=lower]`);
+          await this.delay(80);
           this.bot.chat(`/setblock ${doorTop.x} ${doorTop.y} ${doorTop.z} minecraft:oak_door[half=upper]`);
           blocksPlaced = 2;
           break;
@@ -1295,6 +1303,200 @@ export class AutonomousBotController {
           const smokeTarget = pos.offset(0, chimneyHeight, 0);
           this.bot.chat(`/setblock ${smokeTarget.x} ${smokeTarget.y} ${smokeTarget.z} minecraft:campfire`);
           blocksPlaced++;
+          break;
+
+        case 'streetLamp':
+        case 'lampPost':
+          // Build a decorative street lamp/lamp post
+          const lampHeight = Math.max(3, Math.min(size, 5));
+          // Post
+          for (let y = 0; y < lampHeight; y++) {
+            const target = pos.offset(0, y, 0);
+            this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:oak_fence`);
+            blocksPlaced++;
+            await this.delay(40);
+          }
+          // Lantern on top
+          const lampTop = pos.offset(0, lampHeight, 0);
+          this.bot.chat(`/setblock ${lampTop.x} ${lampTop.y} ${lampTop.z} minecraft:lantern[hanging=false]`);
+          blocksPlaced++;
+          break;
+
+        case 'path':
+        case 'road':
+          // Build a cobblestone path
+          const pathLength = Math.max(5, size);
+          const pathWidth = 3;
+          for (let x = 0; x < pathLength; x++) {
+            for (let z = 0; z < pathWidth; z++) {
+              const target = pos.offset(x, -1, z);
+              // Alternate cobblestone pattern
+              const block = (x + z) % 3 === 0 ? 'minecraft:mossy_cobblestone' : 'minecraft:cobblestone';
+              this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} ${block}`);
+              blocksPlaced++;
+              await this.delay(20);
+            }
+          }
+          break;
+
+        case 'bench':
+          // Build a sitting bench with stairs and signs
+          // Left arm
+          this.bot.chat(`/setblock ${pos.x} ${pos.y} ${pos.z} minecraft:oak_stairs[facing=east]`);
+          await this.delay(80);
+          // Seat (2 blocks)
+          this.bot.chat(`/setblock ${pos.x + 1} ${pos.y} ${pos.z} minecraft:oak_slab[type=bottom]`);
+          await this.delay(80);
+          this.bot.chat(`/setblock ${pos.x + 2} ${pos.y} ${pos.z} minecraft:oak_slab[type=bottom]`);
+          await this.delay(80);
+          // Right arm
+          this.bot.chat(`/setblock ${pos.x + 3} ${pos.y} ${pos.z} minecraft:oak_stairs[facing=west]`);
+          blocksPlaced = 4;
+          break;
+
+        case 'fountain':
+          // Build a decorative water fountain
+          const fountainSize = Math.max(3, Math.min(size, 7));
+          const half = Math.floor(fountainSize / 2);
+          // Base pool (circular-ish)
+          for (let x = -half; x <= half; x++) {
+            for (let z = -half; z <= half; z++) {
+              if (Math.abs(x) + Math.abs(z) <= half + 1) {
+                // Rim
+                if (Math.abs(x) + Math.abs(z) >= half) {
+                  const target = pos.offset(x, 0, z);
+                  this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:stone_bricks`);
+                } else {
+                  // Water
+                  const target = pos.offset(x, 0, z);
+                  this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:water`);
+                }
+                blocksPlaced++;
+                await this.delay(30);
+              }
+            }
+          }
+          // Center pillar
+          for (let y = 1; y <= 3; y++) {
+            const target = pos.offset(0, y, 0);
+            this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:stone_brick_wall`);
+            blocksPlaced++;
+            await this.delay(30);
+          }
+          // Water source on top
+          this.bot.chat(`/setblock ${pos.x} ${pos.y + 4} ${pos.z} minecraft:water`);
+          blocksPlaced++;
+          break;
+
+        case 'gazebo':
+        case 'pergola':
+          // Build a small gazebo/pergola structure
+          const gazeboSize = 5;
+          // Four corner pillars
+          for (const [dx, dz] of [[0, 0], [gazeboSize-1, 0], [0, gazeboSize-1], [gazeboSize-1, gazeboSize-1]]) {
+            for (let y = 0; y < 4; y++) {
+              const target = pos.offset(dx, y, dz);
+              this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:oak_fence`);
+              blocksPlaced++;
+              await this.delay(30);
+            }
+          }
+          // Roof beams
+          for (let x = 0; x < gazeboSize; x++) {
+            this.bot.chat(`/setblock ${pos.x + x} ${pos.y + 4} ${pos.z} minecraft:oak_slab`);
+            await this.delay(80);
+            this.bot.chat(`/setblock ${pos.x + x} ${pos.y + 4} ${pos.z + gazeboSize - 1} minecraft:oak_slab`);
+            blocksPlaced += 2;
+            await this.delay(80);
+          }
+          for (let z = 1; z < gazeboSize - 1; z++) {
+            this.bot.chat(`/setblock ${pos.x} ${pos.y + 4} ${pos.z + z} minecraft:oak_slab`);
+            await this.delay(80);
+            this.bot.chat(`/setblock ${pos.x + gazeboSize - 1} ${pos.y + 4} ${pos.z + z} minecraft:oak_slab`);
+            blocksPlaced += 2;
+            await this.delay(80);
+          }
+          break;
+
+        case 'garden':
+          // Build a decorative garden with flowers and grass
+          const gardenFlowers = ['poppy', 'dandelion', 'cornflower', 'azure_bluet', 'oxeye_daisy', 'allium', 'blue_orchid', 'red_tulip'];
+          for (let x = 0; x < size; x++) {
+            for (let z = 0; z < size; z++) {
+              const target = pos.offset(x, 0, z);
+              // Mix of grass and flowers
+              if (Math.random() < 0.4) {
+                const flower = gardenFlowers[Math.floor(Math.random() * gardenFlowers.length)];
+                this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:${flower}`);
+              } else if (Math.random() < 0.6) {
+                this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:grass`);
+              }
+              blocksPlaced++;
+              await this.delay(25);
+            }
+          }
+          break;
+
+        case 'hedge':
+          // Build a hedge line using leaves
+          for (let x = 0; x < size; x++) {
+            const target = pos.offset(x, 0, 0);
+            this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:oak_leaves[persistent=true]`);
+            // Second layer for taller hedge
+            if (size > 5) {
+              this.bot.chat(`/setblock ${target.x} ${target.y + 1} ${target.z} minecraft:oak_leaves[persistent=true]`);
+              blocksPlaced++;
+            }
+            blocksPlaced++;
+            await this.delay(40);
+          }
+          break;
+
+        case 'statue':
+        case 'monument':
+          // Build a simple statue/monument with armor stand or blocks
+          // Base pedestal
+          for (let x = -1; x <= 1; x++) {
+            for (let z = -1; z <= 1; z++) {
+              const target = pos.offset(x, 0, z);
+              this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:stone_bricks`);
+              blocksPlaced++;
+              await this.delay(30);
+            }
+          }
+          // Pillar
+          for (let y = 1; y <= 3; y++) {
+            const target = pos.offset(0, y, 0);
+            this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:quartz_pillar`);
+            blocksPlaced++;
+            await this.delay(30);
+          }
+          // Top decoration
+          this.bot.chat(`/setblock ${pos.x} ${pos.y + 4} ${pos.z} minecraft:lightning_rod`);
+          blocksPlaced++;
+          break;
+
+        case 'marketStall':
+        case 'stall':
+          // Build a market stall with awning
+          // Counter
+          for (let x = 0; x < 3; x++) {
+            this.bot.chat(`/setblock ${pos.x + x} ${pos.y} ${pos.z} minecraft:oak_slab[type=top]`);
+            blocksPlaced++;
+          }
+          // Back wall
+          for (let x = 0; x < 3; x++) {
+            for (let y = 0; y < 3; y++) {
+              this.bot.chat(`/setblock ${pos.x + x} ${pos.y + y} ${pos.z + 1} minecraft:oak_planks`);
+              blocksPlaced++;
+              await this.delay(30);
+            }
+          }
+          // Awning (wool)
+          for (let x = -1; x < 4; x++) {
+            this.bot.chat(`/setblock ${pos.x + x} ${pos.y + 3} ${pos.z - 1} minecraft:red_wool`);
+            blocksPlaced++;
+          }
           break;
 
         default:

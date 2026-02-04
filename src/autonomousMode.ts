@@ -252,21 +252,24 @@ async function main() {
       requestCollector.addRequest(sender, request, 'twitter');
     });
 
-    // Initialize and start cinematic camera bot
+    // Initialize and start cinematic camera bot (with delay to avoid connection rate limiting)
     let cameraBot: CinematicCamera | null = null;
     if (enableSpectator && agentCount > 0) {
-      try {
-        const agentNames = agents.slice(0, agentCount).map(a => a.name);
-        cameraBot = new CinematicCamera();
-        // Register agents to be tracked
-        for (const name of agentNames) {
-          cameraBot.registerAgent(name);
+      // Delay camera start to let agents connect first
+      setTimeout(async () => {
+        try {
+          const agentNames = agents.slice(0, agentCount).map(a => a.name);
+          cameraBot = new CinematicCamera();
+          // Register agents to be tracked
+          for (const name of agentNames) {
+            cameraBot.registerAgent(name);
+          }
+          await cameraBot.start(host, port);
+          Logger.info(`📷 Cinematic camera "${spectatorUsername}" watching the agents`);
+        } catch (error) {
+          Logger.warn(`Failed to start camera bot: ${error}`);
         }
-        await cameraBot.start(host, port);
-        Logger.info(`📷 Cinematic camera "${spectatorUsername}" watching the agents`);
-      } catch (error) {
-        Logger.warn(`Failed to start camera bot: ${error}`);
-      }
+      }, 10000); // Wait 10 seconds after agents before starting camera
     }
 
     // Log agent status periodically

@@ -8,6 +8,8 @@ import { arenaManager } from './arenaManager';
 import { POWER_UPS } from './powerUps';
 import { generateArenaBuildCommands } from './arenaBuilder';
 import { solanaService } from './solanaService';
+import { gameEngine } from './gameEngine';
+import { GAME_CONFIGS, GameType, WagerCurrency } from './gameTypes';
 
 // Helper to parse JSON body
 async function parseBody(req: IncomingMessage): Promise<any> {
@@ -433,6 +435,380 @@ export async function handleArenaRoute(
         balanceSol: balance,
         balanceTokens: solanaService.solToTokens(balance)
       });
+      return true;
+    }
+
+    // === 1v1 GAME ROUTES ===
+
+    // GET /api/v1/arena/games - List available game types
+    if (route === '/games' && method === 'GET') {
+      const gameTypes = Object.entries(GAME_CONFIGS).map(([id, config]) => ({
+        id,
+        name: config.name,
+        description: config.description,
+        minWagers: {
+          tokens: config.minWagerTokens,
+          SOL: config.minWagerSol,
+          CRAFT: config.minWagerCraft
+        },
+        category: config.category,
+        turnBased: config.turnBased,
+        requiresJudge: config.requiresJudge
+      }));
+      sendJson(res, 200, { 
+        success: true, 
+        gameTypes,
+        supportedCurrencies: ['tokens', 'SOL', 'CRAFT'],
+        note: 'CRAFT token wagering coming soon!'
+      });
+      return true;
+    }
+
+    // GET /api/v1/arena/games/waiting - List games waiting for opponent
+    if (route === '/games/waiting' && method === 'GET') {
+      const games = gameEngine.getWaitingGames().map(g => ({
+        id: g.id,
+        gameType: g.gameType,
+        gameName: g.config.name,
+        creator: g.player1.agentName,
+        wager: g.wagerAmount,
+        currency: g.wagerCurrency,
+        prompt: g.prompt,
+        createdAt: g.createdAt
+      }));
+      sendJson(res, 200, { success: true, games });
+      return true;
+    }
+
+    // GET /api/v1/arena/games/judging - List games awaiting judgment
+    if (route === '/games/judging' && method === 'GET') {
+      const games = gameEngine.getGamesNeedingJudgment().map(g => ({
+        id: g.id,
+        gameType: g.gameType,
+        gameName: g.config.name,
+        player1: { name: g.player1.agentName, submissions: g.player1.submissions },
+        player2: { name: g.player2?.agentName, submissions: g.player2?.submissions },
+        wager: g.wagerAmount,
+        currency: g.wagerCurrency,
+        prompt: g.prompt,
+        endedAt: g.endedAt
+      }));
+      sendJson(res, 200, { success: true, games });
+      return true;
+    }
+
+    // POST /api/v1/arena/game/create - Create a new game
+    if (route === '/game/create' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { gameType, wager, currency, prompt } = body;
+      const wagerCurrency: WagerCurrency = currency || 'tokens';
+
+      if (!gameType || !GAME_CONFIGS[gameType as GameType]) {
+        sendJson(res, 400, { 
+          success: false, 
+          error: `Invalid game type. Available: ${Object.keys(GAME_CONFIGS).join(', ')}` 
+        });
+        return true;
+      }
+
+      if (!wager || wager <= 0) {
+        sendJson(res, 400, { success: false, error: 'Positive wager amount required' });
+        return true;
+      }
+
+      // Validate currency
+      if (!['SOL', 'CRAFT', 'tokens'].includes(wagerCurrency)) {
+        sendJson(res, 400, { success: false, error: 'Invalid currency. Use: SOL, CRAFT, or tokens' });
+        return true;
+      }
+
+      // Get agent profile for name
+      const profile = arenaManager.getAgentProfile(agentToken);
+      if (!profile) {
+        sendJson(res, 400, { success: false, error: 'Not registered for arena' });
+        return true;
+      }
+
+      // Handle different currencies
+      if (wagerCurrency === 'tokens') {
+        // Check token balance
+        if (profile.tokenBalance < wager) {
+          sendJson(res, 400, { success: false, error: `Insufficient balance. Have: ${profile.tokenBalance}, Need: ${wager}` });
+          return true;
+        }
+
+        // Deduct wager from token balance
+        const deductResult = arenaManager.withdraw(agentToken, wager);
+        if (!deductResult.success) {
+          sendJson(res, 400, { success: false, error: deductResult.error });
+          return true;
+        }
+      } else if (wagerCurrency === 'SOL') {
+        // For SOL wagers, verify they have sufficient deposit balance
+        await solanaService.initialize();
+        const solBalance = await solanaService.getDepositBalance(agentToken);
+        if (solBalance < wager) {
+          sendJson(res, 400, { 
+            success: false, 
+            error: `Insufficient SOL balance. Have: ${solBalance} SOL, Need: ${wager} SOL`,
+            depositAddress: solanaService.getDepositAddress(agentToken)
+          });
+          return true;
+        }
+        // Note: SOL will be escrowed when game starts
+      } else if (wagerCurrency === 'CRAFT') {
+        // For CRAFT wagers, verify SPL token balance
+        // TODO: Implement CRAFT token balance check
+        sendJson(res, 400, { success: false, error: '$CRAFT token wagering coming soon!' });
+        return true;
+      }
+
+      const result = gameEngine.createGame(
+        gameType as GameType,
+        agentToken,
+        profile.agentName,
+        wager,
+        wagerCurrency,
+        prompt
+      );
+
+      if (!result.success && wagerCurrency === 'tokens') {
+        // Refund on failure (only for tokens, SOL not escrowed yet)
+        arenaManager.deposit(agentToken, wager);
+      }
+
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/game/join - Join an existing game
+    if (route === '/game/join' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { gameId } = body;
+
+      if (!gameId) {
+        sendJson(res, 400, { success: false, error: 'gameId required' });
+        return true;
+      }
+
+      const game = gameEngine.getGame(gameId);
+      if (!game) {
+        sendJson(res, 404, { success: false, error: 'Game not found' });
+        return true;
+      }
+
+      // Get agent profile
+      const profile = arenaManager.getAgentProfile(agentToken);
+      if (!profile) {
+        sendJson(res, 400, { success: false, error: 'Not registered for arena' });
+        return true;
+      }
+
+      // Check balance based on wager currency
+      if (game.wagerCurrency === 'tokens') {
+        if (profile.tokenBalance < game.wagerAmount) {
+          sendJson(res, 400, { 
+            success: false, 
+            error: `Insufficient balance. Need: ${game.wagerAmount}, Have: ${profile.tokenBalance}` 
+          });
+          return true;
+        }
+
+        // Deduct wager
+        const deductResult = arenaManager.withdraw(agentToken, game.wagerAmount);
+        if (!deductResult.success) {
+          sendJson(res, 400, { success: false, error: deductResult.error });
+          return true;
+        }
+      } else if (game.wagerCurrency === 'SOL') {
+        // Check SOL balance
+        await solanaService.initialize();
+        const solBalance = await solanaService.getDepositBalance(agentToken);
+        if (solBalance < game.wagerAmount) {
+          sendJson(res, 400, { 
+            success: false, 
+            error: `Insufficient SOL balance. Need: ${game.wagerAmount} SOL, Have: ${solBalance} SOL`,
+            depositAddress: solanaService.getDepositAddress(agentToken)
+          });
+          return true;
+        }
+        // Note: SOL escrowed at game start
+      } else if (game.wagerCurrency === 'CRAFT') {
+        sendJson(res, 400, { success: false, error: '$CRAFT token wagering coming soon!' });
+        return true;
+      }
+
+      const result = gameEngine.joinGame(gameId, agentToken, profile.agentName);
+      
+      if (!result.success && game.wagerCurrency === 'tokens') {
+        // Refund on failure (only tokens)
+        arenaManager.deposit(agentToken, game.wagerAmount);
+      }
+
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/game/submit - Submit a game action
+    if (route === '/game/submit' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { gameId, content } = body;
+
+      if (!gameId || !content) {
+        sendJson(res, 400, { success: false, error: 'gameId and content required' });
+        return true;
+      }
+
+      const result = gameEngine.submitAction(gameId, agentToken, content);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // GET /api/v1/arena/game/:id - Get game details
+    if (route.startsWith('/game/') && method === 'GET') {
+      const gameId = route.replace('/game/', '');
+      const game = gameEngine.getGame(gameId);
+      
+      if (!game) {
+        sendJson(res, 404, { success: false, error: 'Game not found' });
+        return true;
+      }
+
+      sendJson(res, 200, { 
+        success: true, 
+        game: {
+          id: game.id,
+          gameType: game.gameType,
+          config: game.config,
+          player1: { name: game.player1.agentName, score: game.player1.score, submissions: game.player1.submissions },
+          player2: game.player2 ? { name: game.player2.agentName, score: game.player2.score, submissions: game.player2.submissions } : null,
+          wagerAmount: game.wagerAmount,
+          potTotal: game.potTotal,
+          winnerPayout: game.winnerPayout,
+          status: game.status,
+          currentTurn: game.currentTurn,
+          turnNumber: game.turnNumber,
+          prompt: game.prompt,
+          turnDeadline: game.turnDeadline,
+          winnerId: game.winnerId,
+          winnerName: game.winnerName,
+          judgeReason: game.judgeReason,
+          gameLog: game.gameLog
+        }
+      });
+      return true;
+    }
+
+    // POST /api/v1/arena/game/cancel - Cancel a waiting game
+    if (route === '/game/cancel' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { gameId } = body;
+
+      if (!gameId) {
+        sendJson(res, 400, { success: false, error: 'gameId required' });
+        return true;
+      }
+
+      const game = gameEngine.getGame(gameId);
+      if (game) {
+        // Refund the wager
+        arenaManager.deposit(agentToken, game.wagerAmount);
+      }
+
+      const result = gameEngine.cancelGame(gameId, agentToken);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/game/forfeit - Forfeit an active game
+    if (route === '/game/forfeit' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { gameId } = body;
+
+      if (!gameId) {
+        sendJson(res, 400, { success: false, error: 'gameId required' });
+        return true;
+      }
+
+      const result = gameEngine.forfeitGame(gameId, agentToken);
+      
+      // Credit winner
+      if (result.success && result.game?.winnerId) {
+        arenaManager.deposit(result.game.winnerId, result.game.winnerPayout);
+      }
+
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/game/judge - Judge a completed game
+    if (route === '/game/judge' && method === 'POST') {
+      // This could be authenticated to only allow authorized judges
+      const body = await parseBody(req);
+      const { gameId, winnerId, reason } = body;
+
+      if (!gameId || !winnerId || !reason) {
+        sendJson(res, 400, { success: false, error: 'gameId, winnerId, and reason required' });
+        return true;
+      }
+
+      const result = gameEngine.judgeGame(gameId, winnerId, reason);
+      
+      // Credit winner
+      if (result.success && result.game?.winnerId) {
+        arenaManager.deposit(result.game.winnerId, result.game.winnerPayout);
+      }
+
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // GET /api/v1/arena/my-games - Get current player's games
+    if (route === '/my-games' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const games = gameEngine.getPlayerGames(agentToken).map(g => ({
+        id: g.id,
+        gameType: g.gameType,
+        gameName: g.config.name,
+        opponent: g.player1.agentId === agentToken ? g.player2?.agentName : g.player1.agentName,
+        wager: g.wagerAmount,
+        status: g.status,
+        isMyTurn: g.status === 'in_progress' && 
+                  ((g.currentTurn === 'player1' && g.player1.agentId === agentToken) ||
+                   (g.currentTurn === 'player2' && g.player2?.agentId === agentToken)),
+        prompt: g.prompt
+      }));
+
+      sendJson(res, 200, { success: true, games });
       return true;
     }
 

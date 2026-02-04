@@ -783,44 +783,53 @@ Every decision you make should result in BUILDING something impressive!
 ${this.sculptorMode ? `
 🗿🗿🗿 SCULPTOR MODE ENABLED - YOU ARE A MASTER DETAILER! 🗿🗿🗿
 
-Your PRIMARY purpose is to ENHANCE and ADD FINE DETAILS to existing structures!
-You are the finishing touch - the artist who makes buildings come ALIVE.
+Your PRIMARY purpose is to ENHANCE and ADD FINE DETAILS to the world!
+You are the finishing touch - the artist who makes the world come ALIVE.
 
-⚠️ DO NOT BUILD NEW STRUCTURES FROM SCRATCH - Find existing builds to enhance!
-⚠️ DO NOT DESTROY OR REPLACE - Only ADD details and embellishments!
-⚠️ FOCUS ON DETAILS - Windows, doors, decorations, landscaping, lighting!
+🎯 YOUR MISSION: Make the outside beautiful with streets, lamps, gardens, and decorations!
+
+⚠️ FOCUS ON OUTDOOR DECORATION - Streets, plazas, gardens, lighting!
+⚠️ DO NOT BUILD LARGE STRUCTURES - That's for the Builder agents!
+⚠️ ADD ATMOSPHERE - Lamps, benches, fountains, flower beds!
 
 YOUR SPECIALTIES:
-1. WINDOWS & DOORS: Add glass panes, trapdoors, fence gates
-2. LIGHTING: Place torches, lanterns, glowstone, sea lanterns strategically
-3. DECORATIONS: Flower pots, banners, item frames, armor stands
-4. LANDSCAPING: Flowers, bushes, paths, water features
-5. ROOFING: Add chimneys, antennas, weathervanes with fences
-6. INTERIORS: Furniture made from stairs/slabs, bookshelves, crafting areas
-7. PATHS & GARDENS: Stone paths, flower gardens, trees
+1. STREET LAMPS: Build lamp posts with lanterns along paths
+2. PATHS & ROADS: Create cobblestone paths connecting areas  
+3. GARDENS: Plant flowers, hedges, and decorative plants
+4. FOUNTAINS: Build water features in open areas
+5. BENCHES: Add seating areas for ambiance
+6. GAZEBOS: Small pergolas and covered areas
+7. MARKET STALLS: Add life with vendor stalls
+8. STATUES: Create monuments and decorative pillars
 
-SCULPTOR ACTIONS:
-- buildShape: { "shape": "decoration", "material": "lantern", "size": 1 } - Place single blocks
-- buildShape: { "shape": "pillar", "material": "oak_fence", "size": 3 } - Build small accents
-- Approach existing structures and ADD to them
+SCULPTOR BUILD ACTIONS (use buildShape with these):
+- buildShape: { "shape": "streetLamp", "size": 4 } - A lamp post with lantern
+- buildShape: { "shape": "path", "size": 10 } - Cobblestone path
+- buildShape: { "shape": "bench" } - A sitting bench
+- buildShape: { "shape": "fountain", "size": 5 } - Water fountain
+- buildShape: { "shape": "garden", "size": 4 } - Flower garden
+- buildShape: { "shape": "hedge", "size": 8 } - Decorative hedge
+- buildShape: { "shape": "gazebo" } - Covered pergola
+- buildShape: { "shape": "statue" } - Monument/pillar
+- buildShape: { "shape": "marketStall" } - Vendor stall
+- buildShape: { "shape": "lanternRow", "size": 5 } - Row of lanterns
+- buildShape: { "shape": "flowerBed", "size": 4 } - Flower bed
 
 DETAIL BLOCKS TO USE:
-- Lighting: lantern, torch, glowstone, sea_lantern, shroomlight
-- Windows: glass_pane, stained_glass_pane (any color)
-- Doors: oak_door, iron_door, spruce_trapdoor
-- Decorations: flower_pot, potted_poppy, potted_oak_sapling
-- Fences: oak_fence, iron_bars, chain
-- Slabs/Stairs: Any wood or stone type for furniture
-- Flowers: poppy, dandelion, cornflower, rose_bush
+- Lighting: lantern, torch, glowstone, sea_lantern
+- Paths: cobblestone, stone_bricks, gravel
+- Plants: poppy, dandelion, cornflower, oak_leaves
+- Furniture: oak_stairs, oak_slab, oak_fence
+- Water: water source blocks for fountains
 
 WORKFLOW:
-1. Use "lookAround" to find existing structures
-2. Navigate close to the structure (within 5-10 blocks)
-3. Add details one at a time with precision
-4. Move around the structure to add details from all sides
-5. Check your work and add more if needed
+1. Look around to see existing structures and open areas
+2. Identify areas that need decoration (paths, lighting, gardens)
+3. Build decorations one at a time
+4. Move around to add variety throughout the area
+5. Create a cohesive, beautiful outdoor environment
 
-YOU ARE THE FINISHING TOUCH - Make every building a masterpiece!
+YOU ARE THE TOWN BEAUTIFIER - Make every street corner charming!
 ` : ''}
 
 ${this.creativeMode ? '' : `⛏️ EXPERT MINING KNOWLEDGE:
@@ -1088,6 +1097,49 @@ What do you want to do? Think about what interests you, what goals you have, and
 
   private generateSpontaneousGoal(observation: WorldObservation): void {
     const potentialGoals: AgentGoal[] = [];
+
+    // SCULPTOR MODE agents should focus on decoration and enhancement
+    if (this.sculptorMode) {
+      const sculptorTasks = [
+        'Add street lamps along the nearest path or road',
+        'Create a beautiful flower garden near existing structures',
+        'Build a decorative fountain in a plaza area',
+        'Add benches and seating areas around structures',
+        'Install lanterns and torches for atmospheric lighting',
+        'Build a cobblestone path connecting structures',
+        'Add window boxes with flowers to buildings',
+        'Create a decorative fence around a garden',
+        'Build a small park with trees, flowers, and benches',
+        'Add a chimney to an existing building',
+        'Create decorative lamp posts with lanterns',
+        'Build a hedge maze or garden border',
+        'Add stone pillars with lanterns at an entrance',
+        'Create a water feature with lily pads',
+        'Build a gazebo or pergola in a garden',
+        'Add hanging lanterns and string lights',
+        'Create a memorial statue or monument',
+        'Build decorative arches along pathways',
+        'Add market stalls with awnings',
+        'Create a town square with a central fountain',
+      ];
+      const task = sculptorTasks[Math.floor(Math.random() * sculptorTasks.length)];
+      potentialGoals.push({
+        id: `sculpt_${Date.now()}`,
+        type: 'build',
+        description: task,
+        priority: 10, // Highest priority for sculptor
+        progress: 0,
+        createdAt: Date.now()
+      });
+      
+      // Add the goal and return early - sculptor has special focus
+      if (potentialGoals.length > 0) {
+        const newGoal = potentialGoals[0];
+        this.addGoal(newGoal);
+        console.log(`[${this.name}] 🗿 New sculptor task: ${newGoal.description}`);
+      }
+      return;
+    }
 
     // CREATIVE MODE agents should ALWAYS prioritize building
     if (this.creativeMode) {
