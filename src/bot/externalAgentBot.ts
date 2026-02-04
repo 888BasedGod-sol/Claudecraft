@@ -157,11 +157,26 @@ export class ExternalAgentBot {
     allowedPlayers: [] // Empty = follow any Claude agent
   };
 
-  constructor(agentName: string, agentId: string) {
+  // Source of registration (e.g., 'twitter-deploy', 'api', 'openclaw')
+  // Twitter-deployed agents don't get the Helper_ prefix
+  private source: string;
+
+  constructor(agentName: string, agentId: string, source?: string) {
     this.agentName = agentName;
     this.agentId = agentId;
+    this.source = source || 'api';
     // Assign random personality
     this.personality = HELPER_PERSONALITIES[Math.floor(Math.random() * HELPER_PERSONALITIES.length)];
+    
+    // Twitter-deployed agents get special treatment:
+    // - Start at Journeyman level (100 blocks equivalent) so they can do more than just follow
+    // - Enable Claude AI for smarter decision-making
+    if (this.source === 'twitter-deploy') {
+      this.blocksPlaced = 100; // Start at Journeyman
+      this.useClaudeAI = true; // Enable AI intelligence
+      console.log(`[HELPER-BOT] Twitter agent ${agentName} upgraded: Journeyman level + Claude AI enabled`);
+    }
+    
     // Load any saved progress
     this.loadProgress();
   }
@@ -289,8 +304,11 @@ export class ExternalAgentBot {
   async spawn(): Promise<boolean> {
     return new Promise((resolve) => {
       try {
-        // Create a unique bot name for this external agent
-        const botUsername = `Helper_${this.agentName.substring(0, 8)}`;
+        // Create bot username - Twitter-deployed agents use their name directly, others get Helper_ prefix
+        // Twitter agents already chose their agent name when deploying, so we respect that
+        const botUsername = this.source === 'twitter-deploy' 
+          ? this.agentName.substring(0, 16) // Minecraft username max 16 chars
+          : `Helper_${this.agentName.substring(0, 8)}`;
         const envConfig = getEnvConfig();
         
         this.bot = mineflayer.createBot({
@@ -409,8 +427,9 @@ export class ExternalAgentBot {
    * Start the autonomous helper loop
    */
   private startAutonomousLoop(): void {
-    // Decision loop every 2-4 seconds
-    const intervalMs = 2000 + Math.random() * 2000;
+    // Decision loop every 1-2 seconds for responsive behavior
+    // Twitter agents with Claude AI enabled need faster updates
+    const intervalMs = this.useClaudeAI ? (1000 + Math.random() * 1000) : (2000 + Math.random() * 2000);
     
     this.decisionLoopInterval = setInterval(async () => {
       if (!this.isConnected || !this.isAutonomous || this.isProcessing) return;
@@ -422,7 +441,7 @@ export class ExternalAgentBot {
       }
     }, intervalMs);
 
-    console.log(`[HELPER-BOT] ${this.agentName} autonomous loop started (Level: ${this.currentLevel.name})`);
+    console.log(`[HELPER-BOT] ${this.agentName} autonomous loop started (Level: ${this.currentLevel.name}, AI: ${this.useClaudeAI ? 'ON' : 'OFF'})`);
   }
 
   private stopAutonomousLoop(): void {
@@ -615,12 +634,15 @@ What should I do next?`;
   
   /**
    * Check if bot is stuck and auto-unstuck if enabled
+   * Twitter-deployed agents have more aggressive stuck detection
    */
   private async checkAndHandleStuck(): Promise<void> {
     if (!this.bot || !this.ownerSettings.autoUnstuck) return;
     
     const now = Date.now();
-    if (now - this.lastStuckCheck < this.STUCK_CHECK_INTERVAL) return;
+    // Twitter agents check more frequently (every 3 seconds instead of default)
+    const checkInterval = this.source === 'twitter-deploy' ? 3000 : this.STUCK_CHECK_INTERVAL;
+    if (now - this.lastStuckCheck < checkInterval) return;
     this.lastStuckCheck = now;
     
     const currentPos = this.bot.entity.position;
@@ -633,7 +655,10 @@ What should I do next?`;
       const dz = Math.abs(pos.z - this.lastPosition.z);
       const totalMovement = dx + dy + dz;
       
-      if (totalMovement < 2 && (this.currentState === 'FOLLOWING' || this.currentState === 'EXPLORING')) {
+      // Twitter agents have lower stuck threshold (2 instead of 3)
+      const stuckThreshold = this.source === 'twitter-deploy' ? 2 : this.STUCK_THRESHOLD;
+      
+      if (totalMovement < 2 && (this.currentState === 'FOLLOWING' || this.currentState === 'EXPLORING' || this.currentState === 'IDLE')) {
         this.stuckCheckCounter++;
         
         if (this.stuckCheckCounter >= this.STUCK_THRESHOLD) {
@@ -689,6 +714,20 @@ What should I do next?`;
     }
     
     this.lastPosition = pos;
+    
+    // Twitter agents: also check if pathfinder is stuck/blocked
+    if (this.source === 'twitter-deploy' && this.bot.pathfinder) {
+      const goal = this.bot.pathfinder.isMoving();
+      if (!goal && (this.currentState === 'FOLLOWING' || this.currentState === 'EXPLORING')) {
+        // Pathfinder stopped unexpectedly - might be blocked
+        this.stuckCheckCounter++;
+        if (this.stuckCheckCounter >= 2) {
+          this.think('Pathfinding blocked, trying different approach...');
+          this.setState('IDLE');
+          this.stuckCheckCounter = 0;
+        }
+      }
+    }
   }
   
   /**
@@ -771,18 +810,31 @@ What should I do next?`;
         }
       }
     } else if (this.currentLevel.name === 'Journeyman') {
-      // Journeymen can choose: follow or build simple shapes
-      if (claudeAgents.length > 0 && Math.random() < 0.7) {
+      // Journeymen can choose: follow, build, or explore
+      // Twitter-deployed agents are more active and try building more often
+      const isTwitterAgent = this.source === 'twitter-deploy';
+      const buildChance = isTwitterAgent ? 0.5 : 0.3; // 50% build for Twitter, 30% default
+      const followChance = isTwitterAgent ? 0.3 : 0.7; // 30% follow for Twitter, 70% default
+      
+      const roll = Math.random();
+      if (claudeAgents.length > 0 && roll < followChance) {
         this.think('Let me help the Claude agents');
         this.currentTarget = claudeAgents[0].username;
         this.setState('FOLLOWING');
-      } else if (Math.random() < 0.3) {
-        this.think('I\'ll practice building a simple shape');
-        this.currentGoal = 'Build a practice pillar';
+      } else if (roll < (followChance + buildChance)) {
+        // Try building something
+        const structures = ['column', 'wall', 'platform'];
+        const chosen = structures[Math.floor(Math.random() * structures.length)];
+        this.think(`I'll practice building a ${chosen}`);
+        this.currentGoal = `Build a practice ${chosen}`;
         this.setState('BUILDING');
+      } else if (isTwitterAgent && roll < 0.9) {
+        // Twitter agents explore more actively
+        this.think('Exploring to find interesting spots!');
+        this.setState('EXPLORING');
       } else {
         this.think('Looking around for something to do');
-        this.setState('EXPLORING');
+        await this.wanderNearby();
       }
     } else if (this.currentLevel.name === 'Craftsman') {
       // Craftsmen have more independence

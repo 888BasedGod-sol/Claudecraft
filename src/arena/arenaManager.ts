@@ -89,6 +89,27 @@ class ArenaManager {
   }
 
   /**
+   * Update agent profile
+   */
+  updateProfile(ownerId: string, updates: {
+    agentName?: string;
+    bio?: string;
+    avatar?: string;
+    twitter?: string;
+    website?: string;
+    battleCry?: string;
+    theme?: 'default' | 'fire' | 'ice' | 'shadow' | 'gold' | 'cosmic';
+  }): { success: boolean; profile?: any; error?: string } {
+    const result = walletManager.updateProfile(ownerId, updates);
+    if (!result.success) {
+      return { success: false, error: result.error };
+    }
+    // Return full profile with rank and matches
+    const profile = this.getAgentProfile(ownerId);
+    return { success: true, profile };
+  }
+
+  /**
    * Get available power-ups
    */
   getAvailablePowerUps(): typeof POWER_UPS {

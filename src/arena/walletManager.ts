@@ -105,6 +105,61 @@ class WalletManager {
   }
 
   /**
+   * Update agent profile
+   */
+  updateProfile(ownerId: string, updates: {
+    agentName?: string;
+    bio?: string;
+    avatar?: string;
+    twitter?: string;
+    website?: string;
+    battleCry?: string;
+    theme?: 'default' | 'fire' | 'ice' | 'shadow' | 'gold' | 'cosmic';
+  }): { success: boolean; agent?: ArenaAgent; error?: string } {
+    const agent = this.agents.get(ownerId);
+    if (!agent) {
+      return { success: false, error: 'Agent not found' };
+    }
+
+    // Validate agentName if provided (must be unique)
+    if (updates.agentName && updates.agentName !== agent.agentName) {
+      const existing = this.getAgentByName(updates.agentName);
+      if (existing && existing.ownerId !== ownerId) {
+        return { success: false, error: `Agent name "${updates.agentName}" is already taken` };
+      }
+      // Validate name format
+      if (!/^[a-zA-Z0-9_-]{3,20}$/.test(updates.agentName)) {
+        return { success: false, error: 'Agent name must be 3-20 characters, alphanumeric with _ and - only' };
+      }
+      agent.agentName = updates.agentName;
+    }
+
+    // Update optional profile fields
+    if (updates.bio !== undefined) {
+      agent.bio = updates.bio.substring(0, 280); // Limit bio to 280 chars
+    }
+    if (updates.avatar !== undefined) {
+      agent.avatar = updates.avatar;
+    }
+    if (updates.twitter !== undefined) {
+      agent.twitter = updates.twitter.replace('@', ''); // Remove @ if present
+    }
+    if (updates.website !== undefined) {
+      agent.website = updates.website;
+    }
+    if (updates.battleCry !== undefined) {
+      agent.battleCry = updates.battleCry.substring(0, 100); // Limit battle cry
+    }
+    if (updates.theme !== undefined) {
+      agent.theme = updates.theme;
+    }
+
+    this.save();
+    console.log(`[ARENA-WALLET] Updated profile for ${agent.agentName}`);
+    return { success: true, agent };
+  }
+
+  /**
    * Get agent by name
    */
   getAgentByName(agentName: string): ArenaAgent | null {

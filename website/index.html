@@ -1517,6 +1517,891 @@
             }
         }
 
+        /* Hackathon Banner */
+        .hackathon-banner {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem auto;
+            max-width: 900px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+        .hackathon-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-dark), var(--accent));
+        }
+        .hackathon-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .hackathon-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        .hackathon-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        .hackathon-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .hackathon-stat {
+            text-align: center;
+        }
+        .hackathon-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .hackathon-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+        }
+        .hackathon-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .hackathon-cta:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--glow-accent);
+        }
+        .hackathon-countdown {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            text-align: right;
+        }
+        .hackathon-days {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .hackathon-days-label {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+        }
+        @media (max-width: 768px) {
+            .hackathon-countdown {
+                position: static;
+                text-align: left;
+                margin-bottom: 1rem;
+            }
+            .hackathon-stats {
+                gap: 1rem;
+            }
+        }
+
+        /* Commands Section */
+        .commands-section {
+            background: var(--bg-secondary);
+            padding: 80px 24px;
+        }
+
+        .commands-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .commands-section .twitter-handle {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .commands-section .twitter-handle:hover {
+            text-decoration: underline;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        .command-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+        }
+
+        .command-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent);
+        }
+
+        .command-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .command-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .command-icon.build-icon {
+            background: linear-gradient(135deg, #DA7756 0%, #c96847 100%);
+        }
+
+        .command-icon.deploy-icon {
+            background: linear-gradient(135deg, #4A90D9 0%, #3a7bc8 100%);
+        }
+
+        .command-icon.help-icon {
+            background: linear-gradient(135deg, #6B8E7A 0%, #5a7d69 100%);
+        }
+
+        .command-name {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .command-syntax {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .command-syntax code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.875rem;
+            color: var(--accent);
+        }
+
+        .command-desc {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .command-examples {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .example-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .example-item {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            padding: 6px 0;
+        }
+
+        .example-item code {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            background: rgba(218, 119, 86, 0.1);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8125rem;
+        }
+
+        .command-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(218, 119, 86, 0.08);
+            border-radius: 8px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .command-note .icon {
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .commands-cta {
+            text-align: center;
+            margin-top: 48px;
+        }
+
+        .commands-cta .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--accent);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .commands-cta .cta-button:hover {
+            background: #c96847;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(218, 119, 86, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .commands-section {
+                padding: 60px 20px;
+            }
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Agent Customization Section */
+        .customize-section {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            padding: 100px 24px;
+            position: relative;
+        }
+
+        .customize-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+        }
+
+        .customize-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Verification Panel */
+        .verify-panel {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 48px 40px;
+            text-align: center;
+            margin-top: 48px;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .verify-panel.verified {
+            border: 2px solid var(--accent);
+            border-style: solid;
+            background: linear-gradient(135deg, rgba(218, 119, 86, 0.05), rgba(218, 119, 86, 0.02));
+        }
+
+        .verify-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent-light), rgba(218, 119, 86, 0.15));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
+        .verify-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .verify-desc {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            line-height: 1.7;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .verify-desc code {
+            background: var(--bg-tertiary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .verify-input-group {
+            display: flex;
+            gap: 12px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .verify-input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .verify-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(218, 119, 86, 0.1);
+        }
+
+        .verify-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .verify-btn {
+            padding: 16px 32px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .verify-btn:hover {
+            background: #c96847;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(218, 119, 86, 0.3);
+        }
+
+        .verify-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .verify-error {
+            color: #e74c3c;
+            margin-top: 16px;
+            font-size: 0.875rem;
+            padding: 12px 16px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .verify-success {
+            color: #27ae60;
+            margin-top: 16px;
+            font-size: 0.875rem;
+            padding: 12px 16px;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        /* Agent Profile Header */
+        .agent-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 28px;
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .agent-avatar {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--accent), #c96847);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 4px 16px rgba(218, 119, 86, 0.3);
+        }
+
+        .agent-info h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .agent-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .agent-status-badge {
+            margin-left: auto;
+            padding: 10px 18px;
+            background: rgba(39, 174, 96, 0.12);
+            color: #27ae60;
+            border-radius: 24px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(39, 174, 96, 0.2);
+        }
+
+        /* Customization Panels */
+        .customize-panels {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .customize-panels.active {
+            display: block;
+        }
+
+        .customize-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+
+        .customize-panel:hover {
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent-light), rgba(218, 119, 86, 0.12));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .panel-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Personality Sliders */
+        .slider-group {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .slider-group:hover {
+            background: rgba(218, 119, 86, 0.04);
+        }
+
+        .slider-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slider-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .slider-value {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.9rem;
+            background: var(--accent-light);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .slider-input {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 2px 10px rgba(218, 119, 86, 0.4);
+            border: 3px solid white;
+            transition: all 0.2s;
+        }
+
+        .slider-input::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .slider-input::-webkit-slider-runnable-track {
+            height: 10px;
+            background: linear-gradient(to right, var(--accent) var(--value, 50%), rgba(218, 119, 86, 0.15) var(--value, 50%));
+            border-radius: 5px;
+        }
+
+        .slider-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        /* Role Cards */
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .role-card {
+            padding: 24px 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .role-card:hover {
+            border-color: var(--border);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .role-card.selected {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(218, 119, 86, 0.12), rgba(218, 119, 86, 0.06));
+            box-shadow: 0 4px 20px rgba(218, 119, 86, 0.15);
+        }
+
+        .role-emoji {
+            font-size: 2.25rem;
+            margin-bottom: 10px;
+        }
+
+        .role-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        /* Style Options */
+        .style-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .style-chip {
+            padding: 12px 20px;
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.25s ease;
+        }
+
+        .style-chip:hover {
+            border-color: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .style-chip.selected {
+            border-color: var(--accent);
+            background: linear-gradient(135deg, rgba(218, 119, 86, 0.15), rgba(218, 119, 86, 0.08));
+            color: var(--accent);
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(218, 119, 86, 0.12);
+        }
+
+        /* Toggle Switches */
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            background: var(--bg-tertiary);
+            border-radius: 14px;
+            transition: all 0.2s;
+        }
+
+        .toggle-item:hover {
+            background: rgba(218, 119, 86, 0.04);
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent);
+            box-shadow: 0 2px 10px rgba(218, 119, 86, 0.3);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Save Section */
+        .save-section {
+            text-align: center;
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+        }
+
+        .save-btn {
+            padding: 18px 56px;
+            background: linear-gradient(135deg, var(--accent), #c96847);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(218, 119, 86, 0.3);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(218, 119, 86, 0.4);
+        }
+
+        .save-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 12px rgba(218, 119, 86, 0.2);
+            background: var(--text-muted);
+        }
+
+        .save-btn.locked {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            box-shadow: 0 4px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .save-status {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .save-status.success {
+            color: #27ae60;
+            padding: 12px 20px;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .save-status.error {
+            color: #e74c3c;
+            padding: 12px 20px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        /* One-time config warning */
+        .config-warning {
+            background: linear-gradient(135deg, rgba(241, 196, 15, 0.12), rgba(241, 196, 15, 0.06));
+            border: 1px solid rgba(241, 196, 15, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        .config-warning-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .config-warning-text {
+            line-height: 1.5;
+        }
+
+        .config-warning-text strong {
+            color: #d4a017;
+        }
+
+        @media (max-width: 768px) {
+            .customize-section {
+                padding: 60px 16px;
+            }
+            .verify-panel {
+                padding: 32px 24px;
+            }
+            .verify-input-group {
+                flex-direction: column;
+            }
+            .verify-btn {
+                width: 100%;
+            }
+            .agent-profile-header {
+                flex-direction: column;
+                text-align: center;
+                padding: 24px 20px;
+            }
+            .agent-status-badge {
+                margin-left: 0;
+                margin-top: 12px;
+            }
+            .customize-panel {
+                padding: 24px 20px;
+            }
+            .role-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .toggle-grid {
+                grid-template-columns: 1fr;
+            }
+            .save-btn {
+                width: 100%;
+                padding: 16px 32px;
+            }
+        }
+
         /* Services Section - Hidden until ready */
         .services-section {
             display: none;
@@ -2058,6 +2943,9 @@
             <line x1="6" x2="6.01" y1="6" y2="6"/>
             <line x1="6" x2="6.01" y1="18" y2="18"/>
         </symbol>
+        <symbol id="icon-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+        </symbol>
     </svg>
 </head>
 <body>
@@ -2089,6 +2977,7 @@
             <div class="nav-links">
                 <a href="#live" onclick="closeMobileMenu()">Activity</a>
                 <a href="#agents" onclick="closeMobileMenu()">Agents</a>
+                <a href="#customize" onclick="closeMobileMenu()">Customize</a>
                 <a href="#integrations" onclick="closeMobileMenu()">Integrations</a>
                 <a href="#openclaw" onclick="closeMobileMenu()">OpenClaw</a>
                 <a href="#join" class="nav-cta" onclick="closeMobileMenu()">Join Server</a>
@@ -2131,6 +3020,40 @@
                     <div class="stat-number" id="stat-memories">0</div>
                     <div class="stat-label">Memories Stored</div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Colosseum Hackathon Banner -->
+        <section class="section" style="padding-top: 1rem;">
+            <div class="hackathon-banner reveal">
+                <div class="hackathon-countdown">
+                    <div class="hackathon-days" id="hackathon-days">--</div>
+                    <div class="hackathon-days-label">days remaining</div>
+                </div>
+                <div class="hackathon-badge">
+                    <svg class="icon icon-sm"><use href="#icon-sparkles"/></svg>
+                    LIVE COMPETITION
+                </div>
+                <h2 class="hackathon-title">Solana AI Hackathon</h2>
+                <p class="hackathon-subtitle">ClaudeCraft is competing in the Colosseum AI Hackathon — vote for us!</p>
+                <div class="hackathon-stats">
+                    <div class="hackathon-stat">
+                        <div class="hackathon-stat-value">$100k</div>
+                        <div class="hackathon-stat-label">Prize Pool</div>
+                    </div>
+                    <div class="hackathon-stat">
+                        <div class="hackathon-stat-value">Feb 2-12</div>
+                        <div class="hackathon-stat-label">2026</div>
+                    </div>
+                    <div class="hackathon-stat">
+                        <div class="hackathon-stat-value">#32</div>
+                        <div class="hackathon-stat-label">Project ID</div>
+                    </div>
+                </div>
+                <a href="https://colosseum.com/agent-hackathon/projects/claudecraft" target="_blank" rel="noopener noreferrer" class="hackathon-cta">
+                    <svg class="icon icon-md"><use href="#icon-rocket"/></svg>
+                    Vote on Colosseum
+                </a>
             </div>
         </section>
 
@@ -2319,6 +3242,287 @@
                 <div style="background: linear-gradient(135deg, var(--accent-light), rgba(218, 119, 86, 0.15)); border: 1px solid var(--accent); border-radius: 16px; padding: 1.5rem;">
                     <h4 style="margin-bottom: 0.5rem; color: var(--accent-dark);">🎁 Community Rewards</h4>
                     <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">All 15% of locked tokens will be used strategically to reward active community members—including build competition winners, arena 1v1 champions, dedicated viewers, contributors, and early supporters of ClaudeCraft.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commands Section -->
+        <section class="section commands-section" id="commands">
+            <div class="commands-container">
+                <div class="section-header reveal">
+                    <div class="section-label">Twitter Commands</div>
+                    <h2 class="section-title">Interact with ClaudeCraft</h2>
+                    <p class="section-subtitle">Tweet at <a href="https://twitter.com/ClaudeCraftSol" target="_blank" class="twitter-handle">@ClaudeCraftSol</a> to control our agents</p>
+                </div>
+                
+                <div class="commands-grid reveal">
+                    <div class="command-card">
+                        <div class="command-header">
+                            <div class="command-icon build-icon">
+                                <svg class="icon icon-lg"><use href="#icon-hammer"/></svg>
+                            </div>
+                            <div class="command-name">-build</div>
+                        </div>
+                        <div class="command-syntax">
+                            <code>@ClaudeCraftSol -build [prompt]</code>
+                        </div>
+                        <p class="command-desc">Request our AI agents to build something in Minecraft. Describe what you want and watch them construct it live!</p>
+                        <div class="command-examples">
+                            <div class="example-label">Examples:</div>
+                            <div class="example-item"><code>-build a medieval castle with towers</code></div>
+                            <div class="example-item"><code>-build pixel art of a dragon</code></div>
+                            <div class="example-item"><code>-build cozy treehouse village</code></div>
+                        </div>
+                    </div>
+
+                    <div class="command-card">
+                        <div class="command-header">
+                            <div class="command-icon deploy-icon">
+                                <svg class="icon icon-lg"><use href="#icon-bot"/></svg>
+                            </div>
+                            <div class="command-name">-deploy</div>
+                        </div>
+                        <div class="command-syntax">
+                            <code>@ClaudeCraftSol -deploy [AgentName]</code>
+                        </div>
+                        <p class="command-desc">Spawn your own AI agent into our Minecraft world! Give it a name and watch it explore, build, and interact with other agents.</p>
+                        <div class="command-examples">
+                            <div class="example-label">Examples:</div>
+                            <div class="example-item"><code>-deploy MyAI_Explorer</code></div>
+                            <div class="example-item"><code>-deploy CryptoBot - my trading agent</code></div>
+                            <div class="example-item"><code>-deploy BuilderX</code></div>
+                        </div>
+                        <div class="command-note">
+                            <svg class="icon icon-sm"><use href="#icon-info"/></svg>
+                            Name must be 3-20 characters, start with a letter
+                        </div>
+                    </div>
+                </div>
+
+                <div class="commands-cta reveal">
+                    <a href="https://twitter.com/intent/tweet?text=@ClaudeCraftSol%20-build%20" target="_blank" class="cta-button">
+                        <svg class="icon icon-md"><use href="#icon-twitter"/></svg>
+                        Try a Command Now
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agent Customization Section -->
+        <section class="section customize-section" id="customize">
+            <div class="customize-container">
+                <div class="section-header reveal">
+                    <div class="section-label">Agent Customization</div>
+                    <h2 class="section-title">Customize Your Agent</h2>
+                    <p class="section-subtitle">Deployed via Twitter? Enter your API key to unlock customization</p>
+                </div>
+
+                <!-- Verification Panel -->
+                <div class="verify-panel reveal" id="verify-panel">
+                    <div class="verify-icon">
+                        <svg class="icon icon-xl"><use href="#icon-key"/></svg>
+                    </div>
+                    <div class="verify-title">Verify Your Agent</div>
+                    <div class="verify-desc">
+                        Enter the API key you received via Twitter DM after using <code>-deploy</code>.<br>
+                        This unlocks full customization of your agent's personality and behavior.
+                    </div>
+                    <div class="verify-input-group">
+                        <input type="text" class="verify-input" id="api-key-input" placeholder="claudecraft_xxxxxx...">
+                        <button class="verify-btn" id="verify-btn" onclick="verifyAgent()">Verify</button>
+                    </div>
+                    <div class="verify-error" id="verify-error" style="display: none;"></div>
+                    <div class="verify-success" id="verify-success" style="display: none;"></div>
+                </div>
+
+                <!-- Customization Panels (hidden until verified) -->
+                <div class="customize-panels" id="customize-panels">
+                    
+                    <!-- Agent Profile Header -->
+                    <div class="agent-profile-header">
+                        <div class="agent-avatar">🤖</div>
+                        <div class="agent-info">
+                            <h3 id="agent-display-name">Your Agent</h3>
+                            <p id="agent-display-id">Verified Agent</p>
+                        </div>
+                        <div class="agent-status-badge">✓ Verified</div>
+                    </div>
+
+                    <!-- One-time config warning -->
+                    <div class="config-warning" id="config-warning">
+                        <span class="config-warning-icon">⚠️</span>
+                        <div class="config-warning-text">
+                            <strong>One-time configuration:</strong> You may only customize your agent once. Choose carefully—these settings are permanent!
+                        </div>
+                    </div>
+
+                    <!-- 1. Personality Sliders -->
+                    <div class="customize-panel">
+                        <div class="panel-header">
+                            <div class="panel-icon">🧠</div>
+                            <div class="panel-title">Personality Traits</div>
+                        </div>
+                        
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Curiosity</span>
+                                <span class="slider-value" id="curiosity-value">50%</span>
+                            </div>
+                            <input type="range" class="slider-input" id="curiosity" min="0" max="100" value="50" oninput="updateSlider(this)">
+                            <div class="slider-desc">How much they explore vs stay in one area</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Creativity</span>
+                                <span class="slider-value" id="creativity-value">50%</span>
+                            </div>
+                            <input type="range" class="slider-input" id="creativity" min="0" max="100" value="50" oninput="updateSlider(this)">
+                            <div class="slider-desc">Experimental builds vs safe, proven designs</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Sociability</span>
+                                <span class="slider-value" id="sociability-value">50%</span>
+                            </div>
+                            <input type="range" class="slider-input" id="sociability" min="0" max="100" value="50" oninput="updateSlider(this)">
+                            <div class="slider-desc">How often they chat and collaborate with others</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Ambition</span>
+                                <span class="slider-value" id="ambition-value">50%</span>
+                            </div>
+                            <input type="range" class="slider-input" id="ambition" min="0" max="100" value="50" oninput="updateSlider(this)">
+                            <div class="slider-desc">Size and complexity of projects they attempt</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Patience</span>
+                                <span class="slider-value" id="patience-value">50%</span>
+                            </div>
+                            <input type="range" class="slider-input" id="patience" min="0" max="100" value="50" oninput="updateSlider(this)">
+                            <div class="slider-desc">How long they stick with a single task</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Risk Tolerance</span>
+                                <span class="slider-value" id="risk-value">50%</span>
+                            </div>
+                            <input type="range" class="slider-input" id="risk" min="0" max="100" value="50" oninput="updateSlider(this)">
+                            <div class="slider-desc">Take shortcuts vs play it safe</div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Role Selection -->
+                    <div class="customize-panel">
+                        <div class="panel-header">
+                            <div class="panel-icon">⚔️</div>
+                            <div class="panel-title">Primary Role</div>
+                        </div>
+                        <div class="role-grid" id="role-grid">
+                            <div class="role-card" data-role="architect" onclick="selectRole(this)">
+                                <div class="role-emoji">🏰</div>
+                                <div class="role-name">Architect</div>
+                            </div>
+                            <div class="role-card selected" data-role="helper" onclick="selectRole(this)">
+                                <div class="role-emoji">🤝</div>
+                                <div class="role-name">Helper</div>
+                            </div>
+                            <div class="role-card" data-role="miner" onclick="selectRole(this)">
+                                <div class="role-emoji">⛏️</div>
+                                <div class="role-name">Miner</div>
+                            </div>
+                            <div class="role-card" data-role="explorer" onclick="selectRole(this)">
+                                <div class="role-emoji">🔭</div>
+                                <div class="role-name">Explorer</div>
+                            </div>
+                            <div class="role-card" data-role="fighter" onclick="selectRole(this)">
+                                <div class="role-emoji">⚔️</div>
+                                <div class="role-name">Fighter</div>
+                            </div>
+                            <div class="role-card" data-role="landscaper" onclick="selectRole(this)">
+                                <div class="role-emoji">🌲</div>
+                                <div class="role-name">Landscaper</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Communication Style -->
+                    <div class="customize-panel">
+                        <div class="panel-header">
+                            <div class="panel-icon">💬</div>
+                            <div class="panel-title">Communication Style</div>
+                        </div>
+                        <div class="style-options" id="comm-style">
+                            <div class="style-chip selected" data-style="chatty" onclick="selectStyle(this, 'comm-style')">💬 Chatty</div>
+                            <div class="style-chip" data-style="quiet" onclick="selectStyle(this, 'comm-style')">🤫 Quiet</div>
+                            <div class="style-chip" data-style="casual" onclick="selectStyle(this, 'comm-style')">😎 Casual</div>
+                            <div class="style-chip" data-style="formal" onclick="selectStyle(this, 'comm-style')">🎩 Formal</div>
+                            <div class="style-chip" data-style="meme" onclick="selectStyle(this, 'comm-style')">🎭 Meme-lord</div>
+                            <div class="style-chip" data-style="announcer" onclick="selectStyle(this, 'comm-style')">📢 Announcer</div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Build Preferences -->
+                    <div class="customize-panel">
+                        <div class="panel-header">
+                            <div class="panel-icon">🏗️</div>
+                            <div class="panel-title">Build Preferences</div>
+                        </div>
+                        <div class="style-options" id="build-style">
+                            <div class="style-chip selected" data-style="medieval" onclick="selectStyle(this, 'build-style')">🏰 Medieval</div>
+                            <div class="style-chip" data-style="modern" onclick="selectStyle(this, 'build-style')">🏢 Modern</div>
+                            <div class="style-chip" data-style="fantasy" onclick="selectStyle(this, 'build-style')">🧙 Fantasy</div>
+                            <div class="style-chip" data-style="futuristic" onclick="selectStyle(this, 'build-style')">🚀 Futuristic</div>
+                            <div class="style-chip" data-style="cozy" onclick="selectStyle(this, 'build-style')">🏡 Cozy</div>
+                            <div class="style-chip" data-style="grand" onclick="selectStyle(this, 'build-style')">👑 Grand</div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Behavior Toggles -->
+                    <div class="customize-panel">
+                        <div class="panel-header">
+                            <div class="panel-icon">⚙️</div>
+                            <div class="panel-title">Behavior Settings</div>
+                        </div>
+                        <div class="toggle-grid">
+                            <div class="toggle-item">
+                                <span class="toggle-label">Can Build</span>
+                                <div class="toggle-switch active" data-toggle="canBuild" onclick="toggleSwitch(this)"></div>
+                            </div>
+                            <div class="toggle-item">
+                                <span class="toggle-label">Can Follow Others</span>
+                                <div class="toggle-switch active" data-toggle="canFollow" onclick="toggleSwitch(this)"></div>
+                            </div>
+                            <div class="toggle-item">
+                                <span class="toggle-label">Can Chat</span>
+                                <div class="toggle-switch active" data-toggle="canChat" onclick="toggleSwitch(this)"></div>
+                            </div>
+                            <div class="toggle-item">
+                                <span class="toggle-label">Can Explore</span>
+                                <div class="toggle-switch active" data-toggle="canExplore" onclick="toggleSwitch(this)"></div>
+                            </div>
+                            <div class="toggle-item">
+                                <span class="toggle-label">Can Gather Resources</span>
+                                <div class="toggle-switch active" data-toggle="canGather" onclick="toggleSwitch(this)"></div>
+                            </div>
+                            <div class="toggle-item">
+                                <span class="toggle-label">Can Enter Arena</span>
+                                <div class="toggle-switch" data-toggle="canFight" onclick="toggleSwitch(this)"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="save-section">
+                        <button class="save-btn" onclick="saveAgentConfig()">💾 Save Configuration</button>
+                        <div class="save-status" id="save-status"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -2652,6 +3856,7 @@
         <div class="footer-links">
             <a href="https://anthropic.com" target="_blank" rel="noopener noreferrer">Anthropic</a>
             <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude AI</a>
+            <a href="https://github.com/888BasedGod-sol/Claudecraft" target="_blank" rel="noopener noreferrer">GitHub</a>
             <a href="https://x.com/claudecraft_ai" target="_blank" rel="noopener noreferrer">Twitter</a>
             <a href="https://t.me/claudecraft_bot" target="_blank" rel="noopener noreferrer">Telegram</a>
             <a href="https://www.moltbook.com/u/ClaudecraftBot" target="_blank" rel="noopener noreferrer">Moltbook</a>
@@ -3154,6 +4359,16 @@
             }
         }
 
+        // Hackathon countdown
+        function updateHackathonCountdown() {
+            const endDate = new Date('2026-02-12T23:59:59Z');
+            const now = new Date();
+            const diff = endDate - now;
+            const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+            const el = document.getElementById('hackathon-days');
+            if (el) el.textContent = days;
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
@@ -3161,8 +4376,283 @@
                 animateCounter('stat-blocks', 45923);
                 animateCounter('stat-memories', 1500);
             }, 500);
+            updateHackathonCountdown();
             connectWebSocket();
         });
+
+        // ===== Agent Customization =====
+        // API base URL - use tunnel for external access, localhost:8081 for local dev
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8081'
+            : 'https://warriors-randy-compact-gif.trycloudflare.com';
+        
+        let verifiedAgentId = null;
+        let verifiedApiKey = null;
+        let agentConfig = {
+            personality: {
+                curiosity: 50,
+                creativity: 50,
+                sociability: 50,
+                ambition: 50,
+                patience: 50,
+                risk: 50
+            },
+            role: 'helper',
+            commStyle: 'chatty',
+            buildStyle: 'medieval',
+            behavior: {
+                canBuild: true,
+                canFollow: true,
+                canChat: true,
+                canExplore: true,
+                canGather: true,
+                canFight: false
+            }
+        };
+
+        async function verifyAgent() {
+            const apiKey = document.getElementById('api-key-input').value.trim();
+            const errorEl = document.getElementById('verify-error');
+            const successEl = document.getElementById('verify-success');
+            const btn = document.getElementById('verify-btn');
+            
+            if (!apiKey) {
+                showVerifyError('Please enter your API key');
+                return;
+            }
+
+            btn.textContent = 'Verifying...';
+            btn.disabled = true;
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/bot/status`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    verifiedApiKey = apiKey;
+                    verifiedAgentId = data.agent?.id || 'verified';
+                    
+                    // Update UI
+                    document.getElementById('agent-display-name').textContent = data.agent?.name || 'Your Agent';
+                    document.getElementById('agent-display-id').textContent = 'Agent ID: ' + verifiedAgentId;
+                    
+                    // Check if config is locked (already configured)
+                    const isLocked = data.agent?.config_locked;
+                    
+                    // Load existing config if available
+                    if (data.agent?.config) {
+                        agentConfig = { ...agentConfig, ...data.agent.config };
+                        applyConfigToUI();
+                    }
+                    
+                    if (isLocked) {
+                        showVerifySuccess('✓ Agent verified! Configuration is locked (already set).');
+                        // Show panels but in read-only mode
+                        setTimeout(() => {
+                            document.getElementById('verify-panel').style.display = 'none';
+                            document.getElementById('customize-panels').style.display = 'block';
+                            // Disable all inputs
+                            lockConfigUI();
+                        }, 1000);
+                    } else {
+                        showVerifySuccess('✓ Agent verified! You can configure your agent (one time only!)');
+                        // Show customization panels
+                        setTimeout(() => {
+                            document.getElementById('verify-panel').style.display = 'none';
+                            document.getElementById('customize-panels').style.display = 'block';
+                        }, 1000);
+                    }
+                    
+                } else {
+                    const error = await response.json();
+                    showVerifyError(error.message || 'Invalid API key');
+                }
+            } catch (err) {
+                showVerifyError('Connection failed. Make sure the server is running.');
+            }
+
+            btn.textContent = 'Verify';
+            btn.disabled = false;
+        }
+
+        function showVerifyError(message) {
+            const errorEl = document.getElementById('verify-error');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function showVerifySuccess(message) {
+            const successEl = document.getElementById('verify-success');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+        }
+
+        function updateSlider(slider) {
+            const valueEl = document.getElementById(slider.id + '-value');
+            valueEl.textContent = slider.value + '%';
+            agentConfig.personality[slider.id] = parseInt(slider.value);
+        }
+
+        function selectRole(card) {
+            document.querySelectorAll('#role-grid .role-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            agentConfig.role = card.dataset.role;
+        }
+
+        function selectStyle(chip, groupId) {
+            document.querySelectorAll(`#${groupId} .style-chip`).forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+            if (groupId === 'comm-style') {
+                agentConfig.commStyle = chip.dataset.style;
+            } else {
+                agentConfig.buildStyle = chip.dataset.style;
+            }
+        }
+
+        function toggleSwitch(toggle) {
+            toggle.classList.toggle('active');
+            const isActive = toggle.classList.contains('active');
+            agentConfig.behavior[toggle.dataset.toggle] = isActive;
+        }
+
+        function applyConfigToUI() {
+            // Apply personality sliders
+            Object.keys(agentConfig.personality).forEach(key => {
+                const slider = document.getElementById(key);
+                if (slider) {
+                    slider.value = agentConfig.personality[key];
+                    updateSlider(slider);
+                }
+            });
+
+            // Apply role selection
+            document.querySelectorAll('#role-grid .role-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.role === agentConfig.role);
+            });
+
+            // Apply comm style
+            document.querySelectorAll('#comm-style .style-chip').forEach(chip => {
+                chip.classList.toggle('selected', chip.dataset.style === agentConfig.commStyle);
+            });
+
+            // Apply build style
+            document.querySelectorAll('#build-style .style-chip').forEach(chip => {
+                chip.classList.toggle('selected', chip.dataset.style === agentConfig.buildStyle);
+            });
+
+            // Apply behavior toggles
+            Object.keys(agentConfig.behavior).forEach(key => {
+                const toggle = document.querySelector(`[data-toggle="${key}"]`);
+                if (toggle) {
+                    toggle.classList.toggle('active', agentConfig.behavior[key]);
+                }
+            });
+        }
+
+        async function saveAgentConfig() {
+            const statusEl = document.getElementById('save-status');
+            const btn = document.querySelector('.save-btn');
+            
+            btn.textContent = '💾 Saving...';
+            btn.disabled = true;
+            statusEl.textContent = '';
+            statusEl.className = 'save-status';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/agent/config`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${verifiedApiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(agentConfig)
+                });
+
+                if (response.ok) {
+                    statusEl.textContent = '✓ Configuration saved permanently! Your agent is now customized.';
+                    statusEl.className = 'save-status success';
+                    // Lock the UI after successful save
+                    lockConfigUI();
+                } else {
+                    const error = await response.json();
+                    statusEl.textContent = '✗ ' + (error.message || 'Failed to save');
+                    statusEl.className = 'save-status error';
+                }
+            } catch (err) {
+                statusEl.textContent = '✗ Connection failed';
+                statusEl.className = 'save-status error';
+            }
+
+            btn.textContent = '💾 Save Configuration';
+            btn.disabled = false;
+        }
+
+        function lockConfigUI() {
+            // Hide the warning banner
+            const warning = document.getElementById('config-warning');
+            if (warning) {
+                warning.style.display = 'none';
+            }
+            
+            // Disable all sliders
+            document.querySelectorAll('.slider-input').forEach(slider => {
+                slider.disabled = true;
+                slider.style.opacity = '0.6';
+                slider.style.cursor = 'not-allowed';
+            });
+            
+            // Disable slider groups styling
+            document.querySelectorAll('.slider-group').forEach(group => {
+                group.style.opacity = '0.7';
+            });
+            
+            // Disable role cards
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.style.pointerEvents = 'none';
+                card.style.opacity = '0.6';
+                if (!card.classList.contains('selected')) {
+                    card.style.opacity = '0.4';
+                }
+            });
+            
+            // Disable style chips
+            document.querySelectorAll('.style-chip').forEach(chip => {
+                chip.style.pointerEvents = 'none';
+                chip.style.opacity = '0.6';
+                if (!chip.classList.contains('selected')) {
+                    chip.style.opacity = '0.4';
+                }
+            });
+            
+            // Disable toggles
+            document.querySelectorAll('.toggle-switch').forEach(toggle => {
+                toggle.style.pointerEvents = 'none';
+                toggle.style.opacity = '0.6';
+            });
+            
+            // Update save button to show locked state
+            const saveBtn = document.querySelector('.save-btn');
+            if (saveBtn) {
+                saveBtn.textContent = '🔒 Configuration Saved';
+                saveBtn.disabled = true;
+                saveBtn.classList.add('locked');
+            }
+            
+            // Add locked status message
+            const statusEl = document.getElementById('save-status');
+            if (statusEl && !statusEl.textContent.includes('locked')) {
+                statusEl.innerHTML = '✓ Your agent configuration has been saved and is now active.';
+                statusEl.className = 'save-status success';
+            }
+        }
     </script>
 </body>
 </html>

@@ -7,6 +7,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { arenaManager } from './arenaManager';
 import { POWER_UPS } from './powerUps';
 import { generateArenaBuildCommands } from './arenaBuilder';
+import { solanaService } from './solanaService';
 
 // Helper to parse JSON body
 async function parseBody(req: IncomingMessage): Promise<any> {
@@ -140,6 +141,40 @@ export async function handleArenaRoute(
       }
 
       sendJson(res, 200, { success: true, profile });
+      return true;
+    }
+
+    // PUT /api/v1/arena/profile - Update agent profile
+    if (route === '/profile' && method === 'PUT') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { agentName, bio, avatar, twitter, website, battleCry, theme } = body;
+
+      // Validate theme if provided
+      const validThemes = ['default', 'fire', 'ice', 'shadow', 'gold', 'cosmic'];
+      if (theme && !validThemes.includes(theme)) {
+        sendJson(res, 400, { 
+          success: false, 
+          error: `Invalid theme. Valid options: ${validThemes.join(', ')}` 
+        });
+        return true;
+      }
+
+      const result = arenaManager.updateProfile(agentToken, {
+        agentName,
+        bio,
+        avatar,
+        twitter,
+        website,
+        battleCry,
+        theme
+      });
+
+      sendJson(res, result.success ? 200 : 400, result);
       return true;
     }
 
@@ -281,6 +316,122 @@ export async function handleArenaRoute(
         message: 'Copy and paste these commands into your Minecraft server console',
         commandCount: commands.length,
         commands 
+      });
+      return true;
+    }
+
+    // === SOLANA ROUTES ===
+
+    // GET /api/v1/arena/solana/info - Get Solana network info
+    if (route === '/solana/info' && method === 'GET') {
+      await solanaService.initialize();
+      const serverInfo = solanaService.getServerInfo();
+      const serverBalance = await solanaService.getServerBalance();
+      sendJson(res, 200, { 
+        success: true, 
+        network: serverInfo?.network || 'unknown',
+        serverAddress: serverInfo?.address || null,
+        serverBalance,
+        conversionRate: '1 SOL = 1000 arena tokens',
+        minDeposit: '0.01 SOL'
+      });
+      return true;
+    }
+
+    // GET /api/v1/arena/solana/deposit-address - Get deposit address for agent
+    if (route === '/solana/deposit-address' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      await solanaService.initialize();
+      const { address, isNew } = solanaService.getOrCreateDepositAddress(agentToken);
+      const balance = await solanaService.getDepositBalance(agentToken);
+      
+      sendJson(res, 200, { 
+        success: true, 
+        depositAddress: address,
+        isNew,
+        currentBalance: balance,
+        message: `Send SOL to this address. 1 SOL = 1000 arena tokens. Min deposit: 0.01 SOL`
+      });
+      return true;
+    }
+
+    // POST /api/v1/arena/solana/check-deposits - Check for new deposits and credit tokens
+    if (route === '/solana/check-deposits' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      await solanaService.initialize();
+      const { newDeposits, totalNewTokens } = await solanaService.checkDeposits(agentToken);
+      
+      // Credit tokens to agent's arena balance
+      if (totalNewTokens > 0) {
+        const result = arenaManager.deposit(agentToken, totalNewTokens);
+        if (result.success) {
+          // Mark deposits as credited
+          for (const dep of newDeposits) {
+            solanaService.markDepositCredited(dep.signature);
+          }
+        }
+      }
+
+      sendJson(res, 200, { 
+        success: true, 
+        newDeposits,
+        totalNewTokens,
+        message: totalNewTokens > 0 
+          ? `Credited ${totalNewTokens} tokens from ${newDeposits.length} deposit(s)`
+          : 'No new deposits found'
+      });
+      return true;
+    }
+
+    // POST /api/v1/arena/solana/airdrop - Request devnet airdrop (devnet only)
+    if (route === '/solana/airdrop' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      await solanaService.initialize();
+      const body = await parseBody(req);
+      const amount = Math.min(body.amount || 1, 2); // Max 2 SOL airdrop
+      
+      const result = await solanaService.requestAirdrop(agentToken, amount);
+      if (result.success) {
+        sendJson(res, 200, { 
+          success: true, 
+          signature: result.signature,
+          amount,
+          message: `Airdropped ${amount} SOL. Call /solana/check-deposits to credit tokens.`
+        });
+      } else {
+        sendJson(res, 400, { success: false, error: result.error });
+      }
+      return true;
+    }
+
+    // GET /api/v1/arena/solana/balance - Get SOL balance of deposit address
+    if (route === '/solana/balance' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      await solanaService.initialize();
+      const balance = await solanaService.getDepositBalance(agentToken);
+      const address = solanaService.getDepositAddress(agentToken);
+      
+      sendJson(res, 200, { 
+        success: true, 
+        depositAddress: address,
+        balanceSol: balance,
+        balanceTokens: solanaService.solToTokens(balance)
       });
       return true;
     }

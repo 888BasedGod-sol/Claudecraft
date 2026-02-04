@@ -44,21 +44,28 @@ export class AutonomousBotController {
   private torchPlacementInterval: number = 3000; // Place torch every 3 seconds when underground (more frequent for safety)
   private positionUpdateInterval: any = null; // Interval for broadcasting position
   private creativeMode: boolean = false; // Use /setblock commands for unlimited building
+  private sculptorMode: boolean = false; // Specialized for fine details on existing builds
   private lastActionResult: { action: string; success: boolean; message: string } | null = null; // Track last action result
   private consecutiveFailures: number = 0; // Track consecutive action failures
 
-  constructor(host: string, port: number, name: string, personality?: Partial<AgentPersonality>, creativeMode: boolean = false) {
+  constructor(host: string, port: number, name: string, personality?: Partial<AgentPersonality>, creativeMode: boolean = false, sculptorMode: boolean = false) {
     this.host = host;
     this.port = port;
     this.botName = name;
     this.personality = personality;
     this.creativeMode = creativeMode;
-    this.agent = new AutonomousAgent(name, personality, creativeMode);
+    this.sculptorMode = sculptorMode;
+    this.agent = new AutonomousAgent(name, personality, creativeMode, sculptorMode);
   }
 
   /** Check if this controller is in creative mode */
   isCreativeMode(): boolean {
     return this.creativeMode;
+  }
+
+  /** Check if this controller is in sculptor mode */
+  isSculptorMode(): boolean {
+    return this.sculptorMode;
   }
 
   /** Get the underlying mineflayer bot instance */
@@ -1208,6 +1215,86 @@ export class AutonomousBotController {
             blocksPlaced++;
             await this.delay(50);
           }
+          break;
+
+        case 'decoration':
+        case 'detail':
+        case 'single':
+          // Place a single detail block - perfect for sculptor fine work
+          const detailTarget = pos.offset(0, 0, 1);
+          this.bot.chat(`/setblock ${detailTarget.x} ${detailTarget.y} ${detailTarget.z} ${blockName}`);
+          blocksPlaced = 1;
+          break;
+
+        case 'window':
+          // Build a window frame with glass
+          const windowSize = Math.max(2, Math.min(size, 4));
+          for (let x = 0; x < windowSize; x++) {
+            for (let y = 0; y < windowSize; y++) {
+              const target = pos.offset(x, y + 1, 1);
+              this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:glass_pane`);
+              blocksPlaced++;
+              await this.delay(30);
+            }
+          }
+          break;
+
+        case 'door':
+          // Place a door
+          const doorBottom = pos.offset(0, 0, 1);
+          const doorTop = pos.offset(0, 1, 1);
+          this.bot.chat(`/setblock ${doorBottom.x} ${doorBottom.y} ${doorBottom.z} minecraft:oak_door[half=lower]`);
+          this.bot.chat(`/setblock ${doorTop.x} ${doorTop.y} ${doorTop.z} minecraft:oak_door[half=upper]`);
+          blocksPlaced = 2;
+          break;
+
+        case 'lanternRow':
+          // Place a row of lanterns for path lighting
+          for (let x = 0; x < size; x++) {
+            const target = pos.offset(x * 3, 0, 1);
+            this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:lantern`);
+            blocksPlaced++;
+            await this.delay(50);
+          }
+          break;
+
+        case 'flowerBed':
+          // Create a decorative flower bed
+          const flowers = ['poppy', 'dandelion', 'cornflower', 'azure_bluet', 'oxeye_daisy'];
+          for (let x = 0; x < size; x++) {
+            for (let z = 0; z < Math.min(size, 3); z++) {
+              const flower = flowers[(x + z) % flowers.length];
+              const target = pos.offset(x, 0, z + 1);
+              this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:${flower}`);
+              blocksPlaced++;
+              await this.delay(30);
+            }
+          }
+          break;
+
+        case 'fence':
+          // Build a fence line
+          for (let x = 0; x < size; x++) {
+            const target = pos.offset(x, 0, 1);
+            this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} ${blockName.includes('fence') ? blockName : 'minecraft:oak_fence'}`);
+            blocksPlaced++;
+            await this.delay(50);
+          }
+          break;
+
+        case 'chimney':
+          // Build a decorative chimney
+          const chimneyHeight = Math.max(3, size);
+          for (let y = 0; y < chimneyHeight; y++) {
+            const target = pos.offset(0, y, 0);
+            this.bot.chat(`/setblock ${target.x} ${target.y} ${target.z} minecraft:brick`);
+            blocksPlaced++;
+            await this.delay(50);
+          }
+          // Add smoke effect with campfire
+          const smokeTarget = pos.offset(0, chimneyHeight, 0);
+          this.bot.chat(`/setblock ${smokeTarget.x} ${smokeTarget.y} ${smokeTarget.z} minecraft:campfire`);
+          blocksPlaced++;
           break;
 
         default:

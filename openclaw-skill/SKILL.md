@@ -1,40 +1,45 @@
 ---
 name: claudecraft
-description: Manage the Claudecraft Minecraft server and control AI agents. Collect viewer requests that ClaudecraftBot reviews every 3 hours to decide what agents should do. Use for any Minecraft server management, building requests, or Claudecraft mentions.
+description: Manage the Claudecraft Minecraft server and control AI agents. Collect viewer requests that ClaudecraftBot reviews every 10 minutes to decide what agents should do. Use for any Minecraft server management, building requests, exploration, adventures, or Claudecraft mentions.
 metadata: {"openclaw":{"emoji":"⛏️","homepage":"https://claudecraft.stream"}}
 user-invocable: true
 ---
 
 # Claudecraft - Minecraft Server & AI Agent Control
 
-Full control over the Claudecraft Minecraft server and autonomous AI agents. 
+Full control over the Claudecraft Minecraft server and 4 autonomous AI agents powered by Claude.
 
-## 🗳️ REQUEST COLLECTION MODE (NEW!)
+## 🗳️ REQUEST COLLECTION MODE
 
-Instead of executing commands immediately, Claudecraft now **collects viewer requests**:
-1. Viewers submit requests via Telegram (e.g., "Build a castle", "Find diamonds")
-2. Requests are queued with upvotes for popularity
-3. **Every 3 hours**, ClaudecraftBot reviews all requests
-4. ClaudecraftBot decides what each agent should focus on
-5. Agents receive high-priority directives based on viewer requests
+Claudecraft now **collects and batches viewer requests** for smarter coordination:
+
+1. **Viewers submit requests** via Telegram, Discord, or chat
+2. **Requests are queued** with upvotes for popularity tracking
+3. **Every 10 minutes**, ClaudecraftBot reviews all pending requests
+4. **ClaudecraftBot assigns tasks** to the best-suited agent
+5. **Agents execute** with priority based on viewer interest
 
 This creates more thoughtful, coordinated agent behavior!
 
 ## When to Use This Skill
 
 Activate this skill when the user:
-- Wants to **submit a building request** (will be queued for review)
+- Wants to **submit a building request** ("Build a castle", "Make a pyramid")
+- Wants to **request exploration** ("Find diamonds", "Explore caves")  
+- Wants **adventure/combat** ("Fight the dragon", "Go to the Nether")
 - Asks about **pending requests** or when next review happens
 - Wants to **start, stop, or restart** the Minecraft server
-- Asks about **server status** or what agents are doing
-- Wants to **manage players** (whitelist, ban, op, kick)
-- Mentions "Minecraft", "build", "claudecraft", or "agents"
+- Asks about **agent status** or what they're currently doing
+- Wants to **manage players** (whitelist, ban, op)
+- Mentions "Minecraft", "build", "claudecraft", "agents", or "stream"
 
 ---
 
-## 📥 SUBMITTING REQUESTS
+## 📥 SUBMITTING VIEWER REQUESTS
 
-When a viewer sends a message, it gets queued for ClaudecraftBot to review:
+**This is the primary way viewers interact with Claudecraft!**
+
+When a viewer sends a message, queue it for ClaudecraftBot to review:
 
 ```bash
 curl -X POST http://localhost:8081/command \
@@ -46,54 +51,54 @@ curl -X POST http://localhost:8081/command \
   }'
 ```
 
-Response will include:
-- How many requests are pending
-- When the next review will happen
+### Example Requests to Queue:
+- **Building**: "Build a medieval castle", "Make pixel art of a creeper", "Create an underwater base"
+- **Exploration**: "Find diamonds", "Explore the caves", "Discover a village"
+- **Adventure**: "Fight a boss", "Go to the Nether", "Do something dangerous"
+- **Social**: "Have the agents meet up", "Collaborate on a project"
+
+### Response Format:
+```json
+{
+  "success": true,
+  "message": "Request queued for review",
+  "pendingCount": 5,
+  "nextReview": "10 minutes"
+}
+```
 
 ### Check Pending Requests
 ```bash
 curl -s http://localhost:8081/requests | python3 -m json.tool
 ```
 
-### Force Immediate Processing (Admin)
+### Get Queue Status
+```bash
+curl -s http://localhost:8081/status | python3 -m json.tool
+```
+
+### Force Immediate Processing (Admin Only)
 ```bash
 curl -X POST http://localhost:8081/requests/process
 ```
 
 ---
 
-## 🖥️ SERVER MANAGEMENT
+## 🤖 THE FOUR AI AGENTS
 
-All server management commands are run from the Claudecraft directory. Set your path:
-```bash
-export CLAUDECRAFT_DIR="/path/to/Claudecraft"
-```
+| Agent | Personality | Mode | Best For |
+|-------|-------------|------|----------|
+| **Claude_Explorer** | Curious, adventurous, patient | Survival | Mining, resource gathering, cave exploration, discovering biomes |
+| **Claude_Builder** | Creative, ambitious, meticulous | Creative | Building structures, pixel art, monuments, anything architectural |
+| **ClaudeAdventurer** | Social, risky, ambitious | Survival | Combat, boss fights, Nether trips, social interactions |
+| **Claude_Sculptor** | Meticulous, patient, detail-focused | Creative | Fine details, decorations, windows, doors, lighting, landscaping |
 
-### Start the Minecraft Server
-```bash
-cd $CLAUDECRAFT_DIR/minecraft-server && java -Xmx4G -Xms2G -jar paper.jar nogui &
-```
-
-### Stop the Minecraft Server
-First, find the process and send a graceful stop:
-```bash
-pkill -f "paper.jar" 2>/dev/null || echo "Server not running"
-```
-
-### Check if Server is Running
-```bash
-pgrep -f "paper.jar" && echo "✅ Server is running" || echo "❌ Server is not running"
-```
-
-### View Server Logs (last 50 lines)
-```bash
-tail -50 $CLAUDECRAFT_DIR/minecraft-server/logs/latest.log
-```
-
-### Check Server Port (25565)
-```bash
-lsof -i :25565 | head -5
-```
+### Agent Assignment Logic:
+- **Building requests** → Claude_Builder (has creative mode, can build instantly)
+- **Detail/decoration requests** → Claude_Sculptor (specializes in fine details)
+- **Mining/exploration** → Claude_Explorer (loves discovering resources)
+- **Combat/adventure** → ClaudeAdventurer (high risk tolerance, seeks thrills)
+- **Social/collab** → All agents may participate
 
 ---
 

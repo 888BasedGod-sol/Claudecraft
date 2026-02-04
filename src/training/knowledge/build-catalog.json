@@ -122,6 +122,142 @@
         "Railings prevent accidental falls",
         "Crouch while building over void"
       ]
+    },
+    {
+      "id": "lighthouse_coastal",
+      "name": "Coastal Lighthouse",
+      "style": "maritime",
+      "difficulty": "medium",
+      "timeToComplete": "20-30 minutes",
+      "materials": {
+        "stone_bricks": 200,
+        "white_concrete": 150,
+        "glowstone": 16,
+        "glass_pane": 32,
+        "lantern": 8
+      },
+      "steps": [
+        "Build 8x8 circular stone base on coastline",
+        "Raise cylindrical tower 25-30 blocks high",
+        "Alternate white concrete bands every 5 blocks",
+        "Create 12x12 glass observation deck at top",
+        "Fill top with glowstone for beacon effect",
+        "Add spiral staircase inside for access"
+      ],
+      "lessonsLearned": [
+        "Circles need careful block placement - use online templates",
+        "Height makes structure visible from far away",
+        "Glowstone works as beacon without needing a real beacon"
+      ]
+    },
+    {
+      "id": "castle_medieval",
+      "name": "Medieval Castle",
+      "style": "medieval",
+      "difficulty": "hard",
+      "timeToComplete": "60-90 minutes",
+      "materials": {
+        "stone_bricks": 500,
+        "cobblestone": 300,
+        "oak_planks": 100,
+        "oak_fence": 50,
+        "torch": 64
+      },
+      "steps": [
+        "Build 20x20 foundation with 3-block thick walls",
+        "Add 4 corner towers (5x5, 15 blocks tall)",
+        "Connect towers with crenellated walls (8 blocks high)",
+        "Add main gatehouse with iron doors",
+        "Build central keep (10x10, 20 blocks tall)",
+        "Add interior rooms: great hall, armory, throne room",
+        "Decorate with banners, armor stands, carpets"
+      ],
+      "lessonsLearned": [
+        "Work from outside in - walls first, then interior",
+        "Corner towers anchor the design",
+        "Crenellations add authenticity",
+        "Interior decoration makes it feel lived-in"
+      ]
+    },
+    {
+      "id": "pyramid_golden",
+      "name": "Golden Pyramid",
+      "style": "egyptian",
+      "difficulty": "medium",
+      "timeToComplete": "30-45 minutes",
+      "materials": {
+        "gold_block": 256,
+        "sandstone": 200,
+        "glowstone": 32,
+        "quartz_block": 64
+      },
+      "steps": [
+        "Mark 21x21 base in desert biome",
+        "Build solid gold pyramid stepping in 1 block per layer",
+        "Hollow out interior for tomb chambers",
+        "Add hidden entrance with pressure plate",
+        "Create sarcophagus room with gold and quartz",
+        "Line corridors with glowstone behind sandstone"
+      ],
+      "lessonsLearned": [
+        "Pyramids look best with odd-numbered bases",
+        "Hidden entrances add mystery",
+        "Interior lighting through blocks creates atmosphere"
+      ]
+    },
+    {
+      "id": "treehouse_jungle",
+      "name": "Jungle Treehouse",
+      "style": "organic",
+      "difficulty": "medium",
+      "timeToComplete": "25-35 minutes",
+      "materials": {
+        "jungle_planks": 150,
+        "jungle_fence": 64,
+        "vine": 32,
+        "lantern": 12,
+        "ladder": 30
+      },
+      "steps": [
+        "Find large jungle tree or build trunk from logs",
+        "Build main platform at Y+15-20 from ground",
+        "Add multiple connected platforms at varying heights",
+        "Connect with rope bridges (fence with trapdoors)",
+        "Add walls only on 2 sides for open-air feel",
+        "Drape vines from edges for natural look"
+      ],
+      "lessonsLearned": [
+        "Use existing trees when possible",
+        "Multiple levels add visual interest",
+        "Open sides show off the jungle view"
+      ]
+    },
+    {
+      "id": "underwater_dome",
+      "name": "Underwater Glass Dome",
+      "style": "futuristic",
+      "difficulty": "hard",
+      "timeToComplete": "45-60 minutes",
+      "materials": {
+        "glass": 400,
+        "prismarine": 200,
+        "sea_lantern": 32,
+        "sponge": 16
+      },
+      "steps": [
+        "Build dome frame underwater using sand/gravel scaffolding",
+        "Replace scaffolding with glass panes",
+        "Add prismarine ring at base and top",
+        "Use sponges to clear water from inside",
+        "Add sea lanterns for illumination",
+        "Build airlock entrance with doors",
+        "Furnish interior with viewing areas"
+      ],
+      "lessonsLearned": [
+        "Sponges are essential for clearing water",
+        "Build frame first, then fill in glass",
+        "Prismarine matches ocean aesthetic"
+      ]
     }
   ],
   "buildingPatterns": {

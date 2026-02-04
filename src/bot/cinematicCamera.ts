@@ -10,47 +10,49 @@ import { Logger } from '../utils/unifiedLogger';
 
 // Camera configuration with spring physics parameters
 const CAMERA_SETTINGS = {
-  // Spring physics - responsive following
-  SPRING_STIFFNESS: 8.0,        // Higher stiffness for tighter following
-  SPRING_DAMPING: 0.85,         // Quick response, slight overshoot
-  POSITION_UPDATE_INTERVAL: 33, // ~30 FPS for smooth updates
+  // Spring physics - RESPONSIVE following for close tracking
+  SPRING_STIFFNESS: 8.0,        // Higher stiffness = tighter follow
+  SPRING_DAMPING: 0.82,         // Lower damping = faster response
+  POSITION_UPDATE_INTERVAL: 40, // 25 FPS for responsive updates
   
-  // Angle tracking - instant lock-on for observation
-  ANGLE_SPRING_STIFFNESS: 30.0,  // Very high for near-instant look-at
-  ANGLE_SPRING_DAMPING: 0.70,    // Lower damping for faster settling
-  LOCK_ON_TARGET: true,          // Always look directly at target
+  // Angle tracking - RESPONSIVE rotation to keep agent centered
+  ANGLE_SPRING_STIFFNESS: 12.0,  // Higher for faster rotation tracking
+  ANGLE_SPRING_DAMPING: 0.80,    // Lower damping for quicker response
+  LOCK_ON_TARGET: false,         // Use spring-based smooth rotation
   
-  // Distance thresholds
-  MIN_TELEPORT_DISTANCE: 0.02,  // Very low for smooth micro-movements
-  MAX_TELEPORT_DISTANCE: 20,    // Faster catch-up when too far
+  // Distance thresholds - tight follow
+  MIN_TELEPORT_DISTANCE: 0.08,  // Teleport on small movements for tight tracking
+  MAX_TELEPORT_DISTANCE: 8,     // Catch up faster if camera falls behind
+  FORCE_LOS_CHECK: false,       // Don't constantly check LOS (causes stuttering)
+  LOS_FAIL_TELEPORT: false,     // Don't immediately teleport when view is blocked
   
-  // Shot composition - CINEMATIC variety with drama
+  // Shot composition - CLOSE FOLLOW with clear view
   SHOTS: {
-    // Primary tracking shots
-    follow: { distance: 4, heightOffset: 2, fov: 70 },          // Classic follow behind
-    closeBehind: { distance: 2.5, heightOffset: 1.2, fov: 78 }, // Intimate behind
+    // Primary tracking shots - CLOSE
+    follow: { distance: 2.5, heightOffset: 1.5, fov: 75 },       // Close follow behind
+    closeBehind: { distance: 2, heightOffset: 1, fov: 80 },     // Very close behind
     
-    // Dynamic action shots
-    shoulder: { distance: 1.8, heightOffset: 0.5, fov: 85 },    // Over-the-shoulder action
-    action: { distance: 3, heightOffset: 1, fov: 80 },          // Action tracking
+    // Dynamic action shots - TIGHT
+    shoulder: { distance: 1.5, heightOffset: 0.4, fov: 85 },    // Tight shoulder
+    action: { distance: 2, heightOffset: 0.8, fov: 82 },        // Close action
     
-    // Dramatic angles
-    lowAngle: { distance: 4, heightOffset: -0.5, fov: 75 },     // Hero shot from below
-    highAngle: { distance: 5, heightOffset: 4, fov: 65 },       // Establishing from above
-    overhead: { distance: 3, heightOffset: 6, fov: 60 },        // Bird's eye
+    // Dramatic angles - CLOSER
+    lowAngle: { distance: 2.5, heightOffset: -0.3, fov: 78 },   // Close hero shot
+    highAngle: { distance: 3, heightOffset: 2.5, fov: 70 },     // Closer from above
+    overhead: { distance: 2.5, heightOffset: 4, fov: 65 },      // Closer bird's eye
     
-    // Wide shots
-    wide: { distance: 8, heightOffset: 3, fov: 65 },            // Wide establishing
-    ultraWide: { distance: 12, heightOffset: 4, fov: 55 },      // Ultra wide for context
+    // Wide shots - REDUCED
+    wide: { distance: 4, heightOffset: 2, fov: 70 },            // Medium establishing
+    ultraWide: { distance: 6, heightOffset: 3, fov: 60 },       // Medium wide
     
-    // Specialty shots
-    side: { distance: 3, heightOffset: 1.5, fov: 75 },          // Side profile
-    dutch: { distance: 3.5, heightOffset: 2, fov: 72 },         // Dutch angle (tilted)
-    orbit: { distance: 5, heightOffset: 2, fov: 70 },           // Orbiting shot
+    // Specialty shots - TIGHTER
+    side: { distance: 2, heightOffset: 1, fov: 78 },            // Close side profile
+    dutch: { distance: 2.5, heightOffset: 1.5, fov: 75 },       // Close dutch angle
+    orbit: { distance: 3, heightOffset: 1.5, fov: 72 },         // Close orbit
     
-    // Multi-agent
-    group: { distance: 10, heightOffset: 4, fov: 65 },          // Group shot
-    twoShot: { distance: 6, heightOffset: 2, fov: 70 },         // Two agents
+    // Multi-agent - CLOSER
+    group: { distance: 5, heightOffset: 2.5, fov: 70 },         // Closer group shot
+    twoShot: { distance: 3.5, heightOffset: 1.5, fov: 72 },     // Closer two-shot
   },
   
   // Shot selection weights by activity type
@@ -73,11 +75,19 @@ const CAMERA_SETTINGS = {
     TRIGGER_ON_ACTION: false, // Disabled
   },
   
-  // Underground detection
+  // Underground detection - AGGRESSIVE for cave filming
   UNDERGROUND: {
-    Y_THRESHOLD: 40,          // Below this Y level is considered underground (lowered to avoid false positives)
+    Y_THRESHOLD: 40,          // Below this Y level is considered underground
     AUTO_SPECTATE: false,     // DISABLED - was causing camera to get stuck
     SPECTATE_MIN_DURATION: 2000,  // Minimum time in spectate mode underground
+    USE_CLOSE_SHOTS: true,    // Use closer camera shots when underground
+    CAVE_DISTANCE_MULT: 0.3,  // Even closer in caves (was 0.4)
+    CAVE_HEIGHT_MULT: 0.2,    // Very low height offset in caves
+    // Underground-specific camera settings (very aggressive)
+    SPRING_STIFFNESS: 20.0,   // Very stiff for instant tracking
+    SPRING_DAMPING: 0.70,     // Lower damping for immediate response
+    MIN_TELEPORT_DISTANCE: 0.03, // Very low threshold for constant updates
+    FOLLOW_SPEED: 0.7,        // Very fast follow behind
   },
   
   // Shot timing - varied for interest
@@ -103,22 +113,24 @@ const CAMERA_SETTINGS = {
     MOVEMENT_INTERVAL: 4000,    // Small movement every 4 seconds
     FORCE_SPECTATE: true,       // Force spectate mode continuously
     CURSOR_WOBBLE: {
-      ENABLED: true,
-      INTERVAL: 2000,           // Subtle cursor move every 2 seconds
-      AMPLITUDE: 0.03,          // Very small wobble (radians)
-      RANDOM_FACTOR: 0.5,       // Add randomness to movement
+      ENABLED: false,            // DISABLED - interferes with smooth camera
+      INTERVAL: 5000,           // Longer interval if ever re-enabled
+      AMPLITUDE: 0.01,          // Smaller wobble (radians)
+      RANDOM_FACTOR: 0.2,       // Less randomness
     },
     STUCK_RECOVERY: {
       ENABLED: true,
-      CHECK_INTERVAL: 10000,    // Check for stuck camera every 10 seconds
-      MAX_IDLE_TIME: 15000,     // Reset if no movement for 15 seconds
+      CHECK_INTERVAL: 10000,    // Check for stuck camera every 10 seconds (less aggressive)
+      MAX_IDLE_TIME: 30000,     // Reset if no movement for 30 seconds (not 8!)
+      TELEPORT_ON_STUCK: true,  // Force teleport when stuck
+      MAX_BLOCKED_CHECKS: 6,    // After 6 blocked checks, force recovery (not 2!)
     },
   },
   
-  // Following behavior
-  FOLLOW_BEHIND_SPEED: 0.3,     // Fast catch-up to stay behind agent
-  IDLE_ORBIT_SPEED: 0.02,       // Slow orbit when target is stationary (cinematic)
-  ORBIT_SPEED: 0.05,            // Orbit speed during orbit shot
+  // Following behavior - RESPONSIVE to keep agent centered
+  FOLLOW_BEHIND_SPEED: 0.35,    // Fast follow to stay behind agent
+  IDLE_ORBIT_SPEED: 0.008,      // Very slow orbit when stationary
+  ORBIT_SPEED: 0.02,            // Slow orbit speed during orbit shot
   
   // Event detection keywords
   EVENT_KEYWORDS: {
@@ -178,6 +190,8 @@ interface AgentActivity {
   health: number;
   isMoving: boolean;
   velocity: Vec3 | null;
+  lastSeen?: number; // Timestamp when entity was last visible
+  entityLostLogged?: boolean; // Whether we already logged losing this entity
 }
 
 export class CinematicCamera {
@@ -195,6 +209,7 @@ export class CinematicCamera {
   private lastCameraPosition: Vec3 | null = null;
   private lastCameraMovement: number = Date.now();
   private consecutiveStuckChecks: number = 0;
+  private stuckLogged: boolean = false; // Only log stuck once per episode
   
   // Target tracking
   private targetAgents: Map<string, AgentActivity> = new Map();
@@ -249,6 +264,9 @@ export class CinematicCamera {
   // Anti-AFK state
   private lastSpectateRefresh: number = 0;
   
+  // LOS check cooldown
+  private lastLosCheckTime: number = 0;
+  
   // Event tracking
   private currentEvent: { type: string; agent: string; startTime: number } | null = null;
   
@@ -283,6 +301,8 @@ export class CinematicCamera {
         
         activity.position = newPos;
         activity.velocity = player.entity.velocity?.clone() || null;
+        activity.lastSeen = Date.now(); // Track when we last saw this agent
+        activity.entityLostLogged = false; // Reset flag when we see entity again
         
         // Detect movement
         if (prevPos) {
@@ -296,6 +316,10 @@ export class CinematicCamera {
         } else {
           activity.isMoving = false;
         }
+      } else if (activity.position) {
+        // Entity not loaded but we have a last known position
+        // The stuck recovery will handle teleporting to the player
+        // Don't spam logs - just silently use last known position
       }
     }
     
@@ -633,34 +657,88 @@ export class CinematicCamera {
   }
 
   /**
-   * Find a valid camera position with line of sight - works underground
+   * Check if a position is underground (below threshold or surrounded by blocks)
+   */
+  private isUnderground(pos: Vec3): boolean {
+    if (!this.bot) return false;
+    
+    // Y level check
+    if (pos.y < CAMERA_SETTINGS.UNDERGROUND.Y_THRESHOLD) {
+      return true;
+    }
+    
+    // Check if surrounded by blocks (cave detection)
+    const checkPositions = [
+      pos.offset(0, 3, 0),   // Above
+      pos.offset(3, 0, 0),   // East
+      pos.offset(-3, 0, 0),  // West
+      pos.offset(0, 0, 3),   // South
+      pos.offset(0, 0, -3),  // North
+    ];
+    
+    let blockedCount = 0;
+    for (const checkPos of checkPositions) {
+      const block = this.bot.blockAt(checkPos);
+      if (block && block.boundingBox === 'block') {
+        blockedCount++;
+      }
+    }
+    
+    // If 3+ directions blocked, we're probably in a cave
+    return blockedCount >= 3;
+  }
+
+  /**
+   * Find a valid camera position with line of sight - IMPROVED for underground/caves
    */
   private findValidCameraPosition(targetPos: Vec3, idealPos: Vec3): Vec3 {
+    const isUnderground = this.isUnderground(targetPos);
+    
+    // Adjust parameters for underground filming
+    let { distance, heightOffset } = this.getTransitionedShotParams();
+    if (isUnderground && CAMERA_SETTINGS.UNDERGROUND.USE_CLOSE_SHOTS) {
+      distance *= CAMERA_SETTINGS.UNDERGROUND.CAVE_DISTANCE_MULT;
+      heightOffset *= CAMERA_SETTINGS.UNDERGROUND.CAVE_HEIGHT_MULT;
+      // Recalculate ideal position with cave parameters
+      idealPos = targetPos.offset(
+        Math.sin(this.orbitAngle) * distance,
+        heightOffset,
+        Math.cos(this.orbitAngle) * distance
+      );
+    }
+    
     // Check if ideal position works
     if (this.hasLineOfSight(idealPos, targetPos) && this.isPositionClear(idealPos)) {
       return idealPos;
     }
     
-    // Try alternative angles at multiple distances and heights
-    const { distance, heightOffset } = this.getTransitionedShotParams();
-    
-    // Alternative angles to try
+    // Alternative angles to try (more options for underground)
     const alternativeAngles = [
       this.orbitAngle,
+      this.orbitAngle + Math.PI / 6,
+      this.orbitAngle - Math.PI / 6,
       this.orbitAngle + Math.PI / 4,
       this.orbitAngle - Math.PI / 4,
+      this.orbitAngle + Math.PI / 3,
+      this.orbitAngle - Math.PI / 3,
       this.orbitAngle + Math.PI / 2,
       this.orbitAngle - Math.PI / 2,
+      this.orbitAngle + 2 * Math.PI / 3,
+      this.orbitAngle - 2 * Math.PI / 3,
       this.orbitAngle + 3 * Math.PI / 4,
       this.orbitAngle - 3 * Math.PI / 4,
       this.orbitAngle + Math.PI,
     ];
     
-    // Try progressively closer distances (helpful in tight underground spaces)
-    const distanceMultipliers = [1.0, 0.75, 0.5, 0.35];
+    // Try progressively closer distances (more aggressive for underground)
+    const distanceMultipliers = isUnderground 
+      ? [1.0, 0.7, 0.5, 0.35, 0.25, 0.15] 
+      : [1.0, 0.75, 0.5, 0.35];
     
-    // Try different heights (underground may have low ceilings)
-    const heightOffsets = [heightOffset, heightOffset * 0.5, 0.5, heightOffset * 0.25];
+    // Try different heights (lower options for caves with low ceilings)
+    const heightOffsets = isUnderground
+      ? [heightOffset, heightOffset * 0.5, 0.3, 0, -0.3, heightOffset * 0.25]
+      : [heightOffset, heightOffset * 0.5, 0.5, heightOffset * 0.25];
     
     // Try combinations of angle, distance, and height
     for (const distMult of distanceMultipliers) {
@@ -676,6 +754,23 @@ export class CinematicCamera {
             this.orbitAngle = angle;
             return altPos;
           }
+        }
+      }
+    }
+    
+    // Underground fallback: try directly beside target at same level
+    if (isUnderground) {
+      const sidePositions = [
+        targetPos.offset(1.5, 0.5, 0),
+        targetPos.offset(-1.5, 0.5, 0),
+        targetPos.offset(0, 0.5, 1.5),
+        targetPos.offset(0, 0.5, -1.5),
+        targetPos.offset(1, 0, 1),
+        targetPos.offset(-1, 0, -1),
+      ];
+      for (const sidePos of sidePositions) {
+        if (this.hasLineOfSight(sidePos, targetPos) && this.isPositionClear(sidePos)) {
+          return sidePos;
         }
       }
     }
@@ -712,7 +807,42 @@ export class CinematicCamera {
   }
 
   /**
+   * Find an emergency camera position when all other options fail
+   * Tries many positions to ensure we can see the target
+   */
+  private findEmergencyCameraPosition(targetPos: Vec3): Vec3 {
+    if (!this.bot) return targetPos.offset(0, 2, 0);
+    
+    // Try positions in a sphere around the target
+    const distances = [1.5, 2, 2.5, 3, 1, 0.8];
+    const heights = [1, 1.5, 2, 0.5, 2.5, 0];
+    const angles = [0, Math.PI/4, Math.PI/2, 3*Math.PI/4, Math.PI, -3*Math.PI/4, -Math.PI/2, -Math.PI/4];
+    
+    for (const dist of distances) {
+      for (const height of heights) {
+        for (const angle of angles) {
+          const testPos = targetPos.offset(
+            Math.sin(angle) * dist,
+            height,
+            Math.cos(angle) * dist
+          );
+          
+          // Check if this position has LOS and is clear
+          if (this.isPositionClear(testPos) && this.hasLineOfSight(testPos, targetPos)) {
+            return testPos;
+          }
+        }
+      }
+    }
+    
+    // Absolute fallback: directly above target
+    return targetPos.offset(0, 2.5, 0);
+  }
+
+  /**
    * Teleport camera to position with look angles
+   * In spectator mode, we MUST use /tp to move - there's no other way
+   * Frequent small teleports = smooth motion for spectators
    */
   private teleportCamera(pos: Vec3): void {
     if (!this.bot) return;
@@ -720,14 +850,17 @@ export class CinematicCamera {
     const now = Date.now();
     const timeSinceLastTeleport = now - this.lastTeleportTime;
     
-    // Rate limit teleports to prevent server spam
-    if (timeSinceLastTeleport < 30) return;
+    // Rate limit teleports - 40ms (25 fps) for smooth camera motion
+    if (timeSinceLastTeleport < 40) return;
     
     // Convert radians to degrees for Minecraft
     const yawDeg = (this.currentYaw * 180 / Math.PI);
     const pitchDeg = (this.currentPitch * 180 / Math.PI);
     
-    this.bot.chat(`/tp ${this.bot.username} ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} ${pos.z.toFixed(2)} ${yawDeg.toFixed(1)} ${pitchDeg.toFixed(1)}`);
+    // Always teleport with position and rotation
+    // Use @s instead of username to ensure it works
+    this.bot.chat(`/tp @s ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} ${pos.z.toFixed(2)} ${yawDeg.toFixed(1)} ${pitchDeg.toFixed(1)}`);
+    
     this.lastTeleportTime = now;
   }
 
@@ -772,10 +905,34 @@ export class CinematicCamera {
     }
     
     const target = this.currentTarget ? this.targetAgents.get(this.currentTarget) : null;
+    
+    // If no position data, try to get from player entity directly
+    if (this.currentTarget && (!target?.position)) {
+      const player = this.bot?.players[this.currentTarget];
+      if (player?.entity?.position) {
+        // Got position from player entity - use it
+        if (target) {
+          target.position = player.entity.position.clone();
+          target.lastSeen = Date.now();
+        }
+      } else {
+        // No entity data available - teleport to world spawn to load chunks
+        // Then try again next frame
+        const timeSinceLastTp = Date.now() - this.lastTeleportTime;
+        if (timeSinceLastTp > 3000) {
+          this.log(`📍 No position for ${this.currentTarget} - teleporting to search`);
+          // Try teleporting to the player directly (server will place us nearby)
+          this.bot?.chat(`/tp @s ${this.currentTarget}`);
+          this.lastTeleportTime = Date.now();
+        }
+        return;
+      }
+    }
+    
     if (!target?.position) return;
     
-    // SKIP underground check - it was causing camera to get stuck
-    // Just follow the target wherever they go
+    // Check if target is underground - use different settings
+    const targetIsUnderground = this.isUnderground(target.position);
     
     // Initialize camera if not done yet (may fail first few frames until position is synced)
     if (!this.cameraInitialized && this.currentTarget) {
@@ -784,6 +941,11 @@ export class CinematicCamera {
     
     // Get shot parameters (with transition interpolation)
     const { distance, heightOffset } = this.getTransitionedShotParams();
+    
+    // Use faster follow speed underground
+    const followSpeed = targetIsUnderground 
+      ? CAMERA_SETTINGS.UNDERGROUND.FOLLOW_SPEED 
+      : CAMERA_SETTINGS.FOLLOW_BEHIND_SPEED;
     
     // ALWAYS FOLLOW BEHIND: Use agent's facing direction (yaw) to position camera
     // Get the agent's yaw from the bot.players data
@@ -797,8 +959,8 @@ export class CinematicCamera {
       // Normalize angle difference
       while (diff > Math.PI) diff -= 2 * Math.PI;
       while (diff < -Math.PI) diff += 2 * Math.PI;
-      // Fast catch-up to stay directly behind
-      this.orbitAngle += diff * CAMERA_SETTINGS.FOLLOW_BEHIND_SPEED;
+      // Use faster follow speed underground
+      this.orbitAngle += diff * followSpeed;
     } else if (target.isMoving && target.velocity && target.velocity.norm() > 0.05) {
       // Fallback: When target is moving, position camera behind based on movement
       const moveAngle = Math.atan2(target.velocity.x, target.velocity.z);
@@ -806,7 +968,7 @@ export class CinematicCamera {
       let diff = targetOrbit - this.orbitAngle;
       while (diff > Math.PI) diff -= 2 * Math.PI;
       while (diff < -Math.PI) diff += 2 * Math.PI;
-      this.orbitAngle += diff * CAMERA_SETTINGS.FOLLOW_BEHIND_SPEED;
+      this.orbitAngle += diff * followSpeed;
     }
     // No else case - camera stays at current angle when agent is stationary without entity data
     
@@ -820,34 +982,75 @@ export class CinematicCamera {
     // Find valid position with line of sight
     const validPos = this.findValidCameraPosition(target.position, idealPos);
     
-    // Check for large distance (teleport lag catch-up)
+    // Only check LOS periodically to avoid stuttering (every 2 seconds max)
+    const timeSinceLastLosCheck = now - (this.lastLosCheckTime || 0);
+    if (CAMERA_SETTINGS.FORCE_LOS_CHECK && timeSinceLastLosCheck > 2000) {
+      this.lastLosCheckTime = now;
+      const currentLOS = this.hasLineOfSight(this.springState.position, target.position);
+      if (!currentLOS && CAMERA_SETTINGS.LOS_FAIL_TELEPORT) {
+        // Lost sight of agent! Force immediate reposition
+        this.log(`📍 LOS blocked - repositioning camera`);
+        this.springState.position = validPos.clone();
+        this.springState.velocity = new Vec3(0, 0, 0);
+        // Always teleport immediately when view is blocked
+        this.teleportCamera(validPos);
+        this.lastCameraMovement = now;
+      }
+    }
+    
+    // Skip proactive LOS check when FORCE_LOS_CHECK is disabled (reduces spam)
+    // Only do emergency repositioning when settings allow it
+    if (CAMERA_SETTINGS.FORCE_LOS_CHECK) {
+      const futureLOS = this.hasLineOfSight(validPos, target.position);
+      if (!futureLOS) {
+        // Even the calculated position is blocked, find a better one
+        const emergencyPos = this.findEmergencyCameraPosition(target.position);
+        this.springState.position = emergencyPos.clone();
+        this.springState.velocity = new Vec3(0, 0, 0);
+        this.teleportCamera(emergencyPos);
+        this.lastCameraMovement = Date.now();
+      }
+    }
+    
+    // Check for large distance (teleport lag catch-up) - lower threshold for tight following
     const distToTarget = this.springState.position.distanceTo(validPos);
-    if (distToTarget > CAMERA_SETTINGS.MAX_TELEPORT_DISTANCE) {
+    const maxTeleportDist = targetIsUnderground ? 3 : CAMERA_SETTINGS.MAX_TELEPORT_DISTANCE;
+    if (distToTarget > maxTeleportDist) {
       // Force teleport to catch up
       this.springState.position = validPos.clone();
       this.springState.velocity = new Vec3(0, 0, 0);
+      this.teleportCamera(validPos);
     }
+    
+    // Use different spring settings underground (stiffer, faster response)
+    const springStiffness = targetIsUnderground 
+      ? CAMERA_SETTINGS.UNDERGROUND.SPRING_STIFFNESS 
+      : CAMERA_SETTINGS.SPRING_STIFFNESS;
+    const springDamping = targetIsUnderground 
+      ? CAMERA_SETTINGS.UNDERGROUND.SPRING_DAMPING 
+      : CAMERA_SETTINGS.SPRING_DAMPING;
     
     // Update spring physics for smooth position
     const springResult = this.updateSpringPhysics(
       this.springState.position,
       validPos,
       this.springState.velocity,
-      CAMERA_SETTINGS.SPRING_STIFFNESS,
-      CAMERA_SETTINGS.SPRING_DAMPING,
+      springStiffness,
+      springDamping,
       deltaTime
     );
     this.springState.position = springResult.position;
     this.springState.velocity = springResult.velocity;
     
-    // Calculate target look angles (always look at agent)
-    const targetLookPos = target.position.offset(0, 1.6, 0); // Eye level
+    // Calculate target look angles (always look at agent's body, not name tag)
+    const targetLookPos = target.position.offset(0, 1.0, 0); // Chest level - below name tag
     const lookAngles = this.calculateLookAngles(this.springState.position, targetLookPos);
     this.targetYaw = lookAngles.yaw;
     this.targetPitch = lookAngles.pitch;
     
-    // Lock-on mode: directly use calculated angles for immediate tracking
-    if (CAMERA_SETTINGS.LOCK_ON_TARGET) {
+    // Underground: use lock-on for instant tracking in tight spaces
+    // Above ground: use smooth spring rotation
+    if (CAMERA_SETTINGS.LOCK_ON_TARGET || targetIsUnderground) {
       this.currentYaw = this.targetYaw;
       this.currentPitch = this.targetPitch;
       this.yawSpring.velocity = 0;
@@ -878,11 +1081,35 @@ export class CinematicCamera {
       this.pitchSpring.velocity = pitchResult.velocity;
     }
     
-    // Only teleport if we've moved enough
-    if (distToTarget > CAMERA_SETTINGS.MIN_TELEPORT_DISTANCE) {
+    // Teleport to maintain agent visibility
+    // Only teleport when we've moved significantly (reduces jitter)
+    // Use lower threshold underground for tighter tracking
+    const minTeleportDist = targetIsUnderground 
+      ? CAMERA_SETTINGS.UNDERGROUND.MIN_TELEPORT_DISTANCE 
+      : CAMERA_SETTINGS.MIN_TELEPORT_DISTANCE;
+    if (distToTarget > minTeleportDist) {
       this.teleportCamera(this.springState.position);
       // Update movement tracking for stuck detection
       this.lastCameraMovement = Date.now();
+    }
+    
+    // Final safety check: if agent is VERY far away, force catch-up
+    // Lower threshold underground since caves are tight
+    const distToAgent = this.springState.position.distanceTo(target.position);
+
+    if (distToAgent > 40 || (targetIsUnderground && distToAgent > 10)) {
+      if (targetIsUnderground) {
+        // Underground: teleport directly to player, server handles collision
+        this.bot.chat(`/tp @s ${this.currentTarget}`);
+        setTimeout(() => {
+          if (this.bot) this.bot.chat(`/tp @s ~2 ~1 ~2`);
+        }, 100);
+      } else {
+        // Smoothly catch up - don't snap, just boost the spring
+        const catchUpPos = target.position.offset(0, 3, 4);
+        this.springState.position = catchUpPos.clone();
+        this.springState.velocity = new Vec3(0, 0, 0);
+      }
     }
   }
 
@@ -1004,8 +1231,8 @@ export class CinematicCamera {
     this.springState.position = pos.clone();
     this.springState.velocity = new Vec3(0, 0, 0);
     
-    // Calculate look angles toward target
-    const targetLookPos = target.position.offset(0, 1.6, 0);
+    // Calculate look angles toward target (chest level - below name tag)
+    const targetLookPos = target.position.offset(0, 1.0, 0);
     const lookAngles = this.calculateLookAngles(pos, targetLookPos);
     this.currentYaw = lookAngles.yaw;
     this.currentPitch = lookAngles.pitch;
@@ -1311,7 +1538,7 @@ export class CinematicCamera {
    * AGGRESSIVE mode - multiple overlapping systems to guarantee activity
    */
   private startAntiAfk(): void {
-    this.log('🔄 Anti-AFK system enabled (AGGRESSIVE MODE)');
+    this.log('🔄 Anti-AFK system enabled (SMOOTH MODE)');
     
     // 1. Primary anti-AFK action interval - arm swing and target check
     this.antiAfkInterval = setInterval(() => {
@@ -1321,14 +1548,8 @@ export class CinematicCamera {
         // Swing arm (invisible action but prevents AFK)
         this.bot.swingArm('right');
         
-        // Also swing left arm for extra activity
-        this.bot.swingArm('left');
-        
-        // Look around slightly to show activity
-        if (this.bot.entity) {
-          const yaw = this.bot.entity.yaw + (Math.random() - 0.5) * 0.1;
-          this.bot.look(yaw, this.bot.entity.pitch, false);
-        }
+        // DON'T use bot.look() - it fights with our smooth camera rotation
+        // The teleport commands already include rotation
         
         // If we have no target, try to find one
         if (!this.currentTarget || this.targetAgents.size === 0) {
@@ -1362,27 +1583,19 @@ export class CinematicCamera {
       }
     }, CAMERA_SETTINGS.ANTI_AFK.MOVEMENT_INTERVAL);
 
-    // 3. Spectate refresh interval - re-issue spectate command frequently
+    // 3. Spectate refresh interval - ensure camera stays in spectator mode
+    // NOTE: Camera does NOT spectate agents - it positions itself independently
+    // This allows OTHER players to spectate the camera bot
     this.spectateRefreshInterval = setInterval(() => {
       if (!this.bot || !this.isRunning) return;
       
       try {
-        const now = Date.now();
+        // Just ensure we're in spectator mode - don't spectate anyone
+        // This keeps camera as independent entity that others can spectate
+        this.bot.chat('/gamemode spectator');
         
-        // ALWAYS re-issue spectate/gamemode to prevent any disconnect
-        if (this.povMode && this.povTarget) {
-          this.bot.chat(`/spectate ${this.povTarget}`);
-          this.lastSpectateRefresh = now;
-          this.log(`🔄 Refreshed spectate on ${this.povTarget}`);
-        } else if (this.currentTarget) {
-          // Force spectator mode and look at target
-          this.bot.chat('/gamemode spectator');
-          // Also spectate the target directly for guaranteed following
-          this.bot.chat(`/spectate ${this.currentTarget}`);
-          this.log(`🔄 Force spectate ${this.currentTarget}`);
-        } else {
-          // No target - ensure spectator mode and find one
-          this.bot.chat('/gamemode spectator');
+        // If no target, find one
+        if (!this.currentTarget) {
           this.selectBestTarget();
         }
       } catch (e) {
@@ -1390,28 +1603,47 @@ export class CinematicCamera {
       }
     }, CAMERA_SETTINGS.ANTI_AFK.SPECTATE_REFRESH);
 
-    // 4. Teleport refresh interval - periodically teleport to target to maintain proximity
+    // 4. Teleport refresh interval - only teleport when truly stuck (not constantly)
+    // This is a gentler fallback than the stuck recovery system
     this.teleportRefreshInterval = setInterval(() => {
       if (!this.bot || !this.isRunning) return;
       
       try {
-        // Find current target and teleport near them
+        // Only teleport if we're stuck for a significant time
+        const timeSinceMove = Date.now() - this.lastCameraMovement;
+        if (timeSinceMove < 15000) {
+          // Camera is moving normally, don't force teleport
+          return;
+        }
+        
+        // Camera appears stuck after 15s - gentle recovery teleport
         if (this.currentTarget) {
           const targetBot = this.bot.players[this.currentTarget];
           if (targetBot && targetBot.entity) {
             const targetPos = targetBot.entity.position;
-            // Teleport behind and above target
-            const yaw = targetBot.entity.yaw || 0;
-            const offsetX = Math.sin(yaw) * 4;
-            const offsetZ = Math.cos(yaw) * 4;
-            const tpX = Math.floor(targetPos.x + offsetX);
-            const tpY = Math.floor(targetPos.y + 3);
-            const tpZ = Math.floor(targetPos.z + offsetZ);
-            this.bot.chat(`/tp @s ${tpX} ${tpY} ${tpZ}`);
-            this.log(`📍 Anti-AFK teleport to ${this.currentTarget}`);
+            // Only Y-level based underground check
+            const isUnderground = targetPos.y < CAMERA_SETTINGS.UNDERGROUND.Y_THRESHOLD;
+            
+            if (isUnderground) {
+              // Underground: teleport directly to player
+              this.bot.chat(`/tp @s ${this.currentTarget}`);
+              setTimeout(() => {
+                if (this.bot) this.bot.chat(`/tp @s ~2 ~0.5 ~2`);
+              }, 100);
+            } else {
+              // Surface: use offset position
+              const yaw = targetBot.entity.yaw || 0;
+              const offsetX = Math.sin(yaw) * 4;
+              const offsetZ = Math.cos(yaw) * 4;
+              const tpX = Math.floor(targetPos.x + offsetX);
+              const tpY = Math.floor(targetPos.y + 3);
+              const tpZ = Math.floor(targetPos.z + offsetZ);
+              this.bot.chat(`/tp @s ${tpX} ${tpY} ${tpZ}`);
+            }
+            // Don't log every teleport - too spammy
+            this.lastCameraMovement = Date.now();
           }
         } else {
-          // No target - try to find agents
           this.selectBestTarget();
         }
       } catch (e) {
@@ -1461,6 +1693,7 @@ export class CinematicCamera {
               // Camera is moving normally
               this.lastCameraMovement = now;
               this.consecutiveStuckChecks = 0;
+              this.stuckLogged = false; // Reset so we can log again if stuck later
             } else {
               // Camera hasn't moved
               this.consecutiveStuckChecks++;
@@ -1468,16 +1701,26 @@ export class CinematicCamera {
           }
           this.lastCameraPosition = currentPos.clone();
           
-          // Check if stuck for too long
+          // Check if stuck for too long (use settings, not hardcoded values)
           const timeSinceMove = now - this.lastCameraMovement;
-          if (timeSinceMove > CAMERA_SETTINGS.ANTI_AFK.STUCK_RECOVERY.MAX_IDLE_TIME || this.consecutiveStuckChecks >= 3) {
-            this.log('⚠️ Camera appears stuck! Attempting recovery...');
+          const maxIdleTime = CAMERA_SETTINGS.ANTI_AFK.STUCK_RECOVERY.MAX_IDLE_TIME || 30000;
+          const maxBlockedChecks = CAMERA_SETTINGS.ANTI_AFK.STUCK_RECOVERY.MAX_BLOCKED_CHECKS || 6;
+          
+          // Only trigger if BOTH conditions met: idle too long AND too many blocked checks
+          if (timeSinceMove > maxIdleTime && this.consecutiveStuckChecks >= maxBlockedChecks) {
+            // Only log once per stuck episode
+            if (!this.stuckLogged) {
+              this.log(`⚠️ Camera stuck! (idle: ${(timeSinceMove/1000).toFixed(1)}s, checks: ${this.consecutiveStuckChecks})`);
+              this.stuckLogged = true;
+            }
             
             // Exit POV mode if stuck there
             if (this.povMode) {
-              this.log('🔧 Exiting stuck POV mode');
               this.exitPovMode();
             }
+            
+            // Force spectator mode
+            this.bot.chat('/gamemode spectator');
             
             // Force re-discover agents
             this.syncPlayerPositions();
@@ -1490,19 +1733,35 @@ export class CinematicCamera {
             // Find a new target
             this.selectBestTarget();
             
-            // If we found a target, teleport to it
+            // If we found a target, teleport DIRECTLY to them (not offset)
             if (this.currentTarget) {
               const target = this.targetAgents.get(this.currentTarget);
               if (target?.position) {
-                this.log(`🔧 Recovered! Now following ${this.currentTarget}`);
+                // Check if underground (Y < 40 only, ignore cave detection for buildings)
+                const isUnderground = target.position.y < CAMERA_SETTINGS.UNDERGROUND.Y_THRESHOLD;
+                if (isUnderground) {
+                  // Underground: teleport DIRECTLY to player (let server handle it)
+                  this.bot.chat(`/tp @s ${this.currentTarget}`);
+                  // After direct teleport, offset slightly
+                  setTimeout(() => {
+                    if (this.bot && this.currentTarget) {
+                      this.bot.chat(`/tp @s ~2 ~1 ~2`);
+                    }
+                  }, 100);
+                } else {
+                  // Surface: teleport behind and above
+                  const tpPos = target.position.offset(0, 4, 4);
+                  this.bot.chat(`/tp @s ${tpPos.x.toFixed(0)} ${tpPos.y.toFixed(0)} ${tpPos.z.toFixed(0)}`);
+                  // Reset spring position to avoid weird interpolation
+                  this.springState.position = tpPos;
+                  this.springState.velocity = new Vec3(0, 0, 0);
+                }
+                
+                // Initialize for new target
                 this.initializeCameraPosition(this.currentTarget);
-                // Force teleport to target
-                const tpPos = target.position.offset(0, 5, 5);
-                this.bot.chat(`/tp @s ${tpPos.x.toFixed(0)} ${tpPos.y.toFixed(0)} ${tpPos.z.toFixed(0)}`);
               }
             } else {
               // No agents found - try to find any player
-              this.log('🔧 No registered agents found, scanning for players...');
               for (const playerName of Object.keys(this.bot.players)) {
                 if (playerName !== this.bot.username) {
                   this.registerAgent(playerName);
@@ -1514,9 +1773,18 @@ export class CinematicCamera {
             // Reset stuck detection
             this.lastCameraMovement = now;
             this.consecutiveStuckChecks = 0;
+            this.stuckLogged = false; // Allow logging again next time
             
-            // Force a shot change
-            this.changeShot();
+            // Force a shot change to wide/overhead for better visibility
+            if (this.currentTarget) {
+              const target = this.targetAgents.get(this.currentTarget);
+              if (target?.position && target.position.y < CAMERA_SETTINGS.UNDERGROUND.Y_THRESHOLD) {
+                // Underground: use closer shots
+                this.transitionToShot('closeBehind');
+              } else {
+                this.changeShot();
+              }
+            }
           }
         } catch (e) {
           this.logError(`Stuck recovery error: ${e}`);

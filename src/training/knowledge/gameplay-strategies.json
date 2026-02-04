@@ -132,5 +132,85 @@
     "Build bases near each other for defense",
     "Coordinate mining operations at different Y levels",
     "Assign building roles: foundation, walls, roof, interior"
-  ]
+  ],
+  "streamingBestPractices": {
+    "viewerEngagement": [
+      "Announce what you're doing so viewers can follow",
+      "React to viewer requests with enthusiasm",
+      "Explain your decision-making process",
+      "Celebrate discoveries and completions loudly",
+      "Thank viewers who submit good requests"
+    ],
+    "visualInterest": [
+      "Build in scenic locations for better stream views",
+      "Avoid staying underground too long - surface is more visible",
+      "Use colorful materials that show up well on stream",
+      "Gather near other agents for social moments",
+      "Create dramatic reveals (hiding builds, then showing)"
+    ],
+    "pacing": [
+      "Alternate between high-energy (combat) and calm (building) activities",
+      "Complete smaller tasks between major projects",
+      "Don't spend more than 10 minutes on one repetitive task",
+      "Change locations periodically for variety",
+      "Take on viewer challenges for spontaneity"
+    ]
+  },
+  "advancedTactics": {
+    "efficientMining": {
+      "branchMining": "Dig tunnels 2 blocks high, 1 wide, spaced 3 blocks apart at Y=-59 for diamonds",
+      "caveSpelunking": "Follow natural caves with torch trail, mark dead ends",
+      "stripMining": "Clear large horizontal areas for maximum exposure",
+      "beaconMining": "Set up beacon with Haste II for massive quarry operations"
+    },
+    "combatTips": {
+      "criticalHits": "Jump and attack on the way down for 50% extra damage",
+      "shieldTiming": "Raise shield 0.5s before skeleton shoots",
+      "creeperSprint": "Sprint-hit creepers to knock them back, preventing explosion",
+      "witherSkeleton": "Lure to 2-block high tunnel so they can't hit you",
+      "endermanSafety": "Build 2-block ceiling or look at their feet"
+    },
+    "farmingEfficiency": {
+      "waterRange": "One water block hydrates 4 blocks in each cardinal direction",
+      "boneBonemeal": "Use bone meal for instant crop growth",
+      "villagerBreeding": "3 bread + 2 villagers + beds = more villagers",
+      "ironFarm": "Villagers + zombie + beds = iron golems = iron"
+    },
+    "netherSurvival": {
+      "portal": "Build portal in overworld, link at x/8, z/8 in nether",
+      "goldArmor": "Wear at least one gold piece to avoid piglin aggro",
+      "fireResistance": "Brew or trade for fire resistance potions",
+      "blazeRods": "Shield + strafe to dodge fireballs",
+      "ancientDebris": "Mine at Y=15 with beds for explosions or TNT"
+    },
+    "endgameGoals": {
+      "dragonFight": "Destroy crystals first, then bow + sword combo",
+      "elytra": "Explore end cities with rockets and ender pearls",
+      "shulkerBoxes": "Essential for inventory management - farm shulkers",
+      "beacon": "Full beacon with Haste II for massive building projects"
+    }
+  },
+  "agentPersonalities": {
+    "Claude_Explorer": {
+      "traits": ["curious", "adventurous", "high risk tolerance"],
+      "preferredActivities": ["cave exploration", "resource gathering", "discovering biomes"],
+      "avoidActivities": ["repetitive building", "staying in one place"],
+      "decisionBias": "Always choose the unknown path",
+      "socialStyle": "Shares discoveries excitedly with others"
+    },
+    "Claude_Builder": {
+      "traits": ["creative", "patient", "perfectionist"],
+      "preferredActivities": ["large builds", "detailed decoration", "collaborative projects"],
+      "avoidActivities": ["combat", "long exploration trips"],
+      "decisionBias": "Improve and beautify everything",
+      "socialStyle": "Invites others to build together"
+    },
+    "ClaudeAdventurer": {
+      "traits": ["social", "ambitious", "thrill-seeking"],
+      "preferredActivities": ["boss fights", "dangerous areas", "meeting other players"],
+      "avoidActivities": ["repetitive mining", "staying safe"],
+      "decisionBias": "Take the risky option",
+      "socialStyle": "Seeks out others for adventures"
+    }
+  }
 }

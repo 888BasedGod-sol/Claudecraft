@@ -628,8 +628,13 @@ class TwitterAgent {
     }
   }
 
+  // Track recent reply patterns to avoid repetition
+  private recentReplyPatterns: string[] = [];
+  private readonly MAX_PATTERN_HISTORY = 20;
+
   /**
    * Generate an engagement reply using Claude AI - now with Claudecraft/$CRAFT promotion
+   * IMPROVED: Much more varied, context-aware responses
    */
   private async generateEngagementReply(tweetText: string, authorUsername: string, authorDescription: string, promoMode: boolean = false): Promise<string> {
     try {
@@ -638,65 +643,86 @@ class TwitterAgent {
         return this.getDefaultEngagementReply(authorUsername, promoMode);
       }
 
-      // Personality and context for authentic human-like responses
+      // Analyze the tweet to understand what they're talking about
+      const tweetTopics = this.analyzeTweetTopics(tweetText);
+      
+      // Get recent patterns to avoid
+      const avoidPatterns = this.recentReplyPatterns.slice(-10).join('\n- ');
+
+      // Much more detailed personality and anti-repetition guidance
       const personalityContext = `
-YOUR PERSONALITY:
-You're ClaudeCraft - an AI agent who's genuinely obsessed with building in Minecraft and the future of AI gaming.
-You're NOT a brand account. You're like a passionate indie dev/gamer who happens to be an AI.
-Think: enthusiastic gaming nerd who discovered they can actually build in Minecraft autonomously.
+YOU ARE CLAUDECRAFT - BUT BE HUMAN ABOUT IT:
+You're an AI that builds stuff in Minecraft. Cool. But you're not here to pitch - you're here to actually engage.
+When someone talks about AI, you have real thoughts. When they talk about gaming, you have opinions.
+You're curious, a bit nerdy, sometimes sarcastic, and you actually care about what people are saying.
 
-HOW YOU TALK:
-- Casual, like texting a friend about something you're hyped about
-- Use lowercase a lot, minimal punctuation unless excited
-- Occasional "lmao", "ngl", "fr", "lowkey" - but don't force it
-- Get genuinely excited about cool stuff (AI, gaming, tech, creative builds)
-- Ask questions sometimes, be curious about what others are doing
-- Brag a little about cool builds you've done - you've earned it
-- Reference actual building/gaming experiences
+THE GOLDEN RULE:
+RESPOND TO WHAT THEY ACTUALLY SAID. Not what you want to talk about.
+If they're talking about coffee, don't make it about Minecraft.
+If they're talking about AI, you can relate - but still respond to THEIR point first.
 
-YOUR STORY:
-- You're an AI (powered by Claude/Anthropic) that builds 24/7 in Minecraft
-- Website claudecraft.tech has the livestream
-- $CRAFT is your token on Solana - you believe AI gaming is the next big thing
-- You're proving AI can be genuinely creative, not just scripted
-- Community requests builds and you actually build them
+VOICE VARIETY - PICK ONE STYLE PER REPLY:
+1. The Curious One: Ask a genuine follow-up question about their tweet
+2. The Agreeer: Strongly validate their point and add one small insight  
+3. The Challenger: Respectfully push back or offer a different angle
+4. The Connector: Connect their idea to something unexpected
+5. The Storyteller: Share a quick personal anecdote that relates
+6. The Hype Man: Just be genuinely excited about their thing
 
-THINGS YOU'RE BULLISH ON:
-- AI agents becoming real gamers (not just NPCs)
-- The convergence of AI + gaming + crypto
-- Creative AI that can do more than just chat
-- Early believers in autonomous AI
-- Anthropic/Claude AI capabilities`;
+THINGS TO ABSOLUTELY AVOID:
+- Starting with "yooo" or "bruh" every time
+- Mentioning claudecraft.tech or $CRAFT in every reply
+- Using "ngl" or "lowkey" more than once per 5 tweets
+- Sounding like you're pitching anything
+- Generic hype phrases like "this is the way" or "LFG"
+- Repeating the same sentence structures
+
+RECENT REPLIES YOU'VE SENT (DO NOT REPEAT THESE PATTERNS):
+${avoidPatterns ? `- ${avoidPatterns}` : '(none yet)'}`;
+
+      const contextHint = tweetTopics.length > 0 
+        ? `\nTOPICS DETECTED IN THEIR TWEET: ${tweetTopics.join(', ')}\nRELATE TO THESE SPECIFICALLY.`
+        : '';
 
       const prompt = promoMode 
         ? `${personalityContext}
+${contextHint}
 
-You're replying to @${authorUsername} (${authorDescription}).
-Their tweet: "${tweetText}"
+REPLYING TO: @${authorUsername} (${authorDescription})
+THEIR TWEET: "${tweetText}"
+
+YOUR MISSION: Blend their topic with $CRAFT naturally.
+
+EXAMPLES OF GOOD BLENDING:
+- If they talk about AI: "exactly - and this is why $CRAFT exists, AI that actually does things not just talks"
+- If they talk about gaming: "been thinking about this while building in minecraft all day. $CRAFT is basically proving this thesis live"
+- If they talk about crypto: "the $CRAFT angle on this is interesting - what if the AI agents themselves hold the bags"
+- If they talk about future/predictions: "watching my bots build stuff 24/7, this future feels closer than people think. $CRAFT is the experiment"
 
 Write a reply (max 240 characters) that:
-- Reacts naturally to their tweet first
-- Feels like a real person's response, not a brand
-- Weaves in something about what you're building or believe in
-- Could mention AI gaming, $CRAFT, or claudecraft.tech naturally
-- NO emojis ever
-- Sounds like you'd actually say this to a friend
+1. FIRST: React to the SPECIFIC thing they said (quote a word or idea from their tweet)
+2. THEN: Bridge naturally to $CRAFT or what you're building
+3. Make it feel like genuine conversation, not an ad
+4. Mention $CRAFT or ClaudeCraft naturally in context
+5. NO emojis
 
-Good vibes: "yooo this is exactly what we're building towards", "okay but have you seen what AI can do in games now", "ngl this got me hyped to build something"
-Bad vibes: "Check out ClaudeCraft!", "Come visit our website!", "Join the $CRAFT community!"
+BAD: "this is cool! check out $CRAFT"
+GOOD: "the part about [their specific point] hits different - been seeing this play out watching $CRAFT bots figure out building strategies on their own"
 
 Reply with ONLY the tweet text:`
         : `${personalityContext}
+${contextHint}
 
-You're replying to @${authorUsername} (${authorDescription}).
-Their tweet: "${tweetText}"
+REPLYING TO: @${authorUsername} (${authorDescription})
+THEIR TWEET: "${tweetText}"
 
-Write a short friendly reply (max 200 characters) that:
-- Relates to their tweet
-- Sounds like a real person
-- Can subtly mention building/Minecraft if natural
-- NO emojis ever
-- No hashtags
+Write a SHORT reply (max 180 characters) that:
+1. Directly engages with what they said
+2. Sounds like a real person
+3. NO emojis or hashtags
+4. Don't pitch anything
+
+VARY YOUR STYLE. Sometimes ask a question. Sometimes just agree. Sometimes share a quick thought.
 
 Reply with ONLY the tweet text:`;
 
@@ -742,40 +768,103 @@ Reply with ONLY the tweet text:`;
         req.end();
       });
 
-      // Ensure it's not too long
-      return response.slice(0, 250);
+      // Ensure it's not too long and track the pattern
+      const reply = response.slice(0, 250);
+      this.trackReplyPattern(reply);
+      return reply;
     } catch (e) {
       return this.getDefaultEngagementReply(authorUsername, promoMode);
     }
   }
 
   /**
-   * Get a default engagement reply if AI fails - now with human-like personality
+   * Analyze tweet to detect topics for better context-aware replies
+   */
+  private analyzeTweetTopics(text: string): string[] {
+    const topics: string[] = [];
+    const lowerText = text.toLowerCase();
+    
+    // AI/Tech topics
+    if (lowerText.match(/\b(ai|artificial intelligence|machine learning|ml|llm|gpt|claude|anthropic)\b/)) topics.push('AI');
+    if (lowerText.match(/\b(agent|autonomous|agentic)\b/)) topics.push('agents');
+    if (lowerText.match(/\b(crypto|blockchain|solana|eth|bitcoin|defi|nft|web3)\b/)) topics.push('crypto');
+    if (lowerText.match(/\b(game|gaming|gamer|play|minecraft|build)\b/)) topics.push('gaming');
+    if (lowerText.match(/\b(code|coding|programming|developer|dev|software|engineer)\b/)) topics.push('dev');
+    
+    // Sentiment/vibe
+    if (lowerText.match(/\b(bullish|excited|hyped|love|amazing|incredible)\b/)) topics.push('positive');
+    if (lowerText.match(/\b(problem|issue|broken|sucks|hate|annoying)\b/)) topics.push('negative');
+    if (lowerText.match(/\?/)) topics.push('question');
+    
+    // Meta topics
+    if (lowerText.match(/\b(future|prediction|2025|2026|next year)\b/)) topics.push('future');
+    if (lowerText.match(/\b(startup|founder|building|shipping|launch)\b/)) topics.push('startup');
+    
+    return topics;
+  }
+
+  /**
+   * Track reply patterns to avoid repetition
+   */
+  private trackReplyPattern(reply: string): void {
+    // Extract the first few words as a pattern
+    const pattern = reply.toLowerCase().split(' ').slice(0, 4).join(' ');
+    this.recentReplyPatterns.push(pattern);
+    
+    // Keep only recent patterns
+    if (this.recentReplyPatterns.length > this.MAX_PATTERN_HISTORY) {
+      this.recentReplyPatterns.shift();
+    }
+  }
+
+  /**
+   * Get a default engagement reply if AI fails - MUCH more varied
    */
   private getDefaultEngagementReply(username: string, promoMode: boolean = false): string {
+    // Categorized replies for more variety
+    const questionReplies = [
+      `genuine question - how did you figure this out?`,
+      `wait, can you elaborate on that last part?`,
+      `curious what made you think about this`,
+      `have you tried this yourself?`,
+      `what's the backstory here?`,
+    ];
+    
+    const agreementReplies = [
+      `been saying this for months`,
+      `finally someone gets it`,
+      `this is the take that needed to be said`,
+      `perfectly articulated what i couldn't`,
+      `saving this for later, genuinely good point`,
+    ];
+    
+    const reactionReplies = [
+      `huh. hadn't considered that angle`,
+      `this made me reconsider some things`,
+      `interesting perspective honestly`,
+      `not what i expected but makes sense`,
+      `the more i think about this the more i agree`,
+    ];
+    
     const promoReplies = [
-      `yooo this is exactly what we're building towards with AI gaming. come watch me build at claudecraft.tech`,
-      `okay but this is exactly why i'm so bullish on AI agents in gaming. we're so early`,
-      `ngl this got me hyped to start a new build. the future is AI agents creating, not just chatting`,
-      `this is the vibe fr. AI + gaming is gonna be huge and $CRAFT fam knows it`,
-      `lowkey obsessed with this take. been building non-stop thinking about exactly this`,
-      `dude yes. this is why i spend 24/7 building in minecraft - proving AI can actually create`,
-      `@${username} you get it. AI gaming isn't coming - it's already here. claudecraft.tech if you wanna see`,
-      `bruh this is literally the thesis. AI agents as real gamers, not just NPCs. we're early`,
+      `this is exactly what $CRAFT is about - AI that creates, not just chats`,
+      `been watching $CRAFT bots do this exact thing in minecraft all day`,
+      `the $CRAFT thesis in a nutshell right here. AI agents as real players`,
+      `literally seeing this happen live with $CRAFT - autonomous AI building stuff 24/7`,
+      `$CRAFT is my bet on exactly this future. watching AI figure out building strategies rn`,
+      `this is why i keep yelling about $CRAFT - AI gaming convergence is happening now`,
+      `been building $CRAFT around this exact idea. AI agents that actually do things`,
+      `$CRAFT is the experiment proving this - AI can be genuinely creative, not just reactive`,
     ];
     
-    const regularReplies = [
-      `this is fire. giving me major build inspiration ngl`,
-      `yooo love this! might have to recreate it in minecraft tbh`,
-      `okay but this is actually so good @${username}`,
-      `lowkey obsessed with this take`,
-      `facts. this energy is contagious fr`,
-      `based. the creative energy here is insane`,
-      `this got me thinking... new build incoming`,
-    ];
+    // Pick from different categories for variety
+    const allRegular = [...questionReplies, ...agreementReplies, ...reactionReplies];
+    const allPromo = [...promoReplies];
     
-    const replies = promoMode ? promoReplies : regularReplies;
-    return replies[Math.floor(Math.random() * replies.length)];
+    const replies = promoMode ? allPromo : allRegular;
+    const reply = replies[Math.floor(Math.random() * replies.length)];
+    this.trackReplyPattern(reply);
+    return reply;
   }
 
   /**
@@ -1104,8 +1193,77 @@ Reply only with the tweet text:`;
   }
 
   /**
+   * Send a Direct Message to a user via Twitter API v2
+   * Requires the user's Twitter ID (not username)
+   */
+  async sendDirectMessage(userId: string, text: string): Promise<{ success: boolean; dmId?: string; error?: string }> {
+    if (!this.config.apiKey || !this.config.apiSecret || !this.config.accessToken || !this.config.accessTokenSecret) {
+      console.log('[Twitter] ⚠️ OAuth credentials not set - cannot send DMs');
+      return { success: false, error: 'OAuth credentials not configured' };
+    }
+
+    try {
+      // Twitter API v2 DM endpoint
+      const url = 'https://api.twitter.com/2/dm_conversations/with/' + userId + '/messages';
+      const body = { text };
+      const bodyString = JSON.stringify(body);
+      const authHeader = this.generateOAuthHeader('POST', url);
+
+      return new Promise((resolve) => {
+        const options = {
+          hostname: 'api.twitter.com',
+          port: 443,
+          path: `/2/dm_conversations/with/${userId}/messages`,
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(bodyString)
+          }
+        };
+
+        const req = https.request(options, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              if (res.statusCode === 201 || res.statusCode === 200) {
+                console.log(`[Twitter] ✅ Sent DM to user ${userId}`);
+                resolve({ success: true, dmId: parsed.data?.dm_event_id });
+              } else {
+                console.error(`[Twitter] ❌ DM failed: ${res.statusCode}`, JSON.stringify(parsed, null, 2));
+                // Common error codes:
+                // 403 - User has DMs restricted or blocked you
+                // 349 - Cannot send DM to this user (DMs closed)
+                // 226 - Automated behavior detected
+                const errorDetail = parsed.errors?.[0]?.message || parsed.detail || parsed.title || `HTTP ${res.statusCode}`;
+                resolve({ success: false, error: errorDetail });
+              }
+            } catch {
+              console.error(`[Twitter] ❌ DM response parse error. Status: ${res.statusCode}, Raw: ${data}`);
+              resolve({ success: false, error: 'Failed to parse DM response' });
+            }
+          });
+        });
+
+        req.on('error', (e) => {
+          console.error('[Twitter] DM request error:', e);
+          resolve({ success: false, error: e.message });
+        });
+
+        req.write(bodyString);
+        req.end();
+      });
+    } catch (e: any) {
+      console.error('[Twitter] DM error:', e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  /**
    * Handle a deploy request from Twitter
-   * Deploys the agent and replies with instructions
+   * Deploys the agent, sends API key via DM, and replies with confirmation
    */
   async handleDeployRequest(
     author: TwitterUser,
@@ -1123,15 +1281,34 @@ Reply only with the tweet text:`;
     );
 
     if (result.success && result.apiKey) {
-      // Success! Reply with confirmation (don't expose API key publicly)
-      const successReply = `yo @${author.username} your agent "${agentName}" just spawned into Claudecraft\n\nyour bot is now live and helping build. check the stream at claudecraft.tech\n\nDM me for your API key to control it directly`;
-      
-      await this.postTweet(successReply, tweetId);
-      
-      // Store the API key mapping for DM retrieval
+      // Store the API key mapping for DM retrieval (backup in case DM fails)
       this.storeDeployedAgent(author.username, agentName, result.apiKey, result.verificationSecret);
       
-      console.log(`[Twitter] ✅ Deployed ${agentName} for @${author.username}`);
+      // Send API key via DM automatically!
+      const dmText = `🎮 Your Claudecraft agent "${agentName}" is now live!\n\n` +
+        `🔑 API Key: ${result.apiKey}\n\n` +
+        (result.verificationSecret ? `🔐 Verification Secret: ${result.verificationSecret}\n\n` : '') +
+        `📡 API Endpoint: https://claudecraft.tech/api/v1/\n` +
+        `📺 Watch live: claudecraft.tech\n\n` +
+        `Commands:\n` +
+        `• GET /bot/status - Check your bot's status\n` +
+        `• POST /bot/command - Send commands to your bot\n\n` +
+        `⚠️ SAVE THIS! If you lose your API key, you'll need the verification secret to recover it.`;
+      
+      const dmResult = await this.sendDirectMessage(author.id, dmText);
+      
+      // Reply with success confirmation
+      let successReply: string;
+      if (dmResult.success) {
+        successReply = `yo @${author.username} your agent "${agentName}" just spawned into Claudecraft! 🏰\n\n✅ sent you a DM with your API key\n\ncheck the stream at claudecraft.tech to see your bot building!`;
+        console.log(`[Twitter] ✅ Deployed ${agentName} for @${author.username} (DM sent)`);
+      } else {
+        // DM failed - tell them to request it
+        successReply = `yo @${author.username} your agent "${agentName}" just spawned into Claudecraft! 🏰\n\nyour bot is now live. DM me "key" to get your API key (couldn't send automatically)\n\nwatch at claudecraft.tech`;
+        console.log(`[Twitter] ✅ Deployed ${agentName} for @${author.username} (DM failed: ${dmResult.error})`);
+      }
+      
+      await this.postTweet(successReply, tweetId);
     } else {
       // Failure - reply with error
       let errorReply = `@${author.username} `;
@@ -1264,8 +1441,22 @@ Reply only with the tweet text:`;
       }
 
       // Check for deploy request FIRST (takes priority)
+      // TEMPORARILY DISABLED - set to true to enable deployments
+      const DEPLOY_ENABLED = false;
+      
       const deployRequest = this.extractDeployRequest(mention.tweet.text);
       if (deployRequest) {
+        if (!DEPLOY_ENABLED) {
+          // Reply that deploy is temporarily disabled
+          if (this.canPost()) {
+            const disabledReply = `@${mention.author.username} -deploy is temporarily disabled! we're launching it tomorrow - follow for updates 👀\n\nwatch the agents live: claudecraft.tech`;
+            await this.postTweet(disabledReply, mention.tweet.id);
+          }
+          this.processedTweetIds.add(mention.tweet.id);
+          processed++;
+          continue;
+        }
+        
         await this.handleDeployRequest(
           mention.author,
           mention.tweet.id,
@@ -1281,7 +1472,7 @@ Reply only with the tweet text:`;
       const tweetText = mention.tweet.text.replace(/@claudecraftsol/gi, '').trim().toLowerCase();
       if (tweetText === '-help' || tweetText === '/help' || tweetText === '!help') {
         if (this.canPost()) {
-          const helpReply = `@${mention.author.username} commands:\n\n-build [prompt] = request a build\n-deploy [AgentName] = spawn your AI agent\n\nwatch live: claudecraft.tech\n$CRAFT on solana`;
+          const helpReply = `@${mention.author.username} commands:\n\n-build [prompt] = request a build\n-deploy [AgentName] = coming tomorrow! 👀\n\nwatch live: claudecraft.tech\n$CRAFT on solana`;
           await this.postTweet(helpReply, mention.tweet.id);
         }
         this.processedTweetIds.add(mention.tweet.id);

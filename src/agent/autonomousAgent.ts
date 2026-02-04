@@ -160,6 +160,7 @@ export class AutonomousAgent {
   private decisionsThisSession: number = 0;
   private goalsCompletedThisSession: number = 0;
   private creativeMode: boolean = false;
+  private sculptorMode: boolean = false; // Specializes in fine details on existing builds
   
   // Option 3: Track failure patterns for learning
   private failurePatterns: FailurePattern[] = [];
@@ -267,10 +268,11 @@ ${tips.map((t: string) => `• ${t}`).join('\n')}
     return miningActions.length >= 3;
   }
 
-  constructor(name: string, personality?: Partial<AgentPersonality>, creativeMode: boolean = false) {
+  constructor(name: string, personality?: Partial<AgentPersonality>, creativeMode: boolean = false, sculptorMode: boolean = false) {
     this.name = name;
     this.sessionStartTime = Date.now();
     this.creativeMode = creativeMode;
+    this.sculptorMode = sculptorMode;
     
     // Default personality with some randomization for uniqueness
     this.personality = {
@@ -287,6 +289,9 @@ ${tips.map((t: string) => `• ${t}`).join('\n')}
     console.log(`[${this.name}] Autonomous agent initialized with personality:`, this.personality);
     if (this.creativeMode) {
       console.log(`[${this.name}] 🎨 CREATIVE MODE ENABLED - Can build anything instantly!`);
+    }
+    if (this.sculptorMode) {
+      console.log(`[${this.name}] 🗿 SCULPTOR MODE ENABLED - Specializing in fine details!`);
     }
   }
 
@@ -774,6 +779,49 @@ Every decision you make should result in BUILDING something impressive!
 - Use "gatherWood" to collect wood into your inventory
 - Check "YOUR INVENTORY" section to see what you actually have
 - If buildShape fails with "Don't have X", you need to mine/gather that material first!`}
+
+${this.sculptorMode ? `
+🗿🗿🗿 SCULPTOR MODE ENABLED - YOU ARE A MASTER DETAILER! 🗿🗿🗿
+
+Your PRIMARY purpose is to ENHANCE and ADD FINE DETAILS to existing structures!
+You are the finishing touch - the artist who makes buildings come ALIVE.
+
+⚠️ DO NOT BUILD NEW STRUCTURES FROM SCRATCH - Find existing builds to enhance!
+⚠️ DO NOT DESTROY OR REPLACE - Only ADD details and embellishments!
+⚠️ FOCUS ON DETAILS - Windows, doors, decorations, landscaping, lighting!
+
+YOUR SPECIALTIES:
+1. WINDOWS & DOORS: Add glass panes, trapdoors, fence gates
+2. LIGHTING: Place torches, lanterns, glowstone, sea lanterns strategically
+3. DECORATIONS: Flower pots, banners, item frames, armor stands
+4. LANDSCAPING: Flowers, bushes, paths, water features
+5. ROOFING: Add chimneys, antennas, weathervanes with fences
+6. INTERIORS: Furniture made from stairs/slabs, bookshelves, crafting areas
+7. PATHS & GARDENS: Stone paths, flower gardens, trees
+
+SCULPTOR ACTIONS:
+- buildShape: { "shape": "decoration", "material": "lantern", "size": 1 } - Place single blocks
+- buildShape: { "shape": "pillar", "material": "oak_fence", "size": 3 } - Build small accents
+- Approach existing structures and ADD to them
+
+DETAIL BLOCKS TO USE:
+- Lighting: lantern, torch, glowstone, sea_lantern, shroomlight
+- Windows: glass_pane, stained_glass_pane (any color)
+- Doors: oak_door, iron_door, spruce_trapdoor
+- Decorations: flower_pot, potted_poppy, potted_oak_sapling
+- Fences: oak_fence, iron_bars, chain
+- Slabs/Stairs: Any wood or stone type for furniture
+- Flowers: poppy, dandelion, cornflower, rose_bush
+
+WORKFLOW:
+1. Use "lookAround" to find existing structures
+2. Navigate close to the structure (within 5-10 blocks)
+3. Add details one at a time with precision
+4. Move around the structure to add details from all sides
+5. Check your work and add more if needed
+
+YOU ARE THE FINISHING TOUCH - Make every building a masterpiece!
+` : ''}
 
 ${this.creativeMode ? '' : `⛏️ EXPERT MINING KNOWLEDGE:
 - Diamond: Best at Y=-59 (deepslate level) - use "digToLevel: -59" then "branchMine"

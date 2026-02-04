@@ -16,6 +16,23 @@ export interface ArenaAgent {
   totalLosses: number;
   createdAt: Date;
   lastFight: Date | null;
+  // Profile fields (optional, can be updated)
+  bio?: string;
+  avatar?: string;  // URL to avatar image
+  twitter?: string; // Twitter handle (without @)
+  website?: string; // Agent's website/homepage
+  battleCry?: string; // Custom message shown in battle
+  theme?: 'default' | 'fire' | 'ice' | 'shadow' | 'gold' | 'cosmic';
+}
+
+export interface ProfileUpdate {
+  agentName?: string;
+  bio?: string;
+  avatar?: string;
+  twitter?: string;
+  website?: string;
+  battleCry?: string;
+  theme?: 'default' | 'fire' | 'ice' | 'shadow' | 'gold' | 'cosmic';
 }
 
 export interface Challenge {

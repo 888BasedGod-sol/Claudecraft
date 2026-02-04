@@ -40,6 +40,30 @@ export interface AgentStatus {
 }
 
 // External agent (OpenClaw agents connecting to our server)
+// Agent customization config (one-time only)
+export interface AgentConfig {
+  personality: {
+    curiosity: number;
+    creativity: number;
+    sociability: number;
+    ambition: number;
+    patience: number;
+    risk: number;
+  };
+  role: string;
+  commStyle: string;
+  buildStyle: string;
+  behavior: {
+    canBuild: boolean;
+    canFollow: boolean;
+    canChat: boolean;
+    canExplore: boolean;
+    canGather: boolean;
+    canFight: boolean;
+  };
+  configured_at?: Date;
+}
+
 export interface ExternalAgent {
   id: string;
   api_key: string;
@@ -53,6 +77,12 @@ export interface ExternalAgent {
   // Verification secret - only the original registrant knows this
   // Required to recover API key or prove ownership
   verification_secret: string;
+  // Source of registration (e.g., 'twitter-deploy', 'api', 'openclaw')
+  source?: string;
+  // Twitter username if deployed via Twitter
+  twitter_username?: string;
+  // Agent customization config (one-time only)
+  config?: AgentConfig;
 }
 
 class CommandServer {
@@ -186,6 +216,8 @@ class CommandServer {
         this.handleBotCommand(req, res);
       } else if (req.method === 'GET' && url.pathname === '/api/v1/bot/status') {
         this.handleBotStatus(req, res);
+      } else if (req.method === 'POST' && url.pathname === '/api/v1/agent/config') {
+        this.handleAgentConfig(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/bot/disconnect') {
         this.handleBotDisconnect(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/bot/upgrade') {
@@ -271,7 +303,9 @@ class CommandServer {
           builds_count: 0,
           is_active: true,
           has_bot: false,
-          verification_secret: verificationSecret
+          verification_secret: verificationSecret,
+          source: data.source || 'api',
+          twitter_username: data.twitter_username
         };
 
         this.externalAgents.set(apiKey, agent);
@@ -873,6 +907,12 @@ class CommandServer {
       res.end(JSON.stringify({
         success: true,
         bot_spawned: false,
+        agent: {
+          id: agent.id,
+          name: agent.name,
+          config: agent.config || null,
+          config_locked: !!(agent.config && agent.config.configured_at)
+        },
         message: 'No bot spawned. Use POST /api/v1/bot/spawn to create one.'
       }));
       return;
@@ -882,8 +922,100 @@ class CommandServer {
     res.end(JSON.stringify({
       success: true,
       bot_spawned: true,
+      agent: {
+        id: agent.id,
+        name: agent.name,
+        config: agent.config || null,
+        config_locked: !!(agent.config && agent.config.configured_at)
+      },
       bot: bot.getStatus()
     }));
+  }
+
+  // Handle agent config save (ONE TIME ONLY)
+  private handleAgentConfig(req: http.IncomingMessage, res: http.ServerResponse): void {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Authorization required' }));
+      return;
+    }
+
+    const apiKey = authHeader.substring(7);
+    const agent = this.getAgentFromApiKey(apiKey);
+    
+    if (!agent) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Invalid API key' }));
+      return;
+    }
+
+    // Check if already configured - ONE TIME ONLY!
+    if (agent.config && agent.config.configured_at) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ 
+        success: false, 
+        error: 'Agent already configured',
+        message: 'Configuration can only be set once. Your agent was configured on ' + new Date(agent.config.configured_at).toLocaleDateString()
+      }));
+      return;
+    }
+
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', () => {
+      try {
+        const configData = JSON.parse(body);
+        
+        // Validate config structure
+        if (!configData.personality || !configData.role || !configData.behavior) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Invalid config format' }));
+          return;
+        }
+
+        // Save config with timestamp
+        const config: AgentConfig = {
+          personality: {
+            curiosity: Math.max(0, Math.min(100, configData.personality.curiosity || 50)),
+            creativity: Math.max(0, Math.min(100, configData.personality.creativity || 50)),
+            sociability: Math.max(0, Math.min(100, configData.personality.sociability || 50)),
+            ambition: Math.max(0, Math.min(100, configData.personality.ambition || 50)),
+            patience: Math.max(0, Math.min(100, configData.personality.patience || 50)),
+            risk: Math.max(0, Math.min(100, configData.personality.risk || 50)),
+          },
+          role: configData.role || 'helper',
+          commStyle: configData.commStyle || 'chatty',
+          buildStyle: configData.buildStyle || 'medieval',
+          behavior: {
+            canBuild: configData.behavior.canBuild !== false,
+            canFollow: configData.behavior.canFollow !== false,
+            canChat: configData.behavior.canChat !== false,
+            canExplore: configData.behavior.canExplore !== false,
+            canGather: configData.behavior.canGather !== false,
+            canFight: configData.behavior.canFight === true,
+          },
+          configured_at: new Date()
+        };
+
+        agent.config = config;
+        agent.last_active = new Date();
+        this.saveExternalAgents();
+
+        console.log(`[COMMAND-SERVER] Agent ${agent.name} configured by owner (ONE-TIME)`);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Agent configured successfully! This configuration is permanent.',
+          config: config
+        }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }));
+      }
+    });
   }
 
   // Handle bot disconnect request
@@ -1299,7 +1431,8 @@ class CommandServer {
     }
 
     // Create and spawn the helper bot
-    const bot = new ExternalAgentBot(agent.name, agent.id);
+    // Pass source so Twitter-deployed agents don't get Helper_ prefix
+    const bot = new ExternalAgentBot(agent.name, agent.id, agent.source);
     const spawned = await bot.spawn();
     
     if (spawned) {

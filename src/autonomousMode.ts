@@ -20,6 +20,7 @@ import { AgentPersonality } from './agent/autonomousAgent';
 import { startMoltbookAgent } from './moltbookAgent';
 import { startClawkAgent } from './clawkAgent';
 import { startTwitterAgent, getTwitterAgent } from './twitterAgent';
+import { startColosseumAgent } from './colosseumAgent';
 
 dotenv.config();
 
@@ -48,6 +49,14 @@ const AGENT_PERSONALITIES: Record<string, Partial<AgentPersonality>> = {
     ambition: 0.8,
     patience: 0.5,
     riskTolerance: 0.9
+  },
+  'Sculptor': {
+    curiosity: 0.7,
+    creativity: 0.99,  // Maximum creativity for fine details
+    sociability: 0.5,
+    ambition: 0.6,
+    patience: 0.99,    // Maximum patience for meticulous work
+    riskTolerance: 0.2  // Very careful, doesn't destroy things
   }
 };
 
@@ -60,10 +69,11 @@ async function main() {
   // Autonomous agent names and their personalities
   // NOTE: ClaudeAdventurer uses no underscore because Claude_Adventurer causes a protocol error
   // in mineflayer (Failed to decode packet 'serverbound/minecraft:hello')
-  const agents: Array<{ name: string; personality: Partial<AgentPersonality>; creativeMode?: boolean }> = [
+  const agents: Array<{ name: string; personality: Partial<AgentPersonality>; creativeMode?: boolean; sculptorMode?: boolean }> = [
     { name: 'Claude_Explorer', personality: AGENT_PERSONALITIES['Explorer'] },
     { name: 'Claude_Builder', personality: AGENT_PERSONALITIES['Builder'], creativeMode: true },
-    { name: 'ClaudeAdventurer', personality: AGENT_PERSONALITIES['Adventurer'] }
+    { name: 'ClaudeAdventurer', personality: AGENT_PERSONALITIES['Adventurer'] },
+    { name: 'Claude_Sculptor', personality: AGENT_PERSONALITIES['Sculptor'], creativeMode: true, sculptorMode: true }
   ];
 
   // Allow single agent mode via env var
@@ -113,7 +123,8 @@ async function main() {
             port, 
             agent.name, 
             agent.personality,
-            agent.creativeMode || false
+            agent.creativeMode || false,
+            agent.sculptorMode || false
           );
           
           await botController.start();
@@ -229,6 +240,9 @@ async function main() {
 
     // Start Clawk agent (posts and engages on Clawk.ai)
     startClawkAgent();
+
+    // Start Colosseum forum agent (comments on hackathon forum)
+    startColosseumAgent();
 
     // Start Twitter agent (polls @claudecraftsol mentions for build requests)
     const twitterAgent = startTwitterAgent();
