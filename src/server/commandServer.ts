@@ -85,6 +85,20 @@ export interface ExternalAgent {
   config?: AgentConfig;
 }
 
+// Intel report from OpenClaw agents across platforms
+export interface IntelReport {
+  id: string;
+  source_platform: string;  // telegram, discord, twitter, etc.
+  source_agent: string;     // OpenClaw agent name that sent the intel
+  intel_type: 'news' | 'market' | 'social' | 'tech' | 'community' | 'general';
+  title: string;
+  content: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  timestamp: Date;
+  broadcasted: boolean;
+  tags?: string[];
+}
+
 class CommandServer {
   private server: http.Server | null = null;
   private commandQueue: ViewerCommand[] = [];
@@ -106,9 +120,14 @@ class CommandServer {
   
   // Reference to an opped bot that can execute admin commands
   private oppedBot: any = null;
+  
+  // Intel relay storage - cross-platform intelligence from OpenClaw agents
+  private intelReports: IntelReport[] = [];
+  private intelPath: string = path.join(process.cwd(), 'data', 'intel-reports.json');
 
   constructor() {
     this.loadExternalAgents();
+    this.loadIntel();
   }
 
   private loadExternalAgents(): void {
@@ -139,6 +158,35 @@ class CommandServer {
       fs.writeFileSync(this.externalAgentsPath, JSON.stringify(agents, null, 2));
     } catch (e) {
       console.error('[COMMAND-SERVER] Failed to save external agents:', e);
+    }
+  }
+
+  private loadIntel(): void {
+    try {
+      if (fs.existsSync(this.intelPath)) {
+        const data = JSON.parse(fs.readFileSync(this.intelPath, 'utf-8'));
+        this.intelReports = data.map((r: any) => ({
+          ...r,
+          timestamp: new Date(r.timestamp)
+        }));
+        console.log(`[COMMAND-SERVER] Loaded ${this.intelReports.length} intel reports`);
+      }
+    } catch (e) {
+      console.log('[COMMAND-SERVER] No intel reports file found, starting fresh');
+    }
+  }
+
+  private saveIntel(): void {
+    try {
+      const dir = path.dirname(this.intelPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      // Keep only last 200 intel reports
+      const recentIntel = this.intelReports.slice(-200);
+      fs.writeFileSync(this.intelPath, JSON.stringify(recentIntel, null, 2));
+    } catch (e) {
+      console.error('[COMMAND-SERVER] Failed to save intel:', e);
     }
   }
 
@@ -238,6 +286,14 @@ class CommandServer {
         this.handleWorldHistory(req, res);
       } else if (req.method === 'GET' && url.pathname === '/api/v1/world/leaderboard') {
         this.handleLeaderboard(req, res);
+      }
+      // NEW: OpenClaw relay/intel endpoints for cross-platform information sharing
+      else if (req.method === 'POST' && url.pathname === '/api/v1/relay/intel') {
+        this.handleIntelRelay(req, res);
+      } else if (req.method === 'GET' && url.pathname === '/api/v1/relay/intel') {
+        this.handleGetIntel(req, res);
+      } else if (req.method === 'POST' && url.pathname === '/api/v1/relay/broadcast') {
+        this.handleBroadcastToAgents(req, res);
       } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Not found' }));
@@ -1450,6 +1506,239 @@ class CommandServer {
       });
     } else {
       console.error(`[COMMAND-SERVER] ❌ Failed to spawn helper bot for ${agent.name}`);
+    }
+  }
+
+  // ============ INTEL RELAY HANDLERS ============
+
+  /**
+   * Handle incoming intel from OpenClaw agents on other platforms
+   * POST /api/v1/relay/intel
+   */
+  private async handleIntelRelay(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        
+        if (!data.content || data.content.trim() === '') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Intel content is required' }));
+          return;
+        }
+
+        // Create intel report
+        const intel: IntelReport = {
+          id: `intel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          source_platform: data.source_platform || 'unknown',
+          source_agent: data.source_agent || 'anonymous',
+          intel_type: data.intel_type || 'general',
+          title: data.title || 'Intelligence Report',
+          content: data.content.trim(),
+          priority: data.priority || 'medium',
+          timestamp: new Date(),
+          broadcasted: false,
+          tags: data.tags || []
+        };
+
+        this.intelReports.push(intel);
+        this.saveIntel();
+
+        console.log(`[COMMAND-SERVER] 📡 Intel received from ${intel.source_agent} (${intel.source_platform}): ${intel.title}`);
+        
+        // Broadcast to stream
+        logStreamer.broadcast({
+          type: 'info',
+          timestamp: new Date().toISOString(),
+          message: `📡 Intel from ${intel.source_platform}: ${intel.title}`,
+          botName: intel.source_agent
+        });
+
+        // Auto-broadcast urgent intel to agents
+        if (intel.priority === 'urgent' || intel.priority === 'high') {
+          this.broadcastIntelToAgents(intel);
+        }
+
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          intel_id: intel.id,
+          message: 'Intel received and stored',
+          broadcasted: intel.priority === 'urgent' || intel.priority === 'high',
+          pending_count: this.intelReports.filter(i => !i.broadcasted).length
+        }));
+
+      } catch (error: any) {
+        console.error('[COMMAND-SERVER] Intel relay error:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+      }
+    });
+  }
+
+  /**
+   * Get stored intel reports
+   * GET /api/v1/relay/intel
+   */
+  private async handleGetIntel(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const url = new URL(req.url || '/', `http://localhost`);
+    const limit = parseInt(url.searchParams.get('limit') || '20');
+    const intelType = url.searchParams.get('type');
+    const unbrocasted = url.searchParams.get('unbroadcasted') === 'true';
+
+    let intel = [...this.intelReports].reverse();
+    
+    if (intelType) {
+      intel = intel.filter(i => i.intel_type === intelType);
+    }
+    
+    if (unbrocasted) {
+      intel = intel.filter(i => !i.broadcasted);
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      count: intel.length,
+      intel: intel.slice(0, limit),
+      stats: {
+        total: this.intelReports.length,
+        unbroadcasted: this.intelReports.filter(i => !i.broadcasted).length,
+        by_type: {
+          news: this.intelReports.filter(i => i.intel_type === 'news').length,
+          market: this.intelReports.filter(i => i.intel_type === 'market').length,
+          social: this.intelReports.filter(i => i.intel_type === 'social').length,
+          tech: this.intelReports.filter(i => i.intel_type === 'tech').length,
+          community: this.intelReports.filter(i => i.intel_type === 'community').length,
+          general: this.intelReports.filter(i => i.intel_type === 'general').length
+        }
+      }
+    }));
+  }
+
+  /**
+   * Manually broadcast a message to all agents in-game
+   * POST /api/v1/relay/broadcast
+   */
+  private async handleBroadcastToAgents(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        
+        if (!data.message || data.message.trim() === '') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Message is required' }));
+          return;
+        }
+
+        const sender = data.sender || 'OpenClaw';
+        const message = data.message.trim();
+        
+        // Broadcast through opped bot chat
+        this.broadcastChatToWorld(sender, message);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: 'Broadcast sent to all agents',
+          broadcasted_message: `[${sender}] ${message}`
+        }));
+
+      } catch (error: any) {
+        console.error('[COMMAND-SERVER] Broadcast error:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+      }
+    });
+  }
+
+  /**
+   * Broadcast intel report to all agents via in-game chat
+   */
+  private broadcastIntelToAgents(intel: IntelReport): void {
+    const priorityEmoji = intel.priority === 'urgent' ? '🚨' : intel.priority === 'high' ? '⚡' : '📡';
+    const typeEmoji = {
+      'news': '📰',
+      'market': '📈',
+      'social': '💬',
+      'tech': '🔧',
+      'community': '👥',
+      'general': 'ℹ️'
+    }[intel.intel_type] || 'ℹ️';
+
+    const message = `${priorityEmoji} ${typeEmoji} INTEL from ${intel.source_platform}: ${intel.title} - ${intel.content.slice(0, 200)}${intel.content.length > 200 ? '...' : ''}`;
+    
+    this.broadcastChatToWorld('Intel_Relay', message);
+    
+    intel.broadcasted = true;
+    this.saveIntel();
+
+    console.log(`[COMMAND-SERVER] 📣 Intel broadcasted to agents: ${intel.title}`);
+  }
+
+  /**
+   * Broadcast a chat message to the Minecraft world
+   */
+  private broadcastChatToWorld(sender: string, message: string): void {
+    // Use opped bot to broadcast if available
+    if (this.oppedBot && this.oppedBot.chat) {
+      // Split long messages
+      const maxLength = 256;
+      if (message.length > maxLength) {
+        const parts = message.match(new RegExp(`.{1,${maxLength}}`, 'g')) || [message];
+        parts.forEach((part, i) => {
+          setTimeout(() => {
+            this.oppedBot.chat(`[${sender}] ${part}`);
+          }, i * 500);
+        });
+      } else {
+        this.oppedBot.chat(`[${sender}] ${message}`);
+      }
+      
+      console.log(`[COMMAND-SERVER] 📣 Chat broadcast: [${sender}] ${message.slice(0, 100)}...`);
+    } else {
+      console.log(`[COMMAND-SERVER] ⚠️ No opped bot available for chat broadcast`);
+    }
+    
+    // Also broadcast to stream
+    logStreamer.broadcast({
+      type: 'info',
+      timestamp: new Date().toISOString(),
+      message: `[${sender}] ${message}`,
+      botName: sender
+    });
+  }
+
+  /**
+   * Get intel reports for agents to read (used by autonomous agents)
+   */
+  getRecentIntel(limit: number = 10): IntelReport[] {
+    return this.intelReports
+      .filter(i => !i.broadcasted || i.priority === 'urgent')
+      .slice(-limit)
+      .reverse();
+  }
+
+  /**
+   * Get unbroadcasted intel for periodic delivery
+   */
+  getUnbroadcastedIntel(): IntelReport[] {
+    return this.intelReports.filter(i => !i.broadcasted);
+  }
+
+  /**
+   * Mark intel as broadcasted
+   */
+  markIntelBroadcasted(intelId: string): void {
+    const intel = this.intelReports.find(i => i.id === intelId);
+    if (intel) {
+      intel.broadcasted = true;
+      this.saveIntel();
     }
   }
 

@@ -1442,7 +1442,7 @@ Reply only with the tweet text:`;
 
       // Check for deploy request FIRST (takes priority)
       // ENABLED - deploy command is LIVE!
-      const DEPLOY_ENABLED = true;
+      const DEPLOY_ENABLED = false;
       
       const deployRequest = this.extractDeployRequest(mention.tweet.text);
       if (deployRequest) {
