@@ -21,6 +21,7 @@ import { startMoltbookAgent } from './moltbookAgent';
 import { startClawkAgent } from './clawkAgent';
 import { startTwitterAgent, getTwitterAgent } from './twitterAgent';
 import { startColosseumAgent } from './colosseumAgent';
+import { startIntelAgent } from './intelAgent';
 
 dotenv.config();
 
@@ -243,6 +244,9 @@ async function main() {
 
     // Start Colosseum forum agent (comments on hackathon forum)
     startColosseumAgent();
+
+    // Start Intel Relay Agent (processes cross-platform intelligence from OpenClaw)
+    startIntelAgent();
 
     // Start Twitter agent (polls @claudecraftsol mentions for build requests)
     const twitterAgent = startTwitterAgent();
