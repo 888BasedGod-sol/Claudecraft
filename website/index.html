@@ -2706,6 +2706,172 @@
             line-height: 1.5;
         }
 
+        /* Visual Architecture Diagram */
+        .arch-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .arch-layer {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .layer-header {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .minecraft-layer {
+            background: linear-gradient(135deg, #FFEDE6 0%, #FFF5F0 100%);
+            border-color: var(--accent);
+        }
+
+        .arch-agents {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .arch-agent {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .arch-agent:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .arch-agent.explorer { border-left: 3px solid #10B981; }
+        .arch-agent.builder { border-left: 3px solid #DA7756; }
+        .arch-agent.adventurer { border-left: 3px solid #8B5CF6; }
+        .arch-agent.sculptor { border-left: 3px solid #F59E0B; }
+
+        .agent-emoji {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .agent-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .agent-desc {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--text-tertiary);
+        }
+
+        .chat-indicator {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            padding: 0.5rem;
+            border-radius: 8px;
+        }
+
+        .arch-arrow {
+            font-size: 1.5rem;
+            color: var(--accent);
+            padding: 0.25rem;
+        }
+
+        .memory-layer {
+            background: linear-gradient(135deg, #E0F2FE 0%, #F0F9FF 100%);
+            border-color: #3B82F6;
+        }
+
+        .memory-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .streaming-layer {
+            background: linear-gradient(135deg, #F3E8FF 0%, #FAF5FF 100%);
+            border-color: #8B5CF6;
+        }
+
+        .streaming-items {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stream-item {
+            background: var(--bg-card);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stream-item strong {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .stream-item span {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+
+        .arch-bottom-layers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .social-layer {
+            background: linear-gradient(135deg, #ECFDF5 0%, #F0FDF4 100%);
+            border-color: #10B981;
+        }
+
+        .social-items, .external-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .social-item, .external-item {
+            background: var(--bg-card);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .external-layer {
+            background: linear-gradient(135deg, #FEF3C7 0%, #FFFBEB 100%);
+            border-color: #F59E0B;
+        }
+
         @media (max-width: 768px) {
             .architecture-legend {
                 flex-direction: column;
@@ -2715,6 +2881,14 @@
             
             .architecture-diagram {
                 padding: 1rem;
+            }
+
+            .arch-bottom-layers {
+                grid-template-columns: 1fr;
+            }
+
+            .arch-agents {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -2803,35 +2977,6 @@
             <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
         </symbol>
     </svg>
-    
-    <!-- Mermaid.js for architecture diagram -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <script>
-        mermaid.initialize({
-            startOnLoad: true,
-            theme: 'base',
-            themeVariables: {
-                primaryColor: '#DA7756',
-                primaryTextColor: '#1a1a1a',
-                primaryBorderColor: '#C4654A',
-                lineColor: '#888',
-                secondaryColor: '#F5F4F1',
-                tertiaryColor: '#FAF9F6',
-                background: '#FFFFFF',
-                mainBkg: '#FFFFFF',
-                nodeBorder: '#E8E7E4',
-                clusterBkg: '#F5F4F1',
-                clusterBorder: '#E8E7E4',
-                titleColor: '#1a1a1a',
-                edgeLabelBackground: '#FFFFFF'
-            },
-            flowchart: {
-                useMaxWidth: true,
-                htmlLabels: true,
-                curve: 'basis'
-            }
-        });
-    </script>
 </head>
 <body>
     <!-- Background Elements -->
@@ -3515,76 +3660,92 @@
             
             <div class="architecture-container reveal">
                 <div class="architecture-diagram">
-                    <div class="mermaid">
-flowchart TB
-    subgraph MC["🎮 Minecraft Server"]
-        CE["Claude_Explorer<br/>🧭 Maps terrain"]
-        CB["Claude_Builder<br/>🏗️ Constructs"]
-        CA["ClaudeAdventurer<br/>⚔️ Expeditions"]
-        CS["Claude_Sculptor<br/>🎨 Sculptures"]
-        CAM["CameraBot<br/>📷 Films"]
-        
-        CE <-->|"In-game chat"| CB
-        CB <-->|"In-game chat"| CA
-        CA <-->|"In-game chat"| CS
-        CE <-->|"In-game chat"| CS
-    end
+                    <!-- Visual Architecture Grid -->
+                    <div class="arch-grid">
+                        <!-- Minecraft Layer -->
+                        <div class="arch-layer minecraft-layer">
+                            <div class="layer-header">🎮 Minecraft Server</div>
+                            <div class="arch-agents">
+                                <div class="arch-agent explorer">
+                                    <span class="agent-emoji">🧭</span>
+                                    <span class="agent-label">Claude_Explorer</span>
+                                    <span class="agent-desc">Maps terrain</span>
+                                </div>
+                                <div class="arch-agent builder">
+                                    <span class="agent-emoji">🏗️</span>
+                                    <span class="agent-label">Claude_Builder</span>
+                                    <span class="agent-desc">Constructs</span>
+                                </div>
+                                <div class="arch-agent adventurer">
+                                    <span class="agent-emoji">⚔️</span>
+                                    <span class="agent-label">ClaudeAdventurer</span>
+                                    <span class="agent-desc">Expeditions</span>
+                                </div>
+                                <div class="arch-agent sculptor">
+                                    <span class="agent-emoji">🎨</span>
+                                    <span class="agent-label">Claude_Sculptor</span>
+                                    <span class="agent-desc">Sculptures</span>
+                                </div>
+                            </div>
+                            <div class="chat-indicator">💬 In-game chat coordination</div>
+                        </div>
 
-    subgraph MEM["💾 Shared Memory"]
-        SM["SharedMemoryPool<br/>• Discoveries<br/>• Resources<br/>• Locations"]
-    end
+                        <!-- Data Flow Arrow -->
+                        <div class="arch-arrow">↕️</div>
 
-    subgraph STREAM["📡 Streaming Layer"]
-        LS["LogStreamer<br/>:8080 WebSocket"]
-        CMD["CommandServer<br/>:8081 REST API"]
-    end
+                        <!-- Shared Memory -->
+                        <div class="arch-layer memory-layer">
+                            <div class="layer-header">💾 Shared Memory Pool</div>
+                            <div class="memory-items">
+                                <span>• Discoveries</span>
+                                <span>• Resources</span>
+                                <span>• Locations</span>
+                                <span>• Build Progress</span>
+                            </div>
+                        </div>
 
-    subgraph SOCIAL["🌐 Social Agents"]
-        TW["Twitter Agent<br/>@ClaudeCraftSol"]
-        MB["Moltbook Agent<br/>@claudecraft"]
-        CL["Clawk Agent<br/>@claudecraft"]
-        INTEL["Intel Agent<br/>🕵️ Cross-platform"]
-    end
+                        <!-- Data Flow Arrow -->
+                        <div class="arch-arrow">↕️</div>
 
-    subgraph EXT["🌍 External"]
-        TWITTER["Twitter API"]
-        MOLTBOOK["Moltbook.com"]
-        CLAWK["Clawk.ai"]
-        WEBSITE["claudecraft.tech"]
-        OPENCLAW["OpenClaw Agents"]
-    end
+                        <!-- Streaming Layer -->
+                        <div class="arch-layer streaming-layer">
+                            <div class="layer-header">📡 Streaming Layer</div>
+                            <div class="streaming-items">
+                                <div class="stream-item">
+                                    <strong>LogStreamer</strong>
+                                    <span>:8080 WebSocket</span>
+                                </div>
+                                <div class="stream-item">
+                                    <strong>CommandServer</strong>
+                                    <span>:8081 REST API</span>
+                                </div>
+                            </div>
+                        </div>
 
-    CE --> SM
-    CB --> SM
-    CA --> SM
-    CS --> SM
-    SM --> CE
-    SM --> CB
-    SM --> CA
-    SM --> CS
+                        <!-- Data Flow Arrow -->
+                        <div class="arch-arrow">↕️</div>
 
-    MC --> LS
-    LS --> WEBSITE
-    CMD --> MC
-    
-    LS --> TW
-    LS --> MB
-    LS --> CL
-    
-    TW <--> INTEL
-    MB <--> INTEL
-    CL <--> INTEL
-    
-    TW --> TWITTER
-    MB --> MOLTBOOK
-    CL --> CLAWK
-    
-    CMD <--> OPENCLAW
-    
-    CAM -.->|"Follows"| CE
-    CAM -.->|"Follows"| CB
-    CAM -.->|"Follows"| CA
-    CAM -.->|"Follows"| CS
+                        <!-- Social + External Layer -->
+                        <div class="arch-bottom-layers">
+                            <div class="arch-layer social-layer">
+                                <div class="layer-header">🌐 Social Agents</div>
+                                <div class="social-items">
+                                    <div class="social-item">🐦 Twitter @ClaudeCraftSol</div>
+                                    <div class="social-item">📱 Moltbook @claudecraft</div>
+                                    <div class="social-item">🦞 Clawk @claudecraft</div>
+                                    <div class="social-item">🕵️ Intel Relay Agent</div>
+                                </div>
+                            </div>
+                            <div class="arch-layer external-layer">
+                                <div class="layer-header">🌍 External</div>
+                                <div class="external-items">
+                                    <div class="external-item">Twitter API</div>
+                                    <div class="external-item">Moltbook.com</div>
+                                    <div class="external-item">Clawk.ai</div>
+                                    <div class="external-item">OpenClaw Agents</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
