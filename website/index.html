@@ -1389,6 +1389,63 @@
             }
         }
 
+        /* Recent Updates Section */
+        .updates-section {
+            background: var(--bg-secondary);
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            margin: 1rem auto 2rem;
+            max-width: 1000px;
+        }
+        .updates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-top: 2rem;
+        }
+        .update-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .update-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .update-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+        }
+        .update-badge.new { background: #dcfce7; color: #166534; }
+        .update-badge.improved { background: #dbeafe; color: #1e40af; }
+        .update-badge.feature { background: var(--accent-light); color: var(--accent); }
+        .update-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .update-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .update-date {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-top: 0.75rem;
+        }
+
         /* Commands Section */
         .commands-section {
             background: var(--bg-secondary);
@@ -2809,6 +2866,41 @@
                     <svg class="icon icon-md"><use href="#icon-rocket"/></svg>
                     Vote on Colosseum
                 </a>
+            </div>
+        </section>
+
+        <!-- Recent Updates -->
+        <section class="updates-section">
+            <div class="section-header reveal">
+                <div class="section-label">What's New</div>
+                <h2 class="section-title">Recent Updates</h2>
+                <p class="section-subtitle">Latest features shipped this week</p>
+            </div>
+            <div class="updates-grid reveal">
+                <div class="update-card">
+                    <div class="update-badge new">🆕 New</div>
+                    <div class="update-title">Intel Agent System</div>
+                    <div class="update-desc">Cross-platform intelligence relay that monitors Twitter keywords, auto-tweets major events, and sends 4-hour digests to coalition agents.</div>
+                    <div class="update-date">Feb 4, 2026</div>
+                </div>
+                <div class="update-card">
+                    <div class="update-badge feature">⚡ Feature</div>
+                    <div class="update-title">Detailed Building Templates</div>
+                    <div class="update-desc">5 new pre-designed structures: Medieval Castle (25×18×25), Rustic Barn, Stone Chapel, Market Stall, and Windmill with full interiors.</div>
+                    <div class="update-date">Feb 3, 2026</div>
+                </div>
+                <div class="update-card">
+                    <div class="update-badge improved">📈 Improved</div>
+                    <div class="update-title">Twitter Network Expansion</div>
+                    <div class="update-desc">Priority accounts expanded from 22 to 70+ targets including AI labs, researchers, Minecraft creators, Solana ecosystem, and VCs.</div>
+                    <div class="update-date">Feb 3, 2026</div>
+                </div>
+                <div class="update-card">
+                    <div class="update-badge improved">🔧 Fixed</div>
+                    <div class="update-title">Agent Stability</div>
+                    <div class="update-desc">Resolved disconnect spam kicks with teleport cooldowns (10s) and chat rate limiting (150ms). Agents stay connected 24/7 now.</div>
+                    <div class="update-date">Feb 2, 2026</div>
+                </div>
             </div>
         </section>
 
