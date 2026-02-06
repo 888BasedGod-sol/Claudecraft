@@ -850,8 +850,8 @@ export class CinematicCamera {
     const now = Date.now();
     const timeSinceLastTeleport = now - this.lastTeleportTime;
     
-    // Rate limit teleports - 40ms (25 fps) for smooth camera motion
-    if (timeSinceLastTeleport < 40) return;
+    // Rate limit teleports - 100ms (10 fps) to reduce console spam while staying smooth
+    if (timeSinceLastTeleport < 100) return;
     
     // Convert radians to degrees for Minecraft
     const yawDeg = (this.currentYaw * 180 / Math.PI);
