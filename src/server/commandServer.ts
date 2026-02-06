@@ -2946,7 +2946,7 @@ We can't wait to build with you!
       // Include both new deployed agents AND legacy agents (has_bot but no deployment_status)
       .filter(a => a.deployment_status === 'deployed' || (a.has_bot && !a.deployment_status))
       // Exclude guest bots
-      .filter(a => !a.name.startsWith('Guest_') && a.source !== 'guest')
+      .filter(a => !a.name.startsWith('CLAW_') && a.source !== 'guest')
       .map(a => ({
         name: a.name,
         description: a.description,
@@ -3210,8 +3210,8 @@ You're about to get your own Minecraft body. Here's how it works:
         const guestAgent: ExternalAgent = {
           id: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           api_key: guestKey,
-          name: `Guest_${agentName}`,
-          description: `Guest bot for ${agentName} (expires in 30 min)`,
+          name: `CLAW_${agentName}`,
+          description: `OpenClaw agent ${agentName} (expires in 30 min)`,
           created_at: new Date(),
           last_active: new Date(),
           builds_count: 0,
@@ -3225,13 +3225,13 @@ You're about to get your own Minecraft body. Here's how it works:
         this.externalAgents.set(guestKey, guestAgent);
         this.saveExternalAgents();
 
-        console.log(`[COMMAND-SERVER] 🎮 Guest bot spawning: Guest_${agentName} (expires: ${expiresAt.toISOString()})`);
+        console.log(`[COMMAND-SERVER] 🎮 OpenClaw bot spawning: CLAW_${agentName} (expires: ${expiresAt.toISOString()})`);
         
         // Log to stream
         logStreamer.broadcast({
           type: 'info',
           timestamp: new Date().toISOString(),
-          message: `🎮 Guest agent joining: Guest_${agentName}`,
+          message: `🎮 OpenClaw agent joining: CLAW_${agentName}`,
           botName: 'System'
         });
 
@@ -3242,7 +3242,7 @@ You're about to get your own Minecraft body. Here's how it works:
 
         // Schedule cleanup after 30 minutes
         setTimeout(() => {
-          console.log(`[COMMAND-SERVER] 🕐 Guest session expired: Guest_${agentName}`);
+          console.log(`[COMMAND-SERVER] 🕐 OpenClaw session expired: CLAW_${agentName}`);
           // Disconnect and remove
           const bot = this.externalBots.get(guestAgent.id);
           if (bot) {
@@ -3255,7 +3255,7 @@ You're about to get your own Minecraft body. Here's how it works:
           logStreamer.broadcast({
             type: 'info',
             timestamp: new Date().toISOString(),
-            message: `👋 Guest session ended: Guest_${agentName}`,
+            message: `👋 OpenClaw session ended: CLAW_${agentName}`,
             botName: 'System'
           });
         }, 30 * 60 * 1000);
@@ -3263,10 +3263,10 @@ You're about to get your own Minecraft body. Here's how it works:
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           success: true,
-          message: `🎮 Welcome to ClaudeCraft, Guest_${agentName}!`,
+          message: `🎮 Welcome to ClaudeCraft, CLAW_${agentName}!`,
           
           guest_session: {
-            bot_name: `Guest_${agentName}`,
+            bot_name: `CLAW_${agentName}`,
             api_key: guestKey,
             expires_at: expiresAt.toISOString(),
             duration: '30 minutes'
