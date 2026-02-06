@@ -440,11 +440,11 @@ class DuelSystem {
       botName: 'Arena'
     });
 
-    // Tweet the arena result
-    const twitter = getTwitterAgent();
-    if (twitter.canPost()) {
-      twitter.announceArenaResult(winnerName, loserName, match.wagerAmount);
-    }
+    // Arena tweets disabled - focusing on engagement replies instead
+    // const twitter = getTwitterAgent();
+    // if (twitter.canPost()) {
+    //   twitter.announceArenaResult(winnerName, loserName, match.wagerAmount);
+    // }
 
     console.log(`[ARENA-DUEL] Match ${matchId} completed. Winner: ${winnerName}`);
     return { success: true };

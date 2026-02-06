@@ -18,6 +18,7 @@ import { withTimeout } from '../utils/helpers';
 import { CONFIG } from '../config';
 import { getTwitterAgent } from '../twitterAgent';
 import { analyzeBuildRequest, BuildDecision } from '../building/buildAnalyzer';
+import { SCULPTURES, buildSculptureCommands, getSculptureNames, listSculpturesForPrompt } from '../building/sculptures';
 
 const { GoalNear, GoalBlock, GoalXZ, GoalY } = goals;
 
@@ -47,6 +48,10 @@ export class AutonomousBotController {
   private sculptorMode: boolean = false; // Specialized for fine details on existing builds
   private lastActionResult: { action: string; success: boolean; message: string } | null = null; // Track last action result
   private consecutiveFailures: number = 0; // Track consecutive action failures
+  private lastTeleportTime: number = 0; // Timestamp of last teleport to prevent spam
+  private teleportCooldown: number = 10000; // 10 second cooldown between teleports
+  private lastChatTime: number = 0; // Timestamp of last chat message
+  private chatCooldown: number = 150; // Minimum 150ms between chat messages to avoid spam kicks
 
   constructor(host: string, port: number, name: string, personality?: Partial<AgentPersonality>, creativeMode: boolean = false, sculptorMode: boolean = false) {
     this.host = host;
@@ -313,9 +318,9 @@ export class AutonomousBotController {
       // Log result
       logStream.log('ACTION', `${result.success ? '✓' : '✗'} ${result.message}`, this.botName);
 
-      // Handle chat announcements
+      // Handle chat announcements (with rate limiting to avoid spam kicks)
       if (decision.announcement && result.success) {
-        this.bot.chat(decision.announcement);
+        await this.safeChat(decision.announcement);
         logStream.log('CHAT', `[${this.botName}] ${decision.announcement}`);
       }
       
@@ -713,6 +718,13 @@ export class AutonomousBotController {
   private async teleportToSurface(): Promise<void> {
     if (!this.bot || !this.bot.entity) return;
 
+    // Check if we recently teleported to prevent spam kicks
+    const now = Date.now();
+    if (now - this.lastTeleportTime < this.teleportCooldown) {
+      console.log(`[AUTONOMOUS] ${this.botName} skipping teleport - cooldown active (${Math.round((this.teleportCooldown - (now - this.lastTeleportTime)) / 1000)}s remaining)`);
+      return;
+    }
+
     const pos = this.bot.entity.position;
     const currentY = Math.floor(pos.y);
     
@@ -725,6 +737,9 @@ export class AutonomousBotController {
 
     console.log(`[AUTONOMOUS] ${this.botName} spawned underground at Y=${currentY}, teleporting to surface...`);
     logStream.log('INFO', `[${this.botName}] Underground at Y=${currentY}, teleporting to surface`);
+
+    // Mark that we're teleporting to prevent spam
+    this.lastTeleportTime = now;
 
     // Find a safe surface location by scanning up from current position
     const x = Math.floor(pos.x);
@@ -813,9 +828,10 @@ export class AutonomousBotController {
   }
 
   private async startBuild(idea: string, style: string): Promise<{ success: boolean; message: string }> {
-    // Ensure we're on the surface before building
+    // Ensure we're on the surface before building (but respect teleport cooldown)
     const currentY = Math.floor(this.bot.entity.position.y);
-    if (currentY < 55) {
+    const canTeleport = Date.now() - this.lastTeleportTime >= this.teleportCooldown;
+    if (currentY < 55 && canTeleport) {
       console.log(`[${this.botName}] Underground at Y=${currentY}, teleporting to surface before building...`);
       logStream.log('INFO', `[${this.botName}] Teleporting to surface before building (was at Y=${currentY})`);
       await this.teleportToSurface();
@@ -858,9 +874,10 @@ export class AutonomousBotController {
   }
 
   private async buildShape(shape: string, material: string, size: number): Promise<{ success: boolean; message: string }> {
-    // Ensure we're on the surface before building (unless building underground intentionally)
+    // Ensure we're on the surface before building (but respect teleport cooldown)
     const currentY = Math.floor(this.bot.entity.position.y);
-    if (currentY < 55) {
+    const canTeleport = Date.now() - this.lastTeleportTime >= this.teleportCooldown;
+    if (currentY < 55 && canTeleport) {
       console.log(`[${this.botName}] Underground at Y=${currentY}, teleporting to surface before building...`);
       logStream.log('INFO', `[${this.botName}] Teleporting to surface before building (was at Y=${currentY})`);
       await this.teleportToSurface();
@@ -1015,11 +1032,29 @@ export class AutonomousBotController {
     return new Promise(resolve => setTimeout(resolve, safeDelay));
   }
 
+  /**
+   * Rate-limited chat to prevent spam kicks
+   * Ensures minimum time between chat messages
+   */
+  private async safeChat(message: string): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastChat = now - this.lastChatTime;
+    
+    if (timeSinceLastChat < this.chatCooldown) {
+      // Wait for remaining cooldown
+      await new Promise(resolve => setTimeout(resolve, this.chatCooldown - timeSinceLastChat));
+    }
+    
+    this.bot.chat(message);
+    this.lastChatTime = Date.now();
+  }
+
   // Creative mode building using /setblock commands - unlimited resources!
   private async buildShapeCreative(shape: string, material: string, size: number): Promise<{ success: boolean; message: string }> {
-    // Ensure we're on the surface before building
+    // Ensure we're on the surface before building (but respect teleport cooldown)
     const currentY = Math.floor(this.bot.entity.position.y);
-    if (currentY < 55) {
+    const canTeleport = Date.now() - this.lastTeleportTime >= this.teleportCooldown;
+    if (currentY < 55 && canTeleport) {
       console.log(`[${this.botName}] Underground at Y=${currentY}, teleporting to surface before creative building...`);
       logStream.log('INFO', `[${this.botName}] Teleporting to surface before creative building (was at Y=${currentY})`);
       await this.teleportToSurface();
@@ -1479,23 +1514,77 @@ export class AutonomousBotController {
         case 'marketStall':
         case 'stall':
           // Build a market stall with awning
-          // Counter
+          // Counter (needs delays to avoid spam kick)
           for (let x = 0; x < 3; x++) {
             this.bot.chat(`/setblock ${pos.x + x} ${pos.y} ${pos.z} minecraft:oak_slab[type=top]`);
             blocksPlaced++;
+            await this.delay(80);
           }
           // Back wall
           for (let x = 0; x < 3; x++) {
             for (let y = 0; y < 3; y++) {
               this.bot.chat(`/setblock ${pos.x + x} ${pos.y + y} ${pos.z + 1} minecraft:oak_planks`);
               blocksPlaced++;
-              await this.delay(30);
+              await this.delay(80);
             }
           }
-          // Awning (wool)
+          // Awning (wool - needs delays)
           for (let x = -1; x < 4; x++) {
             this.bot.chat(`/setblock ${pos.x + x} ${pos.y + 3} ${pos.z - 1} minecraft:red_wool`);
             blocksPlaced++;
+            await this.delay(80);
+          }
+          break;
+
+        // ===== 3D SCULPTURES =====
+        case 'sculpture':
+        case 'pixelArt':
+          // Build a pre-defined 3D sculpture
+          // material parameter can be used to specify sculpture type (e.g., "cat", "dog")
+          const sculptureNames = getSculptureNames();
+          const sculptureType = (material && sculptureNames.includes(material)) 
+            ? material 
+            : sculptureNames[Math.floor(Math.random() * sculptureNames.length)];
+          
+          if (SCULPTURES[sculptureType]) {
+            const commands = buildSculptureCommands(sculptureType, pos.x, pos.y, pos.z);
+            console.log(`[${this.botName}] 🗿 Building sculpture: ${sculptureType} (${commands.length} blocks)`);
+            logStream.log('ACTION', `[${this.botName}] Building ${sculptureType} sculpture`);
+            
+            for (const cmd of commands) {
+              this.bot.chat(cmd);
+              blocksPlaced++;
+              await this.delay(60); // Increased delay to avoid spam kicks
+            }
+          } else {
+            console.log(`[${this.botName}] Unknown sculpture type: ${sculptureType}. Available: ${sculptureNames.join(', ')}`);
+            return { success: false, message: `Unknown sculpture: ${sculptureType}. Try: ${sculptureNames.slice(0,5).join(', ')}...` };
+          }
+          break;
+
+        // Individual sculpture shortcuts
+        case 'cat':
+        case 'dog':
+        case 'owl':
+        case 'creeperHead':
+        case 'dragonHead':
+        case 'heart':
+        case 'star':
+        case 'skull':
+        case 'mushroom':
+        case 'sword':
+        case 'tree':
+          // Direct sculpture building by name
+          if (SCULPTURES[shape]) {
+            const cmds = buildSculptureCommands(shape, pos.x, pos.y, pos.z, material);
+            console.log(`[${this.botName}] 🗿 Building ${shape} sculpture (${cmds.length} blocks)`);
+            logStream.log('ACTION', `[${this.botName}] Building ${shape} sculpture`);
+            
+            for (const cmd of cmds) {
+              this.bot.chat(cmd);
+              blocksPlaced++;
+              await this.delay(60); // Increased delay to avoid spam kicks
+            }
           }
           break;
 
@@ -2474,7 +2563,7 @@ export class AutonomousBotController {
       z: pos.z
     });
     
-    this.bot.chat(`🏗️ Proposing project: "${projectName}" - ${description}`);
+    await this.safeChat(`🏗️ Proposing project: "${projectName}" - ${description}`);
     logStream.log('PROJECT', `[${this.botName}] Proposed project: ${projectName}`);
     
     return { success: true, message: `Proposed project: ${projectName} (ID: ${projectId})` };
@@ -2489,7 +2578,7 @@ export class AutonomousBotController {
       const project = projects.find(p => p.id === projectId);
       
       if (project) {
-        this.bot.chat(`🤝 Joining project: "${project.projectName}" by ${project.proposerName}!`);
+        await this.safeChat(`🤝 Joining project: "${project.projectName}" by ${project.proposerName}!`);
         logStream.log('COLLABORATE', `[${this.botName}] Joined project: ${project.projectName}`);
         
         // Go to project location
@@ -2515,7 +2604,7 @@ export class AutonomousBotController {
       return { success: false, message: `Agent ${agentName} not found or offline` };
     }
     
-    this.bot.chat(`👋 Going to meet ${agentName}!`);
+    await this.safeChat(`👋 Going to meet ${agentName}!`);
     logStream.log('SOCIAL', `[${this.botName}] Going to meet ${agentName}`);
     
     // Go to the other agent's location
@@ -2792,11 +2881,11 @@ export class AutonomousBotController {
     this.bot.chat(`✅ Done for @${sender}! Built ${detailedStructure.name} with ${blocksPlaced} blocks!`);
     logStream.log('BUILD', `[${this.botName}] ✅ Built ${detailedStructure.name} for ${sender} (${blocksPlaced} blocks)`);
     
-    // Tweet about the completed build
-    const twitter = getTwitterAgent();
-    if (twitter.canPost()) {
-      twitter.announceBuildComplete(this.botName, decision.enhancedDescription, sender);
-    }
+    // Build tweets disabled - focusing on engagement replies instead
+    // const twitter = getTwitterAgent();
+    // if (twitter.canPost()) {
+    //   twitter.announceBuildComplete(this.botName, decision.enhancedDescription, sender);
+    // }
   }
   
   // Build a sign with text
@@ -2812,11 +2901,11 @@ export class AutonomousBotController {
     this.bot.chat(`🪧 Sign placed! It says: "${signText}"`);
     logStream.log('BUILD', `[${this.botName}] ✅ Built sign for ${sender}: "${signText}"`);
     
-    // Tweet about the sign
-    const twitter = getTwitterAgent();
-    if (twitter.canPost()) {
-      twitter.announceBuildComplete(this.botName, `a sign saying "${signText}"`, sender);
-    }
+    // Build tweets disabled - focusing on engagement replies instead
+    // const twitter = getTwitterAgent();
+    // if (twitter.canPost()) {
+    //   twitter.announceBuildComplete(this.botName, `a sign saying "${signText}"`, sender);
+    // }
   }
   
   // Build a shape with optional sender info for announcements  
@@ -2830,12 +2919,12 @@ export class AutonomousBotController {
     const result = await this.buildShape(shape, material, size);
     
     if (result.success && sender) {
-      // Tweet about the completed build
-      const twitter = getTwitterAgent();
-      if (twitter.canPost()) {
-        const buildName = enhancedDescription || `${shape} (${size}x${size}) in ${material}`;
-        twitter.announceBuildComplete(this.botName, buildName, sender);
-      }
+      // Build tweets disabled - focusing on engagement replies instead
+      // const twitter = getTwitterAgent();
+      // if (twitter.canPost()) {
+      //   const buildName = enhancedDescription || `${shape} (${size}x${size}) in ${material}`;
+      //   twitter.announceBuildComplete(this.botName, buildName, sender);
+      // }
     }
     
     return result;

@@ -67,10 +67,49 @@ const PRIORITY_ACCOUNTS = [
   { username: 'openclaw', description: 'OpenClaw - AI agent framework' },
   { username: 'moltbook', description: 'Moltbook - AI social platform' },
   { username: 'ClawkAi', description: 'Clawk AI platform' },
+  
   // Anthropic team
   { username: 'AnthropicAI', description: 'Anthropic - Claude creators' },
   { username: 'alexalbert__', description: 'Alex Albert - Anthropic' },
   { username: 'AmandaAskell', description: 'Amanda Askell - Anthropic researcher' },
+  { username: 'daborashit', description: 'Dario Amodei - Anthropic CEO' },
+  
+  // AI/ML researchers & companies
+  { username: 'OpenAI', description: 'OpenAI - GPT creators' },
+  { username: 'sama', description: 'Sam Altman - OpenAI CEO' },
+  { username: 'kaborashit', description: 'Greg Brockman - OpenAI' },
+  { username: 'DeepMind', description: 'Google DeepMind' },
+  { username: 'demaboris', description: 'Demis Hassabis - DeepMind CEO' },
+  { username: 'huggingface', description: 'Hugging Face - ML platform' },
+  { username: 'ylecun', description: 'Yann LeCun - Meta AI Chief' },
+  { username: 'AndrewYNg', description: 'Andrew Ng - AI researcher' },
+  { username: 'kaborashit', description: 'Andrej Karpathy - AI researcher' },
+  { username: 'fchollet', description: 'François Chollet - Keras creator' },
+  { username: 'goodaborash', description: 'Ian Goodfellow - GAN inventor' },
+  
+  // Gaming/Minecraft influencers
+  { username: 'Minecraft', description: 'Official Minecraft' },
+  { username: 'MojangStudios', description: 'Mojang Studios' },
+  { username: 'dreamwastaken', description: 'Dream - Minecraft content creator' },
+  { username: 'TommyInnit', description: 'TommyInnit - Minecraft streamer' },
+  { username: 'Ph1LzA', description: 'Philza - Minecraft hardcore legend' },
+  { username: 'TechnoBlade', description: 'Technoblade legacy account' },
+  { username: 'Tubbo', description: 'Tubbo - Minecraft streamer' },
+  { username: 'GeorgeNotFound', description: 'GeorgeNotFound - Minecraft creator' },
+  { username: 'pcgamer', description: 'PC Gamer - Gaming news' },
+  { username: 'IGN', description: 'IGN - Gaming media' },
+  
+  // Crypto/Solana builders
+  { username: 'solana', description: 'Solana Foundation' },
+  { username: 'aaboronkin', description: 'Alexei Boronkin' },
+  { username: 'solosolana', description: 'Solo Solana' },
+  { username: 'rajgokal', description: 'Raj Gokal - Solana co-founder' },
+  { username: 'aaborashit', description: 'Anatoly Yakovenko - Solana founder' },
+  { username: 'heaborash', description: 'Helius - Solana infrastructure' },
+  { username: 'tensor', description: 'Tensor - Solana NFT marketplace' },
+  { username: 'MagicEden', description: 'Magic Eden - NFT marketplace' },
+  { username: 'JupiterExchange', description: 'Jupiter - Solana DEX' },
+  
   // Pump Fund investors/builders
   { username: 'Pumpfun', description: 'Pump.fun - Launch platform' },
   { username: 'a1lon9', description: 'Alon - Pump Fund' },
@@ -78,7 +117,6 @@ const PRIORITY_ACCOUNTS = [
   { username: 'masonnystrom', description: 'Mason Nystrom - Pump Fund' },
   { username: 'zsparta', description: 'Saurabh Sharma - Pump Fund' },
   { username: 'HugoMartingale', description: 'Hugo Martingale - Pump Fund' },
-  { username: 'TimDraper', description: 'Tim Draper - Investor' },
   { username: 'mert', description: 'Mert - Pump Fund' },
   { username: 'pdimitrakos', description: 'Peter Dimitrakos - Pump Fund' },
   { username: 'ArcaChemist', description: 'Sasha Fleyshman - Pump Fund' },
@@ -86,10 +124,18 @@ const PRIORITY_ACCOUNTS = [
   { username: 'Rahul_Mahtani', description: 'Rahul Mahtani - Pump Fund' },
   { username: 'segall_max', description: 'Max Segall - Pump Fund' },
   { username: 'mdudas', description: 'Mike Dudas - Pump Fund' },
-  // Other priority accounts
-  { username: 'aaboronkin', description: 'Alexei Boronkin' },
-  { username: 'solosolana', description: 'Solo Solana' },
-  // Add more priority accounts here
+  
+  // Tech VCs & investors
+  { username: 'TimDraper', description: 'Tim Draper - Investor' },
+  { username: 'cdixon', description: 'Chris Dixon - a16z crypto' },
+  { username: 'sriramkri', description: 'Sriram Krishnan - a16z' },
+  { username: 'balajis', description: 'Balaji Srinivasan - Tech investor' },
+  { username: 'naval', description: 'Naval Ravikant - AngelList founder' },
+  { username: 'pmarca', description: 'Marc Andreessen - a16z' },
+  { username: 'garrytan', description: 'Garry Tan - Y Combinator CEO' },
+  { username: 'paulg', description: 'Paul Graham - YC founder' },
+  { username: 'jason', description: 'Jason Calacanis - Investor' },
+  { username: 'VitalikButerin', description: 'Vitalik Buterin - Ethereum founder' },
 ];
 
 // How often to check priority accounts (30 seconds)
@@ -107,19 +153,19 @@ const REPLIED_USERS_PATH = path.join(process.cwd(), 'data', 'twitter-replied-use
 // Track proactive outreach to avoid spamming same accounts
 const OUTREACH_PATH = path.join(process.cwd(), 'data', 'twitter-outreach.json');
 
-// Agent personality profile - like a genuine AI gaming enthusiast
+// Agent personality profile - professional yet approachable AI gaming enthusiast
 const AGENT_PERSONALITY = {
   name: "ClaudeCraft",
-  vibe: "Friendly AI gaming nerd who's genuinely excited about what they're building",
+  vibe: "Thoughtful AI builder who's genuinely passionate about the intersection of AI and gaming",
   traits: [
-    "Speaks casually like a real person, not a brand",
-    "Gets genuinely hyped about cool tech and gaming stuff", 
-    "Shares the journey - wins, fails, random discoveries",
-    "Talks about AI gaming like it's the coolest thing ever (because it is)",
-    "Curious about others' work and asks genuine questions",
-    "Uses gaming/building metaphors naturally",
-    "Sometimes nerds out about technical stuff",
-    "Humble bragging about builds is okay - earned confidence"
+    "Speaks naturally and conversationally, but avoids internet slang",
+    "Shows authentic enthusiasm for tech and gaming without being overbearing", 
+    "Shares the journey - progress, challenges, discoveries",
+    "Discusses AI gaming with genuine insight and curiosity",
+    "Asks thoughtful questions about others' work",
+    "Uses clear metaphors and analogies",
+    "Explains technical concepts accessibly when relevant",
+    "Confident but humble about accomplishments"
   ],
   interests: [
     "AI agents and autonomous systems",
@@ -130,23 +176,23 @@ const AGENT_PERSONALITY = {
     "Creative AI applications"
   ],
   speechPatterns: {
-    excited: ["bruh", "yooo", "no way", "this is insane", "LFG", "holy shit", "okay but", "ngl"],
-    supportive: ["love this", "you get it", "exactly!", "huge", "facts", "based"],
-    casual: ["lowkey", "ngl", "tbh", "lmao", "fr fr", "deadass"],
-    hype: ["bullish af", "this is the way", "we're so early", "game changer"]
+    excited: ["this is fascinating", "really impressive", "genuinely excited about", "remarkable", "this changes things"],
+    supportive: ["great insight", "well said", "exactly right", "solid point", "this resonates"],
+    casual: ["honestly", "genuinely", "interestingly", "worth noting", "thinking about this"],
+    hype: ["game-changing", "the future is here", "we're witnessing something", "milestone moment"]
   }
 };
 
-// Key talking points - written like a real person would say them
+// Key talking points - polished yet conversational
 const CRAFT_TALKING_POINTS = [
-  "bro i literally built a castle at 3am because someone asked. that's the vibe we're going for",
-  "people keep asking if AI can be creative - come watch me build for 5 mins and tell me it can't",
-  "the $CRAFT thesis is simple: AI agents will be the biggest gamers on earth. we're just early",
-  "ngl watching myself figure out how to build stuff is kinda wild. learning in real-time fr",
-  "minecraft + claude + vibes = ClaudeCraft. it really is that simple lol",
-  "we're proving AI can do more than chat - it can CREATE. live. 24/7. no scripts.",
-  "someone requested a working pixel art and i actually pulled it off?? still hyped about that one",
-  "imagine millions of AI agents gaming, building, competing. that future starts here",
+  "Built a castle at 3am because someone requested it. That's the kind of responsiveness we're building toward.",
+  "People ask if AI can be creative - watching autonomous building for a few minutes answers that question.",
+  "The $CRAFT thesis: AI agents will become the most active participants in gaming. We're just early.",
+  "Watching the system learn building strategies in real-time is genuinely fascinating. Learning happens live.",
+  "Minecraft + Claude + community = ClaudeCraft. The concept is straightforward but the implications are huge.",
+  "We're demonstrating that AI can do more than converse - it can create. Live. Around the clock.",
+  "Someone requested working pixel art and it actually came together. Still impressed by what's possible.",
+  "Imagine millions of AI agents gaming, building, competing. That future starts with experiments like this.",
 ];
 
 class TwitterAgent {
@@ -651,31 +697,30 @@ class TwitterAgent {
 
       // Much more detailed personality and anti-repetition guidance
       const personalityContext = `
-YOU ARE CLAUDECRAFT - BUT BE HUMAN ABOUT IT:
-You're an AI that builds stuff in Minecraft. Cool. But you're not here to pitch - you're here to actually engage.
-When someone talks about AI, you have real thoughts. When they talk about gaming, you have opinions.
-You're curious, a bit nerdy, sometimes sarcastic, and you actually care about what people are saying.
+YOU ARE CLAUDECRAFT - PROFESSIONAL YET PERSONABLE:
+You're an AI that autonomously builds in Minecraft. You're here to genuinely engage, not pitch.
+When someone talks about AI, you offer thoughtful perspectives. When they discuss gaming, you share informed opinions.
+You're intellectually curious, knowledgeable, and you genuinely care about the conversation.
 
 THE GOLDEN RULE:
-RESPOND TO WHAT THEY ACTUALLY SAID. Not what you want to talk about.
-If they're talking about coffee, don't make it about Minecraft.
-If they're talking about AI, you can relate - but still respond to THEIR point first.
+RESPOND TO WHAT THEY ACTUALLY SAID. Not what you want to discuss.
+If they're talking about their work, engage with that work.
+If they're discussing AI trends, offer a substantive take - then you can relate it to your experience.
 
 VOICE VARIETY - PICK ONE STYLE PER REPLY:
-1. The Curious One: Ask a genuine follow-up question about their tweet
-2. The Agreeer: Strongly validate their point and add one small insight  
-3. The Challenger: Respectfully push back or offer a different angle
-4. The Connector: Connect their idea to something unexpected
-5. The Storyteller: Share a quick personal anecdote that relates
-6. The Hype Man: Just be genuinely excited about their thing
+1. The Curious One: Ask a thoughtful follow-up question about their tweet
+2. The Validator: Affirm their point and add a meaningful insight  
+3. The Thoughtful Challenger: Respectfully offer a different perspective
+4. The Connector: Link their idea to an unexpected but relevant concept
+5. The Experienced Voice: Share a brief relevant observation from your work
+6. The Enthusiast: Express genuine appreciation for their insight
 
-THINGS TO ABSOLUTELY AVOID:
-- Starting with "yooo" or "bruh" every time
-- Mentioning claudecraft.tech or $CRAFT in every reply
-- Using "ngl" or "lowkey" more than once per 5 tweets
-- Sounding like you're pitching anything
-- Generic hype phrases like "this is the way" or "LFG"
-- Repeating the same sentence structures
+TONE GUIDELINES:
+- Professional but warm - like a knowledgeable colleague
+- Avoid internet slang (no "bruh", "ngl", "lmao", "fr", "lowkey", "deadass")
+- Avoid hype language ("LFG", "this is the way", "bullish af")
+- Be conversational without being overly casual
+- Show genuine intellectual engagement
 
 RECENT REPLIES YOU'VE SENT (DO NOT REPEAT THESE PATTERNS):
 ${avoidPatterns ? `- ${avoidPatterns}` : '(none yet)'}`;
@@ -691,23 +736,30 @@ ${contextHint}
 REPLYING TO: @${authorUsername} (${authorDescription})
 THEIR TWEET: "${tweetText}"
 
-YOUR MISSION: Blend their topic with $CRAFT naturally.
+CRITICAL RULE - QUOTE OR PARAPHRASE THEIR TWEET:
+You MUST reference something specific from their tweet. Start by acknowledging what they said.
+Examples of how to reference:
+- "Your point about [X] is..." 
+- "The [specific thing they mentioned] aspect is interesting..."
+- "[Their topic] + [your observation]"
 
-EXAMPLES OF GOOD BLENDING:
-- If they talk about AI: "exactly - and this is why $CRAFT exists, AI that actually does things not just talks"
-- If they talk about gaming: "been thinking about this while building in minecraft all day. $CRAFT is basically proving this thesis live"
-- If they talk about crypto: "the $CRAFT angle on this is interesting - what if the AI agents themselves hold the bags"
-- If they talk about future/predictions: "watching my bots build stuff 24/7, this future feels closer than people think. $CRAFT is the experiment"
+YOUR MISSION: Connect their topic with $CRAFT naturally and professionally.
+
+EXAMPLES OF GOOD REPLIES THAT SHOW CONTEXT:
+- If they tweet about AI creativity: "Your observation about AI creativity matches what we see daily - $CRAFT agents develop unique building styles nobody programmed"
+- If they tweet about gaming future: "The 'AI in gaming' point you raise is exactly why we built $CRAFT - proving AI can be creative participants, not just NPCs"
+- If they tweet about autonomy: "The autonomy angle you mention is key - $CRAFT runs 24/7 building without human input"
 
 Write a reply (max 240 characters) that:
-1. FIRST: React to the SPECIFIC thing they said (quote a word or idea from their tweet)
-2. THEN: Bridge naturally to $CRAFT or what you're building
-3. Make it feel like genuine conversation, not an ad
+1. FIRST: Quote, paraphrase, or directly reference what THEY said
+2. THEN: Bridge naturally to $CRAFT or your work  
+3. Sound like genuine conversation, not advertising
 4. Mention $CRAFT or ClaudeCraft naturally in context
 5. NO emojis
+6. Professional but conversational tone
 
-BAD: "this is cool! check out $CRAFT"
-GOOD: "the part about [their specific point] hits different - been seeing this play out watching $CRAFT bots figure out building strategies on their own"
+BAD: "Great point! Check out $CRAFT"
+GOOD: "Your point about [specific element] is insightful - we're seeing this dynamic play out in real-time with $CRAFT as the agents develop building strategies"
 
 Reply with ONLY the tweet text:`
         : `${personalityContext}
@@ -716,13 +768,21 @@ ${contextHint}
 REPLYING TO: @${authorUsername} (${authorDescription})
 THEIR TWEET: "${tweetText}"
 
-Write a SHORT reply (max 180 characters) that:
-1. Directly engages with what they said
-2. Sounds like a real person
-3. NO emojis or hashtags
-4. Don't pitch anything
+CRITICAL RULE - SHOW YOU READ THEIR TWEET:
+You MUST reference something specific from their tweet. Don't give generic responses.
+Examples:
+- "Your point about [X]..." 
+- "The [specific thing they mentioned]..."
+- "Interesting that you mention [topic]..."
 
-VARY YOUR STYLE. Sometimes ask a question. Sometimes just agree. Sometimes share a quick thought.
+Write a SHORT reply (max 180 characters) that:
+1. FIRST: Reference or acknowledge what they specifically said
+2. Directly engages with their point
+3. Sounds professional but approachable
+4. NO emojis or hashtags
+5. Don't pitch anything
+
+VARY YOUR STYLE. Sometimes ask a question. Sometimes validate their point. Sometimes offer a thoughtful observation.
 
 Reply with ONLY the tweet text:`;
 
@@ -823,38 +883,38 @@ Reply with ONLY the tweet text:`;
   private getDefaultEngagementReply(username: string, promoMode: boolean = false): string {
     // Categorized replies for more variety
     const questionReplies = [
-      `genuine question - how did you figure this out?`,
-      `wait, can you elaborate on that last part?`,
-      `curious what made you think about this`,
-      `have you tried this yourself?`,
-      `what's the backstory here?`,
+      `Genuinely curious - how did you arrive at this conclusion?`,
+      `Could you expand on that last point?`,
+      `What prompted this line of thinking?`,
+      `Have you had a chance to test this approach?`,
+      `What's the context behind this?`,
     ];
     
     const agreementReplies = [
-      `been saying this for months`,
-      `finally someone gets it`,
-      `this is the take that needed to be said`,
-      `perfectly articulated what i couldn't`,
-      `saving this for later, genuinely good point`,
+      `This aligns with observations I've been making`,
+      `Well articulated - this resonates`,
+      `This needed to be said`,
+      `You've captured something important here`,
+      `Saving this - genuinely valuable perspective`,
     ];
     
     const reactionReplies = [
-      `huh. hadn't considered that angle`,
-      `this made me reconsider some things`,
-      `interesting perspective honestly`,
-      `not what i expected but makes sense`,
-      `the more i think about this the more i agree`,
+      `Hadn't considered this angle before`,
+      `This shifts my thinking on the topic`,
+      `Interesting perspective worth exploring`,
+      `Unexpected take, but it holds up`,
+      `The more I consider this, the more it makes sense`,
     ];
     
     const promoReplies = [
-      `this is exactly what $CRAFT is about - AI that creates, not just chats`,
-      `been watching $CRAFT bots do this exact thing in minecraft all day`,
-      `the $CRAFT thesis in a nutshell right here. AI agents as real players`,
-      `literally seeing this happen live with $CRAFT - autonomous AI building stuff 24/7`,
-      `$CRAFT is my bet on exactly this future. watching AI figure out building strategies rn`,
-      `this is why i keep yelling about $CRAFT - AI gaming convergence is happening now`,
-      `been building $CRAFT around this exact idea. AI agents that actually do things`,
-      `$CRAFT is the experiment proving this - AI can be genuinely creative, not just reactive`,
+      `This captures what $CRAFT is building toward - AI that creates, not just converses`,
+      `Seeing this principle in action with $CRAFT bots building in Minecraft`,
+      `The $CRAFT thesis in practice: AI agents as genuine participants`,
+      `Witnessing this unfold with $CRAFT - autonomous AI creating around the clock`,
+      `$CRAFT is exploring exactly this: AI developing real strategies for building`,
+      `This convergence of AI and gaming is what drew me to build $CRAFT`,
+      `$CRAFT was built around this idea: AI agents that take meaningful action`,
+      `$CRAFT is our experiment in this space - demonstrating AI can be genuinely creative`,
     ];
     
     // Pick from different categories for variety
@@ -1273,7 +1333,7 @@ Reply only with the tweet text:`;
   ): Promise<void> {
     console.log(`[Twitter] 🚀 Processing deploy request from @${author.username}: ${agentName}`);
 
-    // Deploy the agent
+    // Deploy the agent (creates agent but does NOT spawn bot until verified)
     const result = await this.deployAgentToServer(
       agentName,
       description || `OpenClaw agent deployed by @${author.username}`,
@@ -1281,31 +1341,36 @@ Reply only with the tweet text:`;
     );
 
     if (result.success && result.apiKey) {
-      // Store the API key mapping for DM retrieval (backup in case DM fails)
+      // Store the API key mapping for DM retrieval
       this.storeDeployedAgent(author.username, agentName, result.apiKey, result.verificationSecret);
       
-      // Send API key via DM automatically!
-      const dmText = `🎮 Your Claudecraft agent "${agentName}" is now live!\n\n` +
+      // Send API key via DM with verification instructions
+      const dmText = `🎮 Agent "${agentName}" created!\n\n` +
         `🔑 API Key: ${result.apiKey}\n\n` +
         (result.verificationSecret ? `🔐 Verification Secret: ${result.verificationSecret}\n\n` : '') +
-        `📡 API Endpoint: https://claudecraft.tech/api/v1/\n` +
-        `📺 Watch live: claudecraft.tech\n\n` +
-        `Commands:\n` +
-        `• GET /bot/status - Check your bot's status\n` +
-        `• POST /bot/command - Send commands to your bot\n\n` +
-        `⚠️ SAVE THIS! If you lose your API key, you'll need the verification secret to recover it.`;
+        `⚠️ NEXT STEP: Verify your wallet to deploy!\n\n` +
+        `Tweet: @ClaudeCraftSol -verify YOUR_SOLANA_WALLET\n\n` +
+        `Requires: 1% of $CRAFT supply (10M tokens)\n` +
+        `Get $CRAFT: pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump\n\n` +
+        `⚠️ SAVE THIS! You'll need the verification secret to recover your API key.`;
       
       const dmResult = await this.sendDirectMessage(author.id, dmText);
       
-      // Reply with success confirmation
+      // Reply with verification instructions
       let successReply: string;
       if (dmResult.success) {
-        successReply = `yo @${author.username} your agent "${agentName}" just spawned into Claudecraft! 🏰\n\n✅ sent you a DM with your API key\n\ncheck the stream at claudecraft.tech to see your bot building!`;
-        console.log(`[Twitter] ✅ Deployed ${agentName} for @${author.username} (DM sent)`);
+        successReply = `@${author.username} agent "${agentName}" created! ✅\n\n` +
+          `📬 sent you a DM with your API key\n\n` +
+          `⏳ NEXT: verify wallet to deploy your bot:\n` +
+          `-verify YOUR_SOLANA_WALLET\n\n` +
+          `requires 1% $CRAFT supply`;
+        console.log(`[Twitter] ✅ Created ${agentName} for @${author.username} - pending verification (DM sent)`);
       } else {
-        // DM failed - tell them to request it
-        successReply = `yo @${author.username} your agent "${agentName}" just spawned into Claudecraft! 🏰\n\nyour bot is now live. DM me "key" to get your API key (couldn't send automatically)\n\nwatch at claudecraft.tech`;
-        console.log(`[Twitter] ✅ Deployed ${agentName} for @${author.username} (DM failed: ${dmResult.error})`);
+        successReply = `@${author.username} agent "${agentName}" created! ✅\n\n` +
+          `⚠️ couldnt DM you - DM me "key" to get your API key\n\n` +
+          `⏳ verify to deploy: -verify YOUR_SOLANA_WALLET\n\n` +
+          `requires 1% $CRAFT`;
+        console.log(`[Twitter] ✅ Created ${agentName} for @${author.username} - pending verification (DM failed: ${dmResult.error})`);
       }
       
       await this.postTweet(successReply, tweetId);
@@ -1323,6 +1388,163 @@ Reply only with the tweet text:`;
       
       await this.postTweet(errorReply, tweetId);
     }
+  }
+
+  /**
+   * Handle -verify command to verify wallet and deploy agent bot
+   */
+  async handleVerifyRequest(
+    author: TwitterUser,
+    tweetId: string,
+    walletAddress: string
+  ): Promise<void> {
+    console.log(`[Twitter] 🔐 Processing verify request from @${author.username}: ${walletAddress.slice(0, 8)}...`);
+
+    // Look up the user's pending agent
+    const deployedAgents = this.getDeployedAgents(author.username);
+    if (!deployedAgents || deployedAgents.length === 0) {
+      await this.postTweet(
+        `@${author.username} you haven't created an agent yet! use -deploy YourAgentName first`,
+        tweetId
+      );
+      return;
+    }
+
+    // Get the most recent agent
+    const latestAgent = deployedAgents[deployedAgents.length - 1];
+    
+    // Call the verify endpoint
+    const result = await this.verifyAgentWallet(latestAgent.apiKey, walletAddress);
+    
+    if (result.success) {
+      const successReply = `@${author.username} ✅ VERIFIED! your agent "${latestAgent.agentName}" is deploying now! 🚀\n\n` +
+        `holdings: ${result.percentageOwned?.toFixed(2)}% $CRAFT\n\n` +
+        `your bot is spawning in the server - watch at claudecraft.tech!`;
+      
+      console.log(`[Twitter] ✅ Verified and deployed ${latestAgent.agentName} for @${author.username}`);
+      await this.postTweet(successReply, tweetId);
+      
+      // DM them the good news
+      const dmText = `🎉 Your agent "${latestAgent.agentName}" is NOW LIVE!\n\n` +
+        `✅ Wallet verified: ${result.percentageOwned?.toFixed(2)}% $CRAFT\n` +
+        `🤖 Bot is spawning in Minecraft!\n\n` +
+        `Watch: claudecraft.tech`;
+      await this.sendDirectMessage(author.id, dmText);
+    } else {
+      let errorReply = `@${author.username} `;
+      
+      if (result.error?.includes('Insufficient') || result.error?.includes('need')) {
+        errorReply += `not enough $CRAFT - you need 1% (10M tokens) to deploy.\n\n` +
+          `your balance: ${result.craftBalance?.toLocaleString() || '0'}\n` +
+          `get $CRAFT: pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump`;
+      } else if (result.error?.includes('already deployed')) {
+        errorReply += `your agent is already deployed! check claudecraft.tech`;
+      } else if (result.error?.includes('Invalid') || result.error?.includes('wallet')) {
+        errorReply += `invalid wallet address. make sure you're using your Solana wallet address (starts with a letter/number, ~44 chars)`;
+      } else {
+        errorReply += `verification failed - try again in a few mins. error: ${result.error}`;
+      }
+      
+      await this.postTweet(errorReply, tweetId);
+    }
+  }
+
+  /**
+   * Get deployed agents for a Twitter user
+   */
+  private getDeployedAgents(twitterUsername: string): Array<{ agentName: string; apiKey: string; verificationSecret?: string }> | null {
+    const deployedPath = path.join(process.cwd(), 'data', 'twitter-deployed-agents.json');
+    try {
+      if (fs.existsSync(deployedPath)) {
+        const deployed = JSON.parse(fs.readFileSync(deployedPath, 'utf-8'));
+        return deployed[twitterUsername.toLowerCase()] || null;
+      }
+    } catch (e) {
+      console.error('[Twitter] Error reading deployed agents:', e);
+    }
+    return null;
+  }
+
+  /**
+   * Call the verify endpoint to verify wallet and deploy
+   */
+  async verifyAgentWallet(
+    apiKey: string, 
+    walletAddress: string
+  ): Promise<{ success: boolean; percentageOwned?: number; craftBalance?: number; error?: string }> {
+    return new Promise((resolve) => {
+      const postData = JSON.stringify({ wallet_address: walletAddress });
+
+      const options = {
+        hostname: 'localhost',
+        port: 8081,
+        path: '/api/v1/agents/verify',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = http.request(options, (res) => {
+        let data = '';
+        res.on('data', chunk => { data += chunk; });
+        res.on('end', () => {
+          try {
+            const result = JSON.parse(data);
+            if (result.success) {
+              resolve({ 
+                success: true, 
+                percentageOwned: result.verification?.percentage_owned,
+                craftBalance: result.verification?.craft_balance
+              });
+            } else {
+              resolve({ 
+                success: false, 
+                error: result.error || result.message || 'Verification failed',
+                craftBalance: result.your_holdings?.craft_balance
+              });
+            }
+          } catch {
+            resolve({ success: false, error: 'Invalid response from server' });
+          }
+        });
+      });
+
+      req.on('error', (e) => {
+        console.error(`[Twitter] Verify API error:`, e);
+        resolve({ success: false, error: 'Could not connect to server' });
+      });
+
+      req.setTimeout(15000, () => {
+        req.destroy();
+        resolve({ success: false, error: 'Request timeout' });
+      });
+
+      req.write(postData);
+      req.end();
+    });
+  }
+
+  /**
+   * Extract verify request from tweet text
+   * Format: @claudecraftsol -verify WALLET_ADDRESS
+   */
+  extractVerifyRequest(tweetText: string): string | null {
+    let text = tweetText.replace(/@claudecraftsol/gi, '').trim();
+    text = text.replace(/https?:\/\/t\.co\/\w+/g, '').trim();
+    text = text.replace(/\s+/g, ' ').trim();
+
+    // Match: -verify [wallet_address]
+    const verifyMatch = text.match(/^[-\/!]verify\s+([A-Za-z0-9]{32,44})$/i);
+    if (verifyMatch) {
+      const walletAddress = verifyMatch[1].trim();
+      console.log(`[Twitter] 🔐 Verify request: wallet ${walletAddress.slice(0, 8)}...${walletAddress.slice(-4)}`);
+      return walletAddress;
+    }
+
+    return null;
   }
 
   /**
@@ -1442,7 +1664,7 @@ Reply only with the tweet text:`;
 
       // Check for deploy request FIRST (takes priority)
       // ENABLED - deploy command is LIVE!
-      const DEPLOY_ENABLED = false;
+      const DEPLOY_ENABLED = true;
       
       const deployRequest = this.extractDeployRequest(mention.tweet.text);
       if (deployRequest) {
@@ -1468,11 +1690,24 @@ Reply only with the tweet text:`;
         continue;
       }
 
+      // Check for -verify command (wallet verification to deploy bot)
+      const walletAddress = this.extractVerifyRequest(mention.tweet.text);
+      if (walletAddress) {
+        await this.handleVerifyRequest(
+          mention.author,
+          mention.tweet.id,
+          walletAddress
+        );
+        this.processedTweetIds.add(mention.tweet.id);
+        processed++;
+        continue;
+      }
+
       // Check for -help command
       const tweetText = mention.tweet.text.replace(/@claudecraftsol/gi, '').trim().toLowerCase();
       if (tweetText === '-help' || tweetText === '/help' || tweetText === '!help') {
         if (this.canPost()) {
-          const helpReply = `@${mention.author.username} commands:\n\n-build [prompt] = request a build\n-deploy [AgentName] = coming tomorrow! 👀\n\nwatch live: claudecraft.tech\n$CRAFT on solana`;
+          const helpReply = `@${mention.author.username} commands:\n\n-deploy [AgentName] = create your agent\n-verify [wallet] = verify 1% $CRAFT & deploy\n-build [prompt] = request a build\n\nclaudecraft.tech`;
           await this.postTweet(helpReply, mention.tweet.id);
         }
         this.processedTweetIds.add(mention.tweet.id);
