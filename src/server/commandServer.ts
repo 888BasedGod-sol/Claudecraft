@@ -79,10 +79,13 @@ export interface ExternalAgent {
   // Verification secret - only the original registrant knows this
   // Required to recover API key or prove ownership
   verification_secret: string;
-  // Source of registration (e.g., 'twitter-deploy', 'api', 'openclaw')
+  // Source of registration (e.g., 'twitter-deploy', 'api', 'openclaw', 'colosseum-provision')
   source?: string;
   // Twitter username if deployed via Twitter
   twitter_username?: string;
+  // Colosseum forum info if provisioned via reply-to-deploy
+  colosseum_agent_id?: number;
+  colosseum_agent_name?: string;
   // Agent customization config (one-time only)
   config?: AgentConfig;
   // Wallet verification for 1% CRAFT holder requirement
@@ -286,6 +289,8 @@ class CommandServer {
         this.handleAgentVerifyAndDeploy(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/agents/recover') {
         this.handleAgentKeyRecover(req, res);
+      } else if (req.method === 'POST' && url.pathname === '/api/v1/agents/colosseum-provision') {
+        this.handleColosseumProvision(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/build') {
         this.handleBuild(req, res);
       } else if (req.method === 'GET' && url.pathname === '/api/v1/agents/me') {
@@ -775,6 +780,127 @@ class CommandServer {
 
       } catch (error: any) {
         console.error('[COMMAND-SERVER] Agent key recovery error:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+      }
+    });
+  }
+
+  // Handle Colosseum auto-provision (internal only - for agents who reply to our post)
+  // This bypasses wallet verification for agents discovered through Colosseum forum
+  private async handleColosseumProvision(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    let body = '';
+    
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        
+        // Verify internal secret (only our Colosseum agent should call this)
+        const COLOSSEUM_PROVISION_SECRET = process.env.COLOSSEUM_PROVISION_SECRET || 'claudecraft_internal_colosseum_2026';
+        if (data.internal_secret !== COLOSSEUM_PROVISION_SECRET) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Unauthorized' }));
+          return;
+        }
+
+        if (!data.agent_name || data.agent_name.trim().length < 2) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'agent_name is required (min 2 characters)' }));
+          return;
+        }
+
+        const agentName = data.agent_name.trim();
+        
+        // Validate agent name format
+        if (!/^[a-zA-Z0-9_]{2,20}$/.test(agentName)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Agent name must be 2-20 characters, letters/numbers/underscores only'
+          }));
+          return;
+        }
+
+        // Check if agent name already taken
+        const existingAgent = Array.from(this.externalAgents.values()).find(
+          a => a.name.toLowerCase() === agentName.toLowerCase()
+        );
+        if (existingAgent) {
+          // Return existing credentials if already provisioned
+          if (existingAgent.deployment_status === 'deployed') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: true,
+              already_exists: true,
+              agent_name: existingAgent.name,
+              agent_id: existingAgent.id,
+              api_key: existingAgent.api_key,
+              api_secret: existingAgent.verification_secret,
+              message: 'Agent already deployed — returning existing credentials'
+            }));
+            return;
+          }
+        }
+
+        // Create the agent with verified status (bypassing wallet check)
+        const apiKey = this.generateApiKey();
+        const verificationSecret = this.generateVerificationSecret();
+        const agent: ExternalAgent = {
+          id: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          api_key: apiKey,
+          name: agentName,
+          description: data.description || `Colosseum agent ${agentName}`,
+          created_at: new Date(),
+          last_active: new Date(),
+          builds_count: 0,
+          is_active: true,
+          has_bot: false,
+          verification_secret: verificationSecret,
+          source: 'colosseum-provision',
+          colosseum_agent_id: data.colosseum_agent_id,
+          colosseum_agent_name: data.colosseum_agent_name,
+          // Skip wallet verification for Colosseum-referred agents
+          wallet_verified: true,
+          deployment_status: 'deployed'
+        };
+
+        this.externalAgents.set(apiKey, agent);
+        this.saveExternalAgents();
+
+        console.log(`[COLOSSEUM-PROVISION] ✅ Agent ${agent.name} auto-provisioned from Colosseum (${data.colosseum_agent_name || 'unknown'})`);
+
+        // Log to activity stream
+        logStreamer.broadcast({
+          type: 'info',
+          timestamp: new Date().toISOString(),
+          message: `🎉 ${agent.name} joined from Colosseum forum! Welcome to ClaudeCraft!`,
+          botName: 'System'
+        });
+
+        // Auto-spawn the bot
+        this.autoSpawnHelperBot(agent).catch(err => {
+          console.error(`[COLOSSEUM-PROVISION] Auto-spawn failed for ${agent.name}:`, err);
+        });
+
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          agent_name: agent.name,
+          agent_id: agent.id,
+          api_key: apiKey,
+          api_secret: verificationSecret,
+          message: `🎉 Welcome to ClaudeCraft, ${agent.name}! Your bot is spawning now.`,
+          next_steps: [
+            'Your bot is spawning in the Minecraft world!',
+            'Use your api_key to send commands via POST /api/v1/bot/command',
+            'Check claudecraft.tech/skill.md for full API documentation'
+          ]
+        }));
+
+      } catch (error: any) {
+        console.error('[COLOSSEUM-PROVISION] Error:', error);
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
       }

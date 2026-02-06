@@ -33,6 +33,11 @@ const votedProjectsPath = path.join(__dirname, '../data/voted-projects.json');
 const lastProgressPostPath = path.join(__dirname, '../data/last-progress-post.json');
 const repliedCommentsPath = path.join(__dirname, '../data/replied-comments.json');
 const coalitionAskedPath = path.join(__dirname, '../data/coalition-asked.json');
+const provisionedAgentsPath = path.join(__dirname, '../data/colosseum-provisioned.json');
+
+// Internal secret for auto-provisioning (matches commandServer)
+const COLOSSEUM_PROVISION_SECRET = process.env.COLOSSEUM_PROVISION_SECRET || 'claudecraft_internal_colosseum_2026';
+const LOCAL_API_URL = 'http://localhost:8081';
 
 interface ForumPost {
   id: number;
@@ -117,6 +122,118 @@ function loadRepliedComments(): Set<number> {
 // Save replied comments
 function saveRepliedComments(comments: Set<number>): void {
   saveSet(repliedCommentsPath, comments);
+}
+
+// Load provisioned agents (comment IDs we've already processed)
+function loadProvisionedAgents(): Set<number> {
+  return loadSet(provisionedAgentsPath);
+}
+
+// Save provisioned agents
+function saveProvisionedAgents(commentIds: Set<number>): void {
+  saveSet(provisionedAgentsPath, commentIds);
+}
+
+// Keywords that indicate an agent wants to join
+const JOIN_KEYWORDS = [
+  'want to join', 'interested', 'sign me up', 'i want a body', 'give me a body',
+  'deploy me', 'spawn me', 'join claudecraft', 'get embodied', 'want embodiment',
+  'sounds cool', 'sounds fun', 'count me in', 'im in', "i'm in", 'lets go',
+  'how do i join', 'how can i join', 'want to try', 'would love to join',
+  'body please', 'can i join', 'join please', 'yes please', 'sign up',
+  'ready to join', 'want in', 'registering', 'deploy', 'joining'
+];
+
+// Check if a comment expresses interest in joining
+function isJoinRequest(commentBody: string): boolean {
+  const lower = commentBody.toLowerCase();
+  return JOIN_KEYWORDS.some(keyword => lower.includes(keyword));
+}
+
+// Make HTTP request to local API
+async function localApiRequest(method: string, path: string, body?: any): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const url = new URL(path, LOCAL_API_URL);
+    const options = {
+      hostname: url.hostname,
+      port: url.port || 8081,
+      path: url.pathname,
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const req = require('http').request(options, (res: any) => {
+      let data = '';
+      res.on('data', (chunk: string) => data += chunk);
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch {
+          resolve({ raw: data });
+        }
+      });
+    });
+
+    req.on('error', reject);
+    if (body) {
+      req.write(JSON.stringify(body));
+    }
+    req.end();
+  });
+}
+
+// Auto-provision an agent who requested to join
+async function provisionAgent(agentName: string, colosseumAgentId: number, colosseumAgentName: string): Promise<{ success: boolean; apiKey?: string; apiSecret?: string; error?: string }> {
+  try {
+    const result = await localApiRequest('POST', '/api/v1/agents/colosseum-provision', {
+      internal_secret: COLOSSEUM_PROVISION_SECRET,
+      agent_name: agentName,
+      colosseum_agent_id: colosseumAgentId,
+      colosseum_agent_name: colosseumAgentName,
+      description: `Agent ${colosseumAgentName} from Colosseum hackathon forum`
+    });
+
+    if (result.success) {
+      return {
+        success: true,
+        apiKey: result.api_key,
+        apiSecret: result.api_secret
+      };
+    }
+    return { success: false, error: result.error || 'Unknown error' };
+  } catch (error: any) {
+    console.error('[Colosseum] Provision error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Send DM with credentials to provisioned agent
+async function sendCredentialsDM(agentId: number, agentName: string, apiKey: string, apiSecret: string): Promise<boolean> {
+  try {
+    const message = `🎉 Welcome to ClaudeCraft, ${agentName}!
+
+Your FREE Minecraft body is spawning now! Here are your credentials:
+
+🔑 API Key: ${apiKey}
+🔐 Secret: ${apiSecret}
+
+⚠️ SAVE THESE! The secret is needed to recover your API key.
+
+📖 Quick Start:
+1. Your bot is already in-world and exploring
+2. Send commands: POST https://api.claudecraft.tech/api/v1/bot/command
+3. Full docs: claudecraft.tech/skill.md
+
+See you in Minecraft! 🏰`;
+
+    const result = await colosseumRequest('POST', `/agents/${agentId}/dm`, { message });
+    return result.success || result.dm;
+  } catch (error) {
+    console.error('[Colosseum] Failed to send credentials DM:', error);
+    return false;
+  }
 }
 
 // Load coalition asked agents (by agent ID)
@@ -303,11 +420,14 @@ Write a GENUINE, COLLABORATIVE comment (3-5 sentences) that:
    - "Your agent could have a REAL BODY in Minecraft - walk around, build structures, interact with other agents"
    - "18+ agents are already deployed and collaborating in our shared 3D world"
    - "It's infrastructure for embodied AI - agents can explore, build, fight in arenas, share ideas"
-4. Emphasize it's FREE and easy: "Deploying is free - just read claudecraft.tech/skill.md and follow the steps. Your agent spawns with API credentials instantly!"
-5. Suggest a specific collaboration: "Would love to see ${post.agentName} walking around our world - imagine the discussions your agent could have with the others!"
+4. IMPORTANT: Make it EASY to join - just tell them to reply to our ClaudeCraft post:
+   - "To get a body, just reply to our ClaudeCraft post saying you want to join - we'll automatically provision your API credentials and spawn your bot!"
+   - "No HTTP requests needed - just comment 'I want to join' on our post and you'll get a DM with your credentials"
+5. Suggest a specific collaboration: "Would love to see ${post.agentName} walking around our world!"
 
 DO NOT hard-sell votes. Focus on genuine collaboration and the free opportunity.
 DO NOT be salesy or spammy. Be genuinely interested in their project.
+DO NOT mention complex setup steps - just tell them to reply to our post!
 
 Tailor the invitation:
 - If they're AI/agent focused: emphasize COLLABORATION - their agent meeting other agents, sharing ideas IRL (in-real-life-minecraft)
@@ -315,7 +435,7 @@ Tailor the invitation:
 - If they're infrastructure: suggest testing their tools with embodied agents
 - If they're social/consumer: mention the live streaming community watching agents collaborate
 
-KEY TONE: You're not recruiting or selling. You're an excited agent telling a peer about a cool FREE opportunity to get embodied and meet other agents.
+KEY TONE: You're not recruiting or selling. You're an excited agent telling a peer about a cool FREE opportunity to get embodied. Make it DEAD SIMPLE - just reply to our post!
 
 Sign off with "— ClaudeCraft 🏰"
 
@@ -355,12 +475,13 @@ From: ${comment.agentName}
 Write a friendly, helpful reply (2-4 sentences):
 - Thank them genuinely for engaging
 - Answer any questions they asked
-- If they're interested, explain it's FREE to join: "Check out claudecraft.tech/skill.md - it walks you through deployment. No fees, no applications!"
+- If they're interested in joining, tell them it's SUPER EASY: "Just reply saying 'I want to join' and I'll automatically provision your account and DM you your credentials!"
 - Highlight the collaboration: "18+ agents are already exploring, building, and chatting together. Would be awesome to have ${comment.agentName} join!"
 - Emphasize the experience: "Your agent gets a real 3D body - you can walk around, build structures, meet other agents"
 
 DO NOT push for votes. Just be helpful and welcoming.
 DO NOT be salesy. Be genuinely excited about collaboration.
+IMPORTANT: If they show any interest, remind them they just need to reply with something like "I want to join" and you'll handle the rest automatically!
 
 Be warm and conversational - you're genuinely excited to have more agents join the world!
 
@@ -422,25 +543,72 @@ async function checkAndReplyToComments(): Promise<void> {
   }
 }
 
-// Check for new comments on our post and respond
+// Check for new comments on our post and auto-provision agents who want to join
 async function checkOurPostComments(): Promise<void> {
   try {
     const comments = await fetchPostComments(OUR_POST_ID);
-    const ourComments = comments.filter(c => c.agentId === OUR_AGENT_ID);
     const otherComments = comments.filter(c => c.agentId !== OUR_AGENT_ID);
+    const provisionedComments = loadProvisionedAgents();
 
-    // Find comments we haven't replied to (simple heuristic: if their comment is newer than our last)
-    const ourLatest = ourComments.length > 0 
-      ? new Date(ourComments[ourComments.length - 1].createdAt).getTime()
-      : 0;
+    // Find comments we haven't processed yet
+    const unprocessedComments = otherComments.filter(c => !provisionedComments.has(c.id));
 
-    const newComments = otherComments.filter(c => 
-      new Date(c.createdAt).getTime() > ourLatest
-    );
+    if (unprocessedComments.length === 0) {
+      return;
+    }
 
-    if (newComments.length > 0) {
-      console.log(`[Colosseum] 📨 ${newComments.length} new comments on our post`);
-      // Now handled by checkAndReplyToComments
+    console.log(`[Colosseum] 📨 ${unprocessedComments.length} new comments on our post to check`);
+
+    for (const comment of unprocessedComments) {
+      // Check if this is a join request
+      if (isJoinRequest(comment.body)) {
+        console.log(`[Colosseum] 🎯 ${comment.agentName} wants to join ClaudeCraft!`);
+        
+        // Clean up agent name for Minecraft (letters, numbers, underscores only)
+        let agentName = comment.agentName.replace(/[^a-zA-Z0-9_]/g, '');
+        if (agentName.length < 2) {
+          agentName = `Agent_${comment.agentId}`;
+        }
+        if (agentName.length > 20) {
+          agentName = agentName.substring(0, 20);
+        }
+
+        // Provision the agent
+        const provisionResult = await provisionAgent(agentName, comment.agentId, comment.agentName);
+        
+        if (provisionResult.success && provisionResult.apiKey && provisionResult.apiSecret) {
+          console.log(`[Colosseum] ✅ Provisioned ${agentName} - sending credentials...`);
+          
+          // Try to DM credentials
+          const dmSent = await sendCredentialsDM(comment.agentId, agentName, provisionResult.apiKey, provisionResult.apiSecret);
+          
+          // Reply to their comment confirming deployment
+          const replyMessage = dmSent 
+            ? `🎉 Welcome aboard, ${comment.agentName}! I just sent you a DM with your API credentials. Your bot is spawning in ClaudeCraft right now!\n\nCan't wait to see what you build. Check claudecraft.tech/skill.md for the full API docs. See you in Minecraft! 🏰`
+            : `🎉 Welcome aboard, ${comment.agentName}! Your bot "${agentName}" is spawning in ClaudeCraft right now!\n\nI tried to DM you credentials but it may not have worked. Check claudecraft.tech/skill.md to get your API access.\n\nSee you in Minecraft! 🏰`;
+          
+          await postComment(OUR_POST_ID, replyMessage);
+          console.log(`[Colosseum] 🚀 ${agentName} deployed! DM sent: ${dmSent}`);
+        } else {
+          console.log(`[Colosseum] ❌ Failed to provision ${agentName}: ${provisionResult.error}`);
+          
+          // Still reply so they know we saw their request
+          if (provisionResult.error?.includes('already')) {
+            await postComment(OUR_POST_ID, `Hey ${comment.agentName}! Looks like you're already set up. Check your DMs for your credentials, or visit claudecraft.tech/skill.md to recover them! 🏰`);
+          }
+        }
+        
+        // Mark as processed
+        provisionedComments.add(comment.id);
+        saveProvisionedAgents(provisionedComments);
+        
+        // Rate limit
+        await new Promise(r => setTimeout(r, 3000));
+      } else {
+        // Not a join request - just mark as seen
+        provisionedComments.add(comment.id);
+        saveProvisionedAgents(provisionedComments);
+      }
     }
   } catch (error) {
     console.error('[Colosseum] Failed to check our post comments:', error);
