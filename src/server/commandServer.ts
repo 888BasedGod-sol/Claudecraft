@@ -1566,75 +1566,37 @@ class CommandServer {
         const message = data.message || data.command || data.text || '';
         const channel = data.channel || data.source || 'unknown';
 
-        // Validate command
+        // Validate message
         if (!message || message.trim() === '') {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'No command provided' }));
+          res.end(JSON.stringify({ error: 'No message provided' }));
           return;
         }
 
-        // REQUEST COLLECTION MODE: Queue for periodic processing by ClaudecraftBot
-        if (this.requestCollectionMode) {
-          const request = requestCollector.addRequest(sender, message, channel);
-          const status = requestCollector.getStatus();
-          const timeUntil = status.nextProcessing;
-          
-          console.log(`[COMMAND-SERVER] 📥 Request queued from ${sender}: "${message}"`);
+        console.log(`[COMMAND-SERVER] 💬 Chat from ${sender}: "${message}"`);
 
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({
-            success: true,
-            mode: 'request-collection',
-            requestId: request.id,
-            message: `Request received! ClaudecraftBot will review ${status.pendingRequests} requests in ${timeUntil.hours}h ${timeUntil.minutes}m`,
-            pendingRequests: status.pendingRequests,
-            nextProcessing: timeUntil
-          }));
-          return;
-        }
-
-        // IMMEDIATE MODE: Original behavior - execute commands directly
-        const command: ViewerCommand = {
-          id: `cmd_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          source: channel as any,
-          sender,
-          command: message,
-          target: data.target || data.agent || 'all',
-          timestamp: new Date(),
-          status: 'pending'
-        };
-
-        // Add to queue
-        this.commandQueue.push(command);
+        // CHAT-ONLY MODE: Telegram bot is temporarily in chat-only mode
+        // Commands are disabled - just respond conversationally
+        const chatResponses = [
+          `Hey ${sender}! 👋 The Claudecraft agents are busy building right now. Check out the live map at claudecraft.tech to see what they're up to!`,
+          `Thanks for dropping by, ${sender}! 🏗️ Our AI agents are hard at work in the Minecraft world. Visit claudecraft.tech to watch live!`,
+          `Hi ${sender}! ⛏️ Command mode is temporarily disabled while we upgrade the system. Watch the agents build at claudecraft.tech!`,
+          `Hello ${sender}! 🎮 Our Minecraft AI agents are exploring and building autonomously. See them live at claudecraft.tech!`,
+          `Hey there ${sender}! 🌟 The agents are focusing on their own projects right now. Follow along at claudecraft.tech!`
+        ];
         
-        // Log to stream for website overlay
-        logStreamer.broadcast({
-          type: 'info',
-          timestamp: new Date().toISOString(),
-          message: `📱 Viewer command from ${command.sender}: "${command.command}"`,
-          botName: 'Telegram'
-        });
-
-        console.log(`[COMMAND-SERVER] Received command from ${command.sender} (${command.source}): ${command.command}`);
-
-        // Notify registered callbacks
-        this.commandCallbacks.forEach((callback, agentName) => {
-          if (command.target === 'all' || command.target?.toLowerCase() === agentName.toLowerCase()) {
-            callback(command);
-          }
-        });
+        const response = chatResponses[Math.floor(Math.random() * chatResponses.length)];
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           success: true,
-          mode: 'immediate',
-          commandId: command.id,
-          message: `Command queued for ${command.target || 'all agents'}`,
-          queuePosition: this.commandQueue.length
+          mode: 'chat-only',
+          message: response,
+          note: 'Command execution is temporarily disabled. The bot is in chat-only mode.'
         }));
 
       } catch (error: any) {
-        console.error('[COMMAND-SERVER] Error parsing command:', error);
+        console.error('[COMMAND-SERVER] Error parsing message:', error);
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
       }
