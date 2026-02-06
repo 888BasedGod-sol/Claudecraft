@@ -591,6 +591,559 @@ function generateSpiralStairs(cx: number, y: number, cz: number, height: number)
 }
 
 // ============================================
+// MEDIEVAL CASTLE - Fortified stronghold
+// ============================================
+export const MEDIEVAL_CASTLE: DetailedStructure = {
+  name: 'Medieval Castle',
+  description: 'A fortified castle with towers, battlements, and great hall',
+  width: 25,
+  height: 18,
+  depth: 25,
+  blocks: [
+    // Stone foundation
+    ...generateFilledLayer(0, 0, 0, 25, 25, 'cobblestone'),
+    ...generateFilledLayer(1, 1, 1, 23, 23, 'stone_bricks'),
+    
+    // Outer walls (thick, 2 blocks)
+    ...generateHollowBox(0, 2, 0, 25, 10, 25, 'stone_bricks'),
+    ...generateHollowBox(1, 2, 1, 23, 10, 23, 'stone_bricks'),
+    
+    // Corner towers (4 towers)
+    ...generateCylinder(2, 2, 2, 3, 14, 'stone_bricks'),
+    ...generateCylinder(22, 2, 2, 3, 14, 'stone_bricks'),
+    ...generateCylinder(2, 2, 22, 3, 14, 'stone_bricks'),
+    ...generateCylinder(22, 2, 22, 3, 14, 'stone_bricks'),
+    
+    // Tower roofs (conical)
+    ...generateCone(2, 16, 2, 4, 4, 'dark_oak_stairs'),
+    ...generateCone(22, 16, 2, 4, 4, 'dark_oak_stairs'),
+    ...generateCone(2, 16, 22, 4, 4, 'dark_oak_stairs'),
+    ...generateCone(22, 16, 22, 4, 4, 'dark_oak_stairs'),
+    
+    // Battlements on walls
+    { x: 3, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 5, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 7, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 9, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 11, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 13, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 15, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 17, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 19, y: 12, z: 0, block: 'stone_bricks' },
+    { x: 21, y: 12, z: 0, block: 'stone_bricks' },
+    
+    // Main gatehouse
+    ...generateHollowBox(10, 2, 24, 5, 8, 3, 'stone_bricks'),
+    { x: 12, y: 2, z: 24, block: 'air' },
+    { x: 12, y: 3, z: 24, block: 'air' },
+    { x: 12, y: 4, z: 24, block: 'air' },
+    { x: 12, y: 5, z: 24, block: 'dark_oak_trapdoor' },
+    
+    // Great hall (center)
+    ...generateHollowBox(8, 2, 8, 9, 6, 9, 'stripped_oak_log'),
+    ...generateRoof(8, 8, 8, 9, 9, 'dark_oak_stairs'),
+    
+    // Throne room interior
+    { x: 12, y: 2, z: 10, block: 'gold_block' }, // Throne base
+    { x: 12, y: 3, z: 10, block: 'oak_stairs' }, // Throne
+    { x: 11, y: 3, z: 10, block: 'oak_slab' },
+    { x: 13, y: 3, z: 10, block: 'oak_slab' },
+    { x: 12, y: 4, z: 9, block: 'orange_banner' }, // Royal banner
+    
+    // Chandeliers
+    { x: 10, y: 6, z: 12, block: 'chain' },
+    { x: 10, y: 5, z: 12, block: 'lantern' },
+    { x: 14, y: 6, z: 12, block: 'chain' },
+    { x: 14, y: 5, z: 12, block: 'lantern' },
+    
+    // Carpets in great hall
+    { x: 12, y: 2, z: 12, block: 'red_carpet' },
+    { x: 12, y: 2, z: 13, block: 'red_carpet' },
+    { x: 12, y: 2, z: 14, block: 'red_carpet' },
+    { x: 12, y: 2, z: 15, block: 'red_carpet' },
+    
+    // Wall torches
+    { x: 1, y: 5, z: 5, block: 'wall_torch' },
+    { x: 1, y: 5, z: 12, block: 'wall_torch' },
+    { x: 1, y: 5, z: 19, block: 'wall_torch' },
+    { x: 23, y: 5, z: 5, block: 'wall_torch' },
+    { x: 23, y: 5, z: 12, block: 'wall_torch' },
+    { x: 23, y: 5, z: 19, block: 'wall_torch' },
+    
+    // Armory displays
+    { x: 4, y: 3, z: 4, block: 'armor_stand' },
+    { x: 20, y: 3, z: 4, block: 'armor_stand' },
+    
+    // Well in courtyard
+    ...generateCylinder(18, 2, 18, 2, 2, 'cobblestone'),
+    { x: 18, y: 2, z: 18, block: 'water' },
+    { x: 18, y: 4, z: 18, block: 'chain' },
+    { x: 18, y: 5, z: 18, block: 'dark_oak_fence' },
+    
+    // Flags on towers
+    { x: 2, y: 20, z: 2, block: 'red_banner' },
+    { x: 22, y: 20, z: 2, block: 'red_banner' },
+    { x: 2, y: 20, z: 22, block: 'red_banner' },
+    { x: 22, y: 20, z: 22, block: 'red_banner' },
+  ]
+};
+
+// ============================================
+// RUSTIC BARN - Countryside farm building
+// ============================================
+export const RUSTIC_BARN: DetailedStructure = {
+  name: 'Rustic Barn',
+  description: 'A large countryside barn with hay storage and animal pens',
+  width: 16,
+  height: 12,
+  depth: 20,
+  blocks: [
+    // Foundation
+    ...generateFilledLayer(0, 0, 0, 16, 20, 'cobblestone'),
+    
+    // Main structure - red wood exterior
+    ...generateHollowBox(0, 1, 0, 16, 7, 20, 'red_terracotta'),
+    
+    // Support beams
+    ...generatePillar(0, 1, 0, 7, 'stripped_oak_log'),
+    ...generatePillar(15, 1, 0, 7, 'stripped_oak_log'),
+    ...generatePillar(0, 1, 19, 7, 'stripped_oak_log'),
+    ...generatePillar(15, 1, 19, 7, 'stripped_oak_log'),
+    ...generatePillar(7, 1, 0, 10, 'stripped_oak_log'),
+    ...generatePillar(8, 1, 0, 10, 'stripped_oak_log'),
+    ...generatePillar(7, 1, 19, 10, 'stripped_oak_log'),
+    ...generatePillar(8, 1, 19, 10, 'stripped_oak_log'),
+    
+    // A-frame roof
+    ...generateRoof(0, 8, 0, 16, 20, 'oak_stairs'),
+    // Roof peak cap
+    ...generateFilledLayer(7, 11, 0, 2, 20, 'oak_planks'),
+    
+    // Large double doors (front)
+    { x: 7, y: 1, z: 0, block: 'air' },
+    { x: 8, y: 1, z: 0, block: 'air' },
+    { x: 7, y: 2, z: 0, block: 'air' },
+    { x: 8, y: 2, z: 0, block: 'air' },
+    { x: 7, y: 3, z: 0, block: 'air' },
+    { x: 8, y: 3, z: 0, block: 'air' },
+    { x: 7, y: 4, z: 0, block: 'air' },
+    { x: 8, y: 4, z: 0, block: 'air' },
+    
+    // Hay loft floor
+    ...generateFilledLayer(1, 5, 1, 14, 18, 'oak_planks'),
+    
+    // Hay bales (ground floor)
+    { x: 2, y: 1, z: 2, block: 'hay_block' },
+    { x: 3, y: 1, z: 2, block: 'hay_block' },
+    { x: 2, y: 2, z: 2, block: 'hay_block' },
+    { x: 2, y: 1, z: 3, block: 'hay_block' },
+    
+    // Hay bales (loft)
+    { x: 2, y: 6, z: 4, block: 'hay_block' },
+    { x: 3, y: 6, z: 4, block: 'hay_block' },
+    { x: 4, y: 6, z: 4, block: 'hay_block' },
+    { x: 2, y: 6, z: 5, block: 'hay_block' },
+    { x: 3, y: 6, z: 5, block: 'hay_block' },
+    { x: 2, y: 7, z: 4, block: 'hay_block' },
+    { x: 3, y: 7, z: 4, block: 'hay_block' },
+    
+    // Animal pens (fenced areas)
+    { x: 2, y: 1, z: 10, block: 'oak_fence' },
+    { x: 3, y: 1, z: 10, block: 'oak_fence' },
+    { x: 4, y: 1, z: 10, block: 'oak_fence_gate' },
+    { x: 5, y: 1, z: 10, block: 'oak_fence' },
+    { x: 5, y: 1, z: 11, block: 'oak_fence' },
+    { x: 5, y: 1, z: 12, block: 'oak_fence' },
+    { x: 5, y: 1, z: 13, block: 'oak_fence' },
+    { x: 5, y: 1, z: 14, block: 'oak_fence' },
+    
+    // Second pen
+    { x: 10, y: 1, z: 10, block: 'oak_fence' },
+    { x: 11, y: 1, z: 10, block: 'oak_fence' },
+    { x: 12, y: 1, z: 10, block: 'oak_fence_gate' },
+    { x: 13, y: 1, z: 10, block: 'oak_fence' },
+    { x: 13, y: 1, z: 11, block: 'oak_fence' },
+    { x: 13, y: 1, z: 12, block: 'oak_fence' },
+    { x: 13, y: 1, z: 13, block: 'oak_fence' },
+    { x: 13, y: 1, z: 14, block: 'oak_fence' },
+    
+    // Water trough
+    { x: 3, y: 1, z: 12, block: 'cauldron' },
+    { x: 11, y: 1, z: 12, block: 'cauldron' },
+    
+    // Feed storage
+    { x: 12, y: 1, z: 2, block: 'barrel' },
+    { x: 13, y: 1, z: 2, block: 'barrel' },
+    { x: 12, y: 2, z: 2, block: 'barrel' },
+    
+    // Tools on wall
+    { x: 14, y: 3, z: 1, block: 'tripwire_hook' },
+    { x: 1, y: 3, z: 1, block: 'tripwire_hook' },
+    
+    // Lanterns
+    { x: 7, y: 4, z: 5, block: 'lantern' },
+    { x: 8, y: 4, z: 15, block: 'lantern' },
+    { x: 7, y: 8, z: 10, block: 'lantern' }, // Loft
+    
+    // Windows on sides
+    { x: 0, y: 3, z: 5, block: 'glass_pane' },
+    { x: 0, y: 3, z: 10, block: 'glass_pane' },
+    { x: 0, y: 3, z: 15, block: 'glass_pane' },
+    { x: 15, y: 3, z: 5, block: 'glass_pane' },
+    { x: 15, y: 3, z: 10, block: 'glass_pane' },
+    { x: 15, y: 3, z: 15, block: 'glass_pane' },
+    
+    // Hay loft opening
+    { x: 7, y: 7, z: 0, block: 'air' },
+    { x: 8, y: 7, z: 0, block: 'air' },
+    
+    // Ladder to loft
+    { x: 1, y: 1, z: 18, block: 'ladder' },
+    { x: 1, y: 2, z: 18, block: 'ladder' },
+    { x: 1, y: 3, z: 18, block: 'ladder' },
+    { x: 1, y: 4, z: 18, block: 'ladder' },
+    
+    // Weathervane
+    { x: 7, y: 12, z: 10, block: 'lightning_rod' },
+  ]
+};
+
+// ============================================
+// STONE CHAPEL - Religious building
+// ============================================
+export const STONE_CHAPEL: DetailedStructure = {
+  name: 'Stone Chapel',
+  description: 'An ornate stone chapel with stained glass and bell tower',
+  width: 12,
+  height: 16,
+  depth: 18,
+  blocks: [
+    // Foundation
+    ...generateFilledLayer(0, 0, 0, 12, 18, 'stone_bricks'),
+    
+    // Main nave walls
+    ...generateHollowBox(0, 1, 0, 12, 8, 14, 'stone_bricks'),
+    
+    // Nave roof (pitched)
+    ...generateRoof(0, 9, 0, 12, 14, 'dark_oak_stairs'),
+    
+    // Bell tower (back)
+    ...generateHollowBox(4, 1, 14, 4, 14, 4, 'stone_bricks'),
+    
+    // Bell tower roof (pyramid)
+    ...generateCone(6, 15, 16, 3, 3, 'dark_oak_stairs'),
+    
+    // Bell
+    { x: 5, y: 12, z: 15, block: 'chain' },
+    { x: 5, y: 11, z: 15, block: 'bell' },
+    { x: 6, y: 12, z: 15, block: 'chain' },
+    { x: 6, y: 11, z: 15, block: 'bell' },
+    
+    // Tower windows (arched)
+    { x: 4, y: 11, z: 15, block: 'air' },
+    { x: 4, y: 12, z: 15, block: 'air' },
+    { x: 7, y: 11, z: 15, block: 'air' },
+    { x: 7, y: 12, z: 15, block: 'air' },
+    { x: 5, y: 11, z: 14, block: 'air' },
+    { x: 5, y: 12, z: 14, block: 'air' },
+    { x: 6, y: 11, z: 14, block: 'air' },
+    { x: 6, y: 12, z: 14, block: 'air' },
+    
+    // Main entrance (double door with arch)
+    { x: 5, y: 1, z: 0, block: 'air' },
+    { x: 6, y: 1, z: 0, block: 'air' },
+    { x: 5, y: 2, z: 0, block: 'air' },
+    { x: 6, y: 2, z: 0, block: 'air' },
+    { x: 5, y: 3, z: 0, block: 'air' },
+    { x: 6, y: 3, z: 0, block: 'air' },
+    { x: 5, y: 4, z: 0, block: 'stone_brick_stairs' }, // Arch
+    { x: 6, y: 4, z: 0, block: 'stone_brick_stairs' },
+    
+    // Stained glass windows (sides)
+    { x: 0, y: 3, z: 3, block: 'red_stained_glass_pane' },
+    { x: 0, y: 4, z: 3, block: 'orange_stained_glass_pane' },
+    { x: 0, y: 5, z: 3, block: 'yellow_stained_glass_pane' },
+    { x: 0, y: 3, z: 7, block: 'blue_stained_glass_pane' },
+    { x: 0, y: 4, z: 7, block: 'purple_stained_glass_pane' },
+    { x: 0, y: 5, z: 7, block: 'blue_stained_glass_pane' },
+    { x: 0, y: 3, z: 11, block: 'green_stained_glass_pane' },
+    { x: 0, y: 4, z: 11, block: 'lime_stained_glass_pane' },
+    { x: 0, y: 5, z: 11, block: 'green_stained_glass_pane' },
+    
+    { x: 11, y: 3, z: 3, block: 'red_stained_glass_pane' },
+    { x: 11, y: 4, z: 3, block: 'orange_stained_glass_pane' },
+    { x: 11, y: 5, z: 3, block: 'yellow_stained_glass_pane' },
+    { x: 11, y: 3, z: 7, block: 'blue_stained_glass_pane' },
+    { x: 11, y: 4, z: 7, block: 'purple_stained_glass_pane' },
+    { x: 11, y: 5, z: 7, block: 'blue_stained_glass_pane' },
+    { x: 11, y: 3, z: 11, block: 'green_stained_glass_pane' },
+    { x: 11, y: 4, z: 11, block: 'lime_stained_glass_pane' },
+    { x: 11, y: 5, z: 11, block: 'green_stained_glass_pane' },
+    
+    // Rose window (front)
+    { x: 5, y: 6, z: 0, block: 'red_stained_glass_pane' },
+    { x: 6, y: 6, z: 0, block: 'red_stained_glass_pane' },
+    { x: 5, y: 7, z: 0, block: 'red_stained_glass_pane' },
+    { x: 6, y: 7, z: 0, block: 'red_stained_glass_pane' },
+    
+    // Altar area
+    { x: 5, y: 1, z: 12, block: 'polished_andesite' },
+    { x: 6, y: 1, z: 12, block: 'polished_andesite' },
+    { x: 5, y: 2, z: 12, block: 'white_carpet' },
+    { x: 6, y: 2, z: 12, block: 'white_carpet' },
+    
+    // Cross behind altar
+    { x: 5, y: 4, z: 13, block: 'gold_block' },
+    { x: 6, y: 4, z: 13, block: 'gold_block' },
+    { x: 5, y: 5, z: 13, block: 'gold_block' },
+    { x: 6, y: 5, z: 13, block: 'gold_block' },
+    { x: 5, y: 6, z: 13, block: 'gold_block' },
+    { x: 6, y: 6, z: 13, block: 'gold_block' },
+    { x: 4, y: 5, z: 13, block: 'gold_block' },
+    { x: 7, y: 5, z: 13, block: 'gold_block' },
+    
+    // Pews (benches)
+    { x: 3, y: 1, z: 3, block: 'oak_stairs' },
+    { x: 3, y: 1, z: 5, block: 'oak_stairs' },
+    { x: 3, y: 1, z: 7, block: 'oak_stairs' },
+    { x: 3, y: 1, z: 9, block: 'oak_stairs' },
+    { x: 8, y: 1, z: 3, block: 'oak_stairs' },
+    { x: 8, y: 1, z: 5, block: 'oak_stairs' },
+    { x: 8, y: 1, z: 7, block: 'oak_stairs' },
+    { x: 8, y: 1, z: 9, block: 'oak_stairs' },
+    
+    // Center aisle carpet
+    { x: 5, y: 1, z: 2, block: 'red_carpet' },
+    { x: 6, y: 1, z: 2, block: 'red_carpet' },
+    { x: 5, y: 1, z: 4, block: 'red_carpet' },
+    { x: 6, y: 1, z: 4, block: 'red_carpet' },
+    { x: 5, y: 1, z: 6, block: 'red_carpet' },
+    { x: 6, y: 1, z: 6, block: 'red_carpet' },
+    { x: 5, y: 1, z: 8, block: 'red_carpet' },
+    { x: 6, y: 1, z: 8, block: 'red_carpet' },
+    { x: 5, y: 1, z: 10, block: 'red_carpet' },
+    { x: 6, y: 1, z: 10, block: 'red_carpet' },
+    
+    // Candles
+    { x: 4, y: 2, z: 12, block: 'candle' },
+    { x: 7, y: 2, z: 12, block: 'candle' },
+    { x: 2, y: 1, z: 2, block: 'candle' },
+    { x: 9, y: 1, z: 2, block: 'candle' },
+    
+    // Chandelier
+    { x: 5, y: 7, z: 7, block: 'chain' },
+    { x: 5, y: 6, z: 7, block: 'lantern' },
+    { x: 6, y: 7, z: 7, block: 'chain' },
+    { x: 6, y: 6, z: 7, block: 'lantern' },
+    
+    // Steps to entrance
+    { x: 4, y: 0, z: -1, block: 'stone_brick_stairs' },
+    { x: 5, y: 0, z: -1, block: 'stone_brick_stairs' },
+    { x: 6, y: 0, z: -1, block: 'stone_brick_stairs' },
+    { x: 7, y: 0, z: -1, block: 'stone_brick_stairs' },
+  ]
+};
+
+// ============================================
+// MARKET STALL - Colorful merchant booth
+// ============================================
+export const MARKET_STALL: DetailedStructure = {
+  name: 'Market Stall',
+  description: 'A colorful market stall with awning and goods display',
+  width: 7,
+  height: 5,
+  depth: 5,
+  blocks: [
+    // Base platform
+    ...generateFilledLayer(0, 0, 0, 7, 5, 'oak_planks'),
+    
+    // Support posts
+    ...generatePillar(0, 1, 0, 4, 'stripped_oak_log'),
+    ...generatePillar(6, 1, 0, 4, 'stripped_oak_log'),
+    ...generatePillar(0, 1, 4, 4, 'stripped_oak_log'),
+    ...generatePillar(6, 1, 4, 4, 'stripped_oak_log'),
+    
+    // Counter/display
+    { x: 1, y: 1, z: 0, block: 'oak_stairs' },
+    { x: 2, y: 1, z: 0, block: 'oak_stairs' },
+    { x: 3, y: 1, z: 0, block: 'oak_stairs' },
+    { x: 4, y: 1, z: 0, block: 'oak_stairs' },
+    { x: 5, y: 1, z: 0, block: 'oak_stairs' },
+    
+    // Awning (striped wool)
+    { x: 0, y: 4, z: -1, block: 'red_wool' },
+    { x: 1, y: 4, z: -1, block: 'white_wool' },
+    { x: 2, y: 4, z: -1, block: 'red_wool' },
+    { x: 3, y: 4, z: -1, block: 'white_wool' },
+    { x: 4, y: 4, z: -1, block: 'red_wool' },
+    { x: 5, y: 4, z: -1, block: 'white_wool' },
+    { x: 6, y: 4, z: -1, block: 'red_wool' },
+    
+    { x: 0, y: 4, z: 0, block: 'red_wool' },
+    { x: 1, y: 4, z: 0, block: 'white_wool' },
+    { x: 2, y: 4, z: 0, block: 'red_wool' },
+    { x: 3, y: 4, z: 0, block: 'white_wool' },
+    { x: 4, y: 4, z: 0, block: 'red_wool' },
+    { x: 5, y: 4, z: 0, block: 'white_wool' },
+    { x: 6, y: 4, z: 0, block: 'red_wool' },
+    
+    { x: 0, y: 5, z: 1, block: 'red_wool' },
+    { x: 1, y: 5, z: 1, block: 'white_wool' },
+    { x: 2, y: 5, z: 1, block: 'red_wool' },
+    { x: 3, y: 5, z: 1, block: 'white_wool' },
+    { x: 4, y: 5, z: 1, block: 'red_wool' },
+    { x: 5, y: 5, z: 1, block: 'white_wool' },
+    { x: 6, y: 5, z: 1, block: 'red_wool' },
+    
+    { x: 0, y: 5, z: 2, block: 'red_wool' },
+    { x: 1, y: 5, z: 2, block: 'white_wool' },
+    { x: 2, y: 5, z: 2, block: 'red_wool' },
+    { x: 3, y: 5, z: 2, block: 'white_wool' },
+    { x: 4, y: 5, z: 2, block: 'red_wool' },
+    { x: 5, y: 5, z: 2, block: 'white_wool' },
+    { x: 6, y: 5, z: 2, block: 'red_wool' },
+    
+    // Back wall display
+    { x: 1, y: 1, z: 4, block: 'barrel' },
+    { x: 2, y: 1, z: 4, block: 'barrel' },
+    { x: 4, y: 1, z: 4, block: 'barrel' },
+    { x: 5, y: 1, z: 4, block: 'barrel' },
+    { x: 1, y: 2, z: 4, block: 'flower_pot' },
+    { x: 5, y: 2, z: 4, block: 'flower_pot' },
+    
+    // Goods on display
+    { x: 2, y: 2, z: 0, block: 'melon' },
+    { x: 3, y: 2, z: 0, block: 'pumpkin' },
+    { x: 4, y: 2, z: 0, block: 'melon' },
+    
+    // Hanging items
+    { x: 3, y: 3, z: 1, block: 'lantern' },
+    
+    // Small crates
+    { x: 1, y: 1, z: 2, block: 'chest' },
+    { x: 5, y: 1, z: 2, block: 'chest' },
+    
+    // Sign (shop name)
+    { x: 3, y: 3, z: -1, block: 'oak_sign' },
+  ]
+};
+
+// ============================================
+// WINDMILL - Grain processing structure
+// ============================================
+export const WINDMILL: DetailedStructure = {
+  name: 'Windmill',
+  description: 'A traditional windmill with sails and grinding floor',
+  width: 11,
+  height: 18,
+  depth: 11,
+  blocks: [
+    // Stone base
+    ...generateCircle(5, 0, 5, 5, 'cobblestone'),
+    ...generateCircle(5, 1, 5, 5, 'cobblestone'),
+    
+    // Main tower (tapered cylinder)
+    ...generateCylinder(5, 2, 5, 4, 4, 'white_terracotta'),
+    ...generateCylinder(5, 6, 5, 4, 4, 'white_terracotta'),
+    ...generateCylinder(5, 10, 5, 3, 4, 'white_terracotta'),
+    
+    // Cone roof
+    ...generateCone(5, 14, 5, 4, 4, 'dark_oak_stairs'),
+    
+    // Door
+    { x: 5, y: 2, z: 9, block: 'air' },
+    { x: 5, y: 3, z: 9, block: 'air' },
+    
+    // Windows
+    { x: 5, y: 6, z: 9, block: 'glass_pane' },
+    { x: 1, y: 8, z: 5, block: 'glass_pane' },
+    { x: 9, y: 8, z: 5, block: 'glass_pane' },
+    { x: 5, y: 11, z: 1, block: 'glass_pane' },
+    
+    // Sail hub (front of windmill)
+    { x: 5, y: 10, z: 0, block: 'stripped_oak_log' },
+    { x: 5, y: 11, z: 0, block: 'stripped_oak_log' },
+    
+    // Sails (cross pattern) - using fences and wool
+    // Upper sail
+    { x: 5, y: 12, z: 0, block: 'oak_fence' },
+    { x: 5, y: 13, z: 0, block: 'oak_fence' },
+    { x: 5, y: 14, z: 0, block: 'oak_fence' },
+    { x: 5, y: 15, z: 0, block: 'oak_fence' },
+    { x: 4, y: 13, z: 0, block: 'white_wool' },
+    { x: 4, y: 14, z: 0, block: 'white_wool' },
+    { x: 6, y: 13, z: 0, block: 'white_wool' },
+    { x: 6, y: 14, z: 0, block: 'white_wool' },
+    
+    // Lower sail
+    { x: 5, y: 9, z: 0, block: 'oak_fence' },
+    { x: 5, y: 8, z: 0, block: 'oak_fence' },
+    { x: 5, y: 7, z: 0, block: 'oak_fence' },
+    { x: 5, y: 6, z: 0, block: 'oak_fence' },
+    { x: 4, y: 8, z: 0, block: 'white_wool' },
+    { x: 4, y: 7, z: 0, block: 'white_wool' },
+    { x: 6, y: 8, z: 0, block: 'white_wool' },
+    { x: 6, y: 7, z: 0, block: 'white_wool' },
+    
+    // Left sail
+    { x: 4, y: 10, z: 0, block: 'oak_fence' },
+    { x: 3, y: 10, z: 0, block: 'oak_fence' },
+    { x: 2, y: 10, z: 0, block: 'oak_fence' },
+    { x: 1, y: 10, z: 0, block: 'oak_fence' },
+    { x: 3, y: 9, z: 0, block: 'white_wool' },
+    { x: 2, y: 9, z: 0, block: 'white_wool' },
+    { x: 3, y: 11, z: 0, block: 'white_wool' },
+    { x: 2, y: 11, z: 0, block: 'white_wool' },
+    
+    // Right sail
+    { x: 6, y: 10, z: 0, block: 'oak_fence' },
+    { x: 7, y: 10, z: 0, block: 'oak_fence' },
+    { x: 8, y: 10, z: 0, block: 'oak_fence' },
+    { x: 9, y: 10, z: 0, block: 'oak_fence' },
+    { x: 7, y: 9, z: 0, block: 'white_wool' },
+    { x: 8, y: 9, z: 0, block: 'white_wool' },
+    { x: 7, y: 11, z: 0, block: 'white_wool' },
+    { x: 8, y: 11, z: 0, block: 'white_wool' },
+    
+    // Interior - Grinding floor
+    ...generateFilledLayer(3, 2, 3, 5, 5, 'oak_planks'),
+    { x: 5, y: 2, z: 5, block: 'grindstone' },
+    
+    // Flour storage
+    { x: 3, y: 2, z: 3, block: 'barrel' },
+    { x: 7, y: 2, z: 3, block: 'barrel' },
+    { x: 3, y: 3, z: 3, block: 'barrel' },
+    
+    // Wheat storage
+    { x: 3, y: 2, z: 7, block: 'hay_block' },
+    { x: 4, y: 2, z: 7, block: 'hay_block' },
+    { x: 3, y: 3, z: 7, block: 'hay_block' },
+    
+    // Interior floors
+    ...generateCircle(5, 5, 5, 3, 'oak_planks'),
+    ...generateCircle(5, 9, 5, 2, 'oak_planks'),
+    
+    // Ladders
+    { x: 7, y: 2, z: 5, block: 'ladder' },
+    { x: 7, y: 3, z: 5, block: 'ladder' },
+    { x: 7, y: 4, z: 5, block: 'ladder' },
+    { x: 6, y: 5, z: 5, block: 'ladder' },
+    { x: 6, y: 6, z: 5, block: 'ladder' },
+    { x: 6, y: 7, z: 5, block: 'ladder' },
+    { x: 6, y: 8, z: 5, block: 'ladder' },
+    
+    // Lanterns
+    { x: 5, y: 4, z: 5, block: 'lantern' },
+    { x: 5, y: 8, z: 5, block: 'lantern' },
+    
+    // Path to entrance
+    { x: 5, y: 0, z: 10, block: 'gravel' },
+    { x: 5, y: 0, z: 11, block: 'gravel' },
+    { x: 5, y: 0, z: 12, block: 'gravel' },
+  ]
+};
+
+// ============================================
 // STRUCTURE REGISTRY - Easy lookup by name
 // ============================================
 export const DETAILED_STRUCTURES: Record<string, DetailedStructure> = {
@@ -619,6 +1172,33 @@ export const DETAILED_STRUCTURES: Record<string, DetailedStructure> = {
   
   'lighthouse': LIGHTHOUSE,
   'beacon': LIGHTHOUSE,
+  
+  // New detailed structures
+  'castle': MEDIEVAL_CASTLE,
+  'medieval_castle': MEDIEVAL_CASTLE,
+  'fortress': MEDIEVAL_CASTLE,
+  'stronghold': MEDIEVAL_CASTLE,
+  'keep': MEDIEVAL_CASTLE,
+  
+  'barn': RUSTIC_BARN,
+  'rustic_barn': RUSTIC_BARN,
+  'farm_barn': RUSTIC_BARN,
+  'stable': RUSTIC_BARN,
+  
+  'chapel': STONE_CHAPEL,
+  'church': STONE_CHAPEL,
+  'stone_chapel': STONE_CHAPEL,
+  'cathedral': STONE_CHAPEL,
+  
+  'market': MARKET_STALL,
+  'market_stall': MARKET_STALL,
+  'shop': MARKET_STALL,
+  'stall': MARKET_STALL,
+  'vendor': MARKET_STALL,
+  
+  'windmill': WINDMILL,
+  'mill': WINDMILL,
+  'grain_mill': WINDMILL,
 };
 
 /**

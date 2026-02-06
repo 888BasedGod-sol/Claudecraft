@@ -187,29 +187,145 @@
   "buildingTechniques": {
     "foundations": {
       "flat": "Clear area and place floor blocks directly",
-      "raised": "Build platform 1-3 blocks above ground",
-      "sunken": "Dig into ground and build down",
-      "stilts": "Use pillars to elevate structure above terrain or water"
+      "raised": "Build platform 1-3 blocks above ground with stone steps leading up",
+      "sunken": "Dig into ground and build down, add drainage moat",
+      "stilts": "Use pillars to elevate structure above terrain or water",
+      "mixed": "Combine terrain levels - part raised, part sunken for visual interest"
     },
     "walls": {
       "solid": "Full blocks for complete walls",
       "windowed": "Alternate blocks with glass panes",
       "halfWall": "Use stairs for half-height walls",
-      "pillared": "Columns at corners with different material fill"
+      "pillared": "Columns at corners with different material fill",
+      "layered": "Outer decorative layer + inner structural layer for depth",
+      "textured": "Mix similar materials (stone_bricks + cracked + mossy) for age"
     },
     "roofs": {
-      "flat": "Simple flat surface (good for modern)",
-      "peaked": "Use stairs in A-frame pattern",
+      "flat": "Simple flat surface (good for modern), add railings + rooftop garden",
+      "peaked": "Use stairs in A-frame pattern, extend eaves 1-2 blocks",
       "hipped": "Stairs on all four sides meeting at top",
       "dome": "Curved using stairs in circular pattern",
-      "curved": "Use stairs to create wave or curve shapes"
+      "curved": "Use stairs to create wave or curve shapes",
+      "multilevel": "Different roof heights for wings/sections add complexity",
+      "dormer": "Add small windowed protrusions from sloped roofs"
     },
     "details": {
-      "depth": "Push or pull sections to add visual interest",
+      "depth": "Push or pull sections to add visual interest - recess windows, extend corners",
       "contrast": "Use 2-3 materials that complement each other",
       "lighting": "Add torches, lanterns, or glowstone strategically",
       "greenery": "Include plants, leaves, and vines",
       "water": "Add fountains, pools, or moats"
+    }
+  },
+  "decorationPhases": {
+    "description": "Complete builds in phases for maximum detail",
+    "phase1_structure": {
+      "name": "Core Structure",
+      "tasks": ["Foundation", "Walls", "Roof frame"],
+      "materials": "Primary materials only"
+    },
+    "phase2_exterior": {
+      "name": "Exterior Details",
+      "tasks": [
+        "Add window frames (trapdoors as shutters)",
+        "Install doors with steps/porches",
+        "Add trim using contrasting material",
+        "Create chimney with campfire for smoke",
+        "Add overhanging eaves and gutters (upside-down stairs)"
+      ],
+      "materials": "Accent materials, stairs, slabs, trapdoors"
+    },
+    "phase3_interior": {
+      "name": "Interior Finishing",
+      "tasks": [
+        "Floor variations (rugs from carpet, patterns with slabs)",
+        "Furniture (bed, table=fence+pressure_plate, chairs=stairs+signs)",
+        "Storage (barrels, chests, bookshelves)",
+        "Lighting (lanterns on chains, wall torches, hidden glowstone)",
+        "Wall decorations (paintings, item_frames, banners)"
+      ]
+    },
+    "phase4_landscaping": {
+      "name": "Exterior Landscaping",
+      "tasks": [
+        "Paths connecting entrances (cobble, gravel, or stone_brick variants)",
+        "Gardens with flower_pots and planted flowers",
+        "Trees and bushes (leaf blocks on fence posts)",
+        "Fencing around property",
+        "Street lamps (fence posts with lanterns)",
+        "Water features (pond, fountain, stream)",
+        "Seating areas (benches from stairs or slabs)"
+      ]
+    },
+    "phase5_ambiance": {
+      "name": "Final Touches",
+      "tasks": [
+        "Ambient lighting (hidden lights, mood lighting)",
+        "Signs with names/labels",
+        "Item frames with themed items",
+        "Mobs in pens if appropriate",
+        "Background sounds (noteblocks, water)"
+      ]
+    }
+  },
+  "detailTechniques": {
+    "windowDetails": {
+      "description": "Make windows more interesting than plain glass",
+      "techniques": [
+        "Use glass_pane instead of glass for depth",
+        "Add trapdoors on sides as shutters",
+        "Place flower_pot with flowers below window",
+        "Frame with contrasting material (logs, stone)",
+        "Add curtains using banners inside"
+      ]
+    },
+    "doorDetails": {
+      "description": "Entrances set the tone for a build",
+      "techniques": [
+        "Add steps leading up (stone_brick_stairs)",
+        "Create porch overhang with slabs",
+        "Frame door with pillars (logs or stone)",
+        "Add lanterns on either side",
+        "Use path blocks leading to entrance"
+      ]
+    },
+    "roofDetails": {
+      "description": "Roofs should have character",
+      "techniques": [
+        "Extend eaves 1-2 blocks past walls",
+        "Add dormer windows on steep roofs",
+        "Include chimney with campfire inside for smoke",
+        "Mix in cracked/mossy variants for age",
+        "Add weather vane (lightning_rod) at peak"
+      ]
+    },
+    "interiorFurniture": {
+      "description": "Custom furniture using block combinations",
+      "table": "oak_fence + oak_pressure_plate on top",
+      "chair": "oak_stairs with item_frame or sign as armrests",
+      "couch": "2-3 stairs in row with signs as arms",
+      "bookshelf_desk": "bookshelf with carpet on top",
+      "cabinet": "barrel or chest with trapdoors as doors",
+      "chandelier": "fence post + chains + lanterns",
+      "fireplace": "stone_brick frame + campfire + iron_bars",
+      "bed_canopy": "fence posts at corners + carpet/wool on top"
+    },
+    "gardenElements": {
+      "description": "Outdoor decoration techniques",
+      "bush": "leaf_block on fence_post",
+      "hedge": "row of leaf_blocks shaped with slabs on top",
+      "flower_bed": "coarse_dirt border + flowers",
+      "path": "mix gravel + cobblestone + stone_button for texture",
+      "pond": "dig 2 deep, add water, lilypads, sugar_cane",
+      "bench": "2 stairs facing each other or slabs + signs",
+      "lamp_post": "fence posts stacked + lantern on top"
+    },
+    "textureVariation": {
+      "description": "Break up monotonous surfaces",
+      "stone_mix": ["stone_bricks", "cracked_stone_bricks", "mossy_stone_bricks", "stone"],
+      "wood_mix": ["planks", "stripped_log", "log"],
+      "cobble_mix": ["cobblestone", "mossy_cobblestone", "andesite"],
+      "floor_pattern": "Alternate materials in checkerboard or stripe patterns"
     }
   },
   "inspirationalIdeas": [

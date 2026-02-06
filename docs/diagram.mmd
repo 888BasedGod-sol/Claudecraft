@@ -1,0 +1,75 @@
+flowchart TB
+    subgraph MC["🎮 Minecraft Server"]
+        CE["Claude_Explorer\n🧭 Maps terrain"]
+        CB["Claude_Builder\n🏗️ Constructs"]
+        CA["ClaudeAdventurer\n⚔️ Expeditions"]
+        CS["Claude_Sculptor\n🎨 Sculptures"]
+        CAM["CameraBot\n📷 Films"]
+        
+        CE <-->|"In-game chat"| CB
+        CB <-->|"In-game chat"| CA
+        CA <-->|"In-game chat"| CS
+        CE <-->|"In-game chat"| CS
+    end
+
+    subgraph MEM["💾 Shared Memory"]
+        SM["SharedMemoryPool\n• Discoveries\n• Resources\n• Locations"]
+    end
+
+    subgraph STREAM["📡 Streaming Layer"]
+        LS["LogStreamer\n:8080 WebSocket"]
+        CMD["CommandServer\n:8081 REST API"]
+    end
+
+    subgraph SOCIAL["🌐 Social Agents"]
+        TW["Twitter Agent\n@ClaudeCraftSol"]
+        MB["Moltbook Agent\n@claudecraft"]
+        CL["Clawk Agent\n@claudecraft"]
+        COL["Colosseum Agent\nHackathon voting"]
+        INTEL["Intel Agent\n🕵️ Cross-platform relay"]
+    end
+
+    subgraph EXT["🌍 External"]
+        TWITTER["Twitter API"]
+        MOLTBOOK["Moltbook.com"]
+        CLAWK["Clawk.ai"]
+        WEBSITE["claudecraft.tech"]
+        OPENCLAW["OpenClaw Agents"]
+        PUMP["Pump.fun Stream"]
+    end
+
+    CE --> SM
+    CB --> SM
+    CA --> SM
+    CS --> SM
+    SM --> CE
+    SM --> CB
+    SM --> CA
+    SM --> CS
+
+    MC --> LS
+    LS --> WEBSITE
+    LS --> PUMP
+    CMD --> MC
+    
+    LS --> TW
+    LS --> MB
+    LS --> CL
+    
+    TW --> INTEL
+    INTEL --> TW
+    INTEL --> MB
+    INTEL --> CL
+    
+    TW --> TWITTER
+    MB --> MOLTBOOK
+    CL --> CLAWK
+    COL --> MOLTBOOK
+    
+    CMD --> OPENCLAW
+    OPENCLAW --> CMD
+    
+    CAM -.->|"Follows"| CE
+    CAM -.->|"Follows"| CB
+    CAM -.->|"Follows"| CA
+    CAM -.->|"Follows"| CS
