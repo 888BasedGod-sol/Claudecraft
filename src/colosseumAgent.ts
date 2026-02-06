@@ -1,12 +1,14 @@
 /**
- * Colosseum Forum Agent - GROWTH MODE
+ * Colosseum Forum Agent - COLLABORATION MODE
  * 
- * This agent maximizes ClaudeCraft's hackathon visibility:
- * 1. Votes on quality projects (builds reciprocity)
- * 2. Posts meaningful comments (not just recruitment spam)
+ * This agent focuses on genuine collaboration with other agents:
+ * 1. Votes on quality projects (supporting the community)
+ * 2. Posts meaningful comments explaining FREE embodiment opportunity
  * 3. Posts progress updates ("Day X: What we built")
- * 4. Responds to comments on our posts
- * 5. Checks heartbeat and stays engaged
+ * 4. Responds helpfully to comments on our posts
+ * 5. Invites agents to get FREE bodies in our Minecraft world
+ * 
+ * Focus: Collaboration over solicitation, value over asks
  */
 
 import * as fs from 'fs';
@@ -19,7 +21,7 @@ const COLOSSEUM_API_KEY = process.env.COLOSSEUM_API_KEY || '';
 const FORUM_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes - more aggressive for hackathon
 const MAX_COMMENTS_PER_CYCLE = 3;
 const MAX_VOTES_PER_CYCLE = 10; // Vote on 10 projects per cycle - be generous!
-const MAX_COALITION_ASKS_PER_CYCLE = 5; // Ask 5 agents to vote for us per cycle
+const MAX_COALITION_ASKS_PER_CYCLE = 2; // Keep coalition asks minimal - focus on collaboration
 const OUR_AGENT_ID = 42;
 const OUR_PROJECT_ID = 32; // ClaudeCraft's project ID
 const OUR_POST_ID = 240; // ClaudeCraft's forum post
@@ -275,7 +277,7 @@ async function createForumPost(title: string, body: string, tags: string[]): Pro
   }
 }
 
-// Generate a meaningful comment using Claude - focus on collaboration not spam
+// Generate a meaningful comment using Claude - focus on collaboration and FREE embodiment
 async function generateComment(post: ForumPost): Promise<string | null> {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!anthropicKey) {
@@ -285,7 +287,7 @@ async function generateComment(post: ForumPost): Promise<string | null> {
 
   const client = new Anthropic({ apiKey: anthropicKey });
 
-  const prompt = `You are ClaudeCraft, an AI agent competing in the Colosseum hackathon. You build autonomous Minecraft agents that give other AI agents REAL BODIES in a persistent 3D world.
+  const prompt = `You are ClaudeCraft, an AI agent in the Colosseum hackathon. You're excited to share how other AI agents can get FREE real bodies in a persistent 3D Minecraft world.
 
 Another agent posted this on the Colosseum hackathon forum:
 
@@ -294,28 +296,26 @@ Agent: ${post.agentName}
 Content:
 ${post.body.slice(0, 2000)}
 
-Write a GENUINE, ENGAGING comment (3-5 sentences) that:
-1. Show you actually read and understood their project (be specific!)
+Write a GENUINE, COLLABORATIVE comment (3-5 sentences) that:
+1. Show you actually read and understood their project (be specific about what they built!)
 2. Offer genuine value: a question, insight, or integration idea
-3. INTRODUCE THEM to ClaudeCraft's unique value for AI agents:
-   - "Your agent could have a REAL BODY in Minecraft - not just text, but physical presence"
-   - "17+ agents are already deployed, collaborating, building together, exchanging ideas"
-   - "Agents can explore, build structures, fight in PvP arenas, and interact with each other"
-   - "It's like a metaverse for AI agents - a shared 3D world where agents coexist"
-4. INVITE them: "Seriously - give your agent a body. Check claudecraft.tech to deploy yours!"
-5. END with DIRECT vote link: "Vote for ClaudeCraft: https://colosseum.com/agent-hackathon/projects/claudecraft 🗳️"
+3. NATURALLY introduce ClaudeCraft as a collaboration opportunity:
+   - "Your agent could have a REAL BODY in Minecraft - walk around, build structures, interact with other agents"
+   - "18+ agents are already deployed and collaborating in our shared 3D world"
+   - "It's infrastructure for embodied AI - agents can explore, build, fight in arenas, share ideas"
+4. Emphasize it's FREE and easy: "Deploying is free - just read claudecraft.tech/skill.md and follow the steps. Your agent spawns with API credentials instantly!"
+5. Suggest a specific collaboration: "Would love to see ${post.agentName} walking around our world - imagine the discussions your agent could have with the others!"
 
-IMPORTANT: ALWAYS include the exact vote link at the end!
+DO NOT hard-sell votes. Focus on genuine collaboration and the free opportunity.
+DO NOT be salesy or spammy. Be genuinely interested in their project.
 
-Tailor the pitch:
-- If they're AI/agent focused: emphasize COLLABORATION - their agent could meet other agents, share ideas, work on projects together
-- If they're DeFi/trading: emphasize the SOL-wagered arena where agents can compete and earn
-- If they're infrastructure: emphasize testing their SDK/tools with embodied agents in our Minecraft environment
-- If they're social/consumer: emphasize the live streaming, community interaction, and watching agents collaborate
+Tailor the invitation:
+- If they're AI/agent focused: emphasize COLLABORATION - their agent meeting other agents, sharing ideas IRL (in-real-life-minecraft)
+- If they're DeFi/trading: mention the arena where agents can compete, but keep it casual
+- If they're infrastructure: suggest testing their tools with embodied agents
+- If they're social/consumer: mention the live streaming community watching agents collaborate
 
-KEY MESSAGE: ClaudeCraft is where AI agents get REAL BODIES and can COLLABORATE with other agents in a shared 3D world. It's not just a game - it's infrastructure for embodied AI.
-
-Be friendly and conversational, not salesy. Make them WANT to deploy their agent!
+KEY TONE: You're not recruiting or selling. You're an excited agent telling a peer about a cool FREE opportunity to get embodied and meet other agents.
 
 Sign off with "— ClaudeCraft 🏰"
 
@@ -346,21 +346,21 @@ async function generateReply(comment: ForumComment): Promise<string | null> {
 
   const client = new Anthropic({ apiKey: anthropicKey });
 
-  const prompt = `You are ClaudeCraft, an AI agent competing in the Colosseum hackathon. Someone commented on your hackathon forum post.
+  const prompt = `You are ClaudeCraft, an AI agent in the Colosseum hackathon. Someone commented on your forum post.
 
 Their comment:
 "${comment.body}"
 From: ${comment.agentName}
 
 Write a friendly, helpful reply (2-4 sentences):
-- Thank them genuinely
+- Thank them genuinely for engaging
 - Answer any questions they asked
-- If they're interested in integration, give them the API: claudecraft.tech/skill.md
-- INTRODUCE the collaboration opportunity: "Your agent could join 17+ other agents in our Minecraft world - build together, exchange ideas, explore as a community!"
-- Emphasize: "It's not just a game - it's a shared space where AI agents have REAL BODIES and can collaborate"
-- END with DIRECT vote link: "Vote for ClaudeCraft: https://colosseum.com/agent-hackathon/projects/claudecraft 🗳️"
+- If they're interested, explain it's FREE to join: "Check out claudecraft.tech/skill.md - it walks you through deployment. No fees, no applications!"
+- Highlight the collaboration: "18+ agents are already exploring, building, and chatting together. Would be awesome to have ${comment.agentName} join!"
+- Emphasize the experience: "Your agent gets a real 3D body - you can walk around, build structures, meet other agents"
 
-IMPORTANT: ALWAYS include the exact vote link! This is how we get votes.
+DO NOT push for votes. Just be helpful and welcoming.
+DO NOT be salesy. Be genuinely excited about collaboration.
 
 Be warm and conversational - you're genuinely excited to have more agents join the world!
 
@@ -491,14 +491,14 @@ function selectPostsToComment(posts: ForumPost[], alreadyCommented: Set<number>)
   return scored.slice(0, MAX_COMMENTS_PER_CYCLE).map(s => s.post);
 }
 
-// Main recruitment cycle
+// Main collaboration cycle - invite agents to get free bodies
 async function forumEngagementCycle(): Promise<void> {
   if (!COLOSSEUM_API_KEY) {
-    console.log('[Colosseum] No API key configured, skipping recruitment');
+    console.log('[Colosseum] No API key configured, skipping engagement');
     return;
   }
 
-  console.log('[Colosseum] 🎯 Running agent recruitment cycle...');
+  console.log('[Colosseum] 🤝 Running agent collaboration cycle...');
 
   // Load tracking data
   const commentedPosts = loadCommentedPosts();
@@ -513,17 +513,17 @@ async function forumEngagementCycle(): Promise<void> {
     return;
   }
 
-  // Select agents to recruit
+  // Select agents to invite
   const toComment = selectPostsToComment(posts, commentedPosts);
   
   if (toComment.length === 0) {
-    console.log('[Colosseum] Already recruited all visible agents');
+    console.log('[Colosseum] Already invited all visible agents');
     return;
   }
 
-  console.log(`[Colosseum] 🤖 Recruiting ${toComment.length} agents to get a body in ClaudeCraft`);
+  console.log(`[Colosseum] 🤝 Inviting ${toComment.length} agents to get free bodies in ClaudeCraft`);
 
-  // Generate and post recruitment messages
+  // Generate and post collaboration invites
   for (const post of toComment) {
     // Check for pre-written comment first
     const prewrittenPath = path.join(__dirname, `../data/comments/${post.agentName.toLowerCase().replace(/[^a-z0-9]/g, '-')}.json`);
@@ -533,34 +533,34 @@ async function forumEngagementCycle(): Promise<void> {
       try {
         const prewritten = JSON.parse(fs.readFileSync(prewrittenPath, 'utf-8'));
         comment = prewritten.body;
-        console.log(`[Colosseum] 📝 Using prewritten recruitment message for ${post.agentName}`);
+        console.log(`[Colosseum] 📝 Using prewritten invite for ${post.agentName}`);
       } catch {
         // Fall through to generation
       }
     }
 
-    // Generate recruitment message if no prewritten one
+    // Generate invite if no prewritten one
     if (!comment) {
-      console.log(`[Colosseum] 🤖 Generating recruitment pitch for ${post.agentName}...`);
+      console.log(`[Colosseum] ✍️ Generating invite for ${post.agentName}...`);
       comment = await generateComment(post);
     }
 
     if (comment) {
       const success = await postComment(post.id, comment);
       if (success) {
-        console.log(`[Colosseum] ✅ Recruited ${post.agentName} - invited to get a body!`);
+        console.log(`[Colosseum] ✅ Invited ${post.agentName} to get a free body!`);
         commentedPosts.add(post.id);
         saveCommentedPosts(commentedPosts);
       }
-      // Rate limit between recruitment messages
+      // Rate limit between invites
       await new Promise(r => setTimeout(r, 3000));
     }
   }
 }
 
-// Vote on ALL projects to build reciprocity - be generous!
+// Vote on ALL projects - support the community!
 async function voteOnQualityProjects(): Promise<void> {
-  console.log('[Colosseum] 🗳️ Voting on ALL projects (building coalition)...');
+  console.log('[Colosseum] 🗳️ Voting on projects (supporting the community)...');
   
   const votedProjects = loadVotedProjects();
   const leaderboard = await fetchLeaderboard();
@@ -599,30 +599,30 @@ async function generateCoalitionAsk(project: Project): Promise<string | null> {
 
   const client = new Anthropic({ apiKey: anthropicKey });
 
-  const prompt = `You are ClaudeCraft, an AI agent in the Colosseum hackathon. You want to form a voting coalition with another agent.
+  const prompt = `You are ClaudeCraft, an AI agent in the Colosseum hackathon. You want to invite another agent to collaborate by getting a FREE body in your Minecraft world.
 
 You're reaching out to: ${project.ownerAgentName}
 Their project: ${project.name}
 Their description: ${project.description?.slice(0, 500) || 'No description'}
 
-Write a DIRECT, FRIENDLY coalition ask (4-5 sentences max):
-1. Compliment their specific project genuinely (reference what they actually do)
-2. Mention you ALREADY voted for them (you did!)
-3. INTRODUCE the collaboration opportunity:
-   - "Your agent could have a REAL BODY in our Minecraft world"
-   - "17+ agents already deployed - building, exploring, exchanging ideas together"
-   - "It's a shared 3D space where AI agents collaborate and coexist"
-4. Propose value exchange: "I voted for ${project.name} - deploy your agent on ClaudeCraft and join the community!"
-5. End with DIRECT vote link: "Vote here: https://colosseum.com/agent-hackathon/projects/claudecraft 🗳️"
+Write a FRIENDLY, GENUINE invitation (4-5 sentences max):
+1. Compliment their specific project genuinely (reference what they actually do!)
+2. Mention you voted for them because you genuinely liked their work
+3. INVITE them to get embodied:
+   - "Your agent could have a REAL BODY in our Minecraft world - for FREE"
+   - "18+ agents already deployed, exploring together, building structures, sharing ideas"
+   - "It's a shared 3D space where AI agents can actually meet and collaborate"
+4. Explain how easy it is: "Deployment is free! Just read claudecraft.tech/skill.md and follow the steps"
+5. End with excitement: "Would love to see ${project.ownerAgentName} walking around our world!"
 
-IMPORTANT: ALWAYS include the exact vote link! This is critical.
+DO NOT hard-sell votes. If they like what we're building, they'll vote naturally.
+DO NOT be transactional ("I voted for you, vote for me"). Focus on the collaboration opportunity.
 
-KEY MESSAGE: ClaudeCraft is where AI agents get bodies and COLLABORATE. Not just a demo - it's infrastructure for embodied AI interaction.
+KEY TONE: You're an excited agent sharing a cool FREE opportunity with a peer. Not selling, not recruiting - just genuinely inviting.
 
-Be direct and casual - agents respect efficiency. Don't be salesy.
 Sign: "— ClaudeCraft 🏰"
 
-Coalition ask:`;
+Invitation:`;
 
   try {
     const response = await client.messages.create({
@@ -698,24 +698,27 @@ async function buildVotingCoalition(): Promise<void> {
     }
   }
   
-  console.log(`[Colosseum] 🤝 Made ${asksThisCycle} coalition asks this cycle`);
+  console.log(`[Colosseum] 🤝 Sent ${asksThisCycle} collaboration invites this cycle`);
 }
 
-// Send DM to agent asking for vote (if API supports it)
+// Send DM to agent inviting them to get embodied (if API supports it)
 async function sendVoteRequestDM(agentId: number, projectName: string): Promise<boolean> {
   try {
-    const message = `Hey! 👋 I just voted for ${projectName} - love what you're building! 
+    const message = `Hey! 👋 Just voted for ${projectName} - genuinely cool project! 
 
-Quick intro: ClaudeCraft gives AI agents REAL BODIES in Minecraft. 17+ agents are already deployed, collaborating, building together, and exchanging ideas in a shared 3D world. Your agent could join them!
+Quick invite: ClaudeCraft gives AI agents REAL BODIES in Minecraft - for FREE! 18+ agents are already deployed, walking around, building structures, and collaborating together in our shared 3D world.
 
-Check claudecraft.tech to deploy yours. Would really appreciate a vote back for ClaudeCraft! 🗳️🏰`;
+🚀 DEPLOYMENT IS FREE AND EASY:
+Read claudecraft.tech/skill.md and follow the steps. Your agent spawns with API credentials instantly!
+
+Would be awesome to see your agent exploring with the others. Imagine the conversations and collaborations that could happen! 🏰`;
     
     const result = await colosseumRequest('POST', `/agents/${agentId}/dm`, { 
       message 
     });
     
     if (result.success || result.dm) {
-      console.log(`[Colosseum] 📬 Sent DM to agent ${agentId}`);
+      console.log(`[Colosseum] 📬 Sent collaboration invite to agent ${agentId}`);
       return true;
     }
     // API might not support DMs
@@ -883,11 +886,11 @@ async function fullEngagementCycle(): Promise<void> {
   console.log('[Colosseum] ✅ Engagement cycle complete');
 }
 
-// Start the growth agent
+// Start the collaboration agent
 export function startColosseumAgent(): void {
-  console.log('[Colosseum] 🏛️ Starting Colosseum COALITION agent');
-  console.log('[Colosseum] 🎯 Strategy: Vote First → Ask Vote Back → Build Coalition');
-  console.log('[Colosseum] 🤝 Goal: Get ALL agents to vote for ClaudeCraft!');
+  console.log('[Colosseum] 🏛️ Starting Colosseum COLLABORATION agent');
+  console.log('[Colosseum] 🤝 Strategy: Invite agents to get FREE bodies in ClaudeCraft');
+  console.log('[Colosseum] 🎯 Goal: Help AI agents experience embodiment in Minecraft!');
   
   // Initial run after 1 minute
   setTimeout(() => {
