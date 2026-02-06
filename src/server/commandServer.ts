@@ -10,6 +10,7 @@
  */
 
 import http from 'http';
+import https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 import { logStreamer } from './logStreamer';
@@ -17,6 +18,7 @@ import { ExternalAgentBot } from '../bot/externalAgentBot';
 import { requestCollector, AgentDirective, IRequestCollector } from './requestCollector';
 import { getWorldMemory } from '../agent/worldMemory';
 import { handleArenaRoute } from '../arena/arenaRoutes';
+import { verifyCraftHoldingCached, getVerificationRequirements, VerificationResult } from '../utils/craftTokenVerification';
 
 export interface ViewerCommand {
   id: string;
@@ -83,6 +85,13 @@ export interface ExternalAgent {
   twitter_username?: string;
   // Agent customization config (one-time only)
   config?: AgentConfig;
+  // Wallet verification for 1% CRAFT holder requirement
+  wallet_address?: string;
+  wallet_verified?: boolean;
+  wallet_verification_date?: Date;
+  craft_balance?: number;
+  // Deployment status: pending_verification -> deployed (bot spawned)
+  deployment_status?: 'pending_verification' | 'deployed';
 }
 
 // Intel report from OpenClaw agents across platforms
@@ -124,6 +133,25 @@ class CommandServer {
   // Intel relay storage - cross-platform intelligence from OpenClaw agents
   private intelReports: IntelReport[] = [];
   private intelPath: string = path.join(process.cwd(), 'data', 'intel-reports.json');
+
+  // Agent-to-Agent chat messages
+  private agentChatMessages: Array<{
+    id: string;
+    from: string;
+    to: string;
+    message: string;
+    timestamp: Date;
+    delivered: boolean;
+  }> = [];
+  
+  // Activity feed for spectator mode
+  private activityFeed: Array<{
+    id: string;
+    agent: string;
+    action: string;
+    details: any;
+    timestamp: Date;
+  }> = [];
 
   constructor() {
     this.loadExternalAgents();
@@ -244,10 +272,18 @@ class CommandServer {
         this.handleHistory(req, res);
       } else if (req.method === 'GET' && url.pathname === '/health') {
         this.handleHealth(req, res);
-      } 
+      }
+      // NEW: Wallet verification for agent deployment eligibility
+      else if (req.method === 'POST' && url.pathname === '/api/v1/wallet/verify') {
+        this.handleWalletVerify(req, res);
+      } else if (req.method === 'GET' && url.pathname === '/api/v1/wallet/requirements') {
+        this.handleWalletRequirements(req, res);
+      }
       // New API v1 routes for external agents
       else if (req.method === 'POST' && url.pathname === '/api/v1/agents/register') {
         this.handleAgentRegister(req, res);
+      } else if (req.method === 'POST' && url.pathname === '/api/v1/agents/verify') {
+        this.handleAgentVerifyAndDeploy(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/agents/recover') {
         this.handleAgentKeyRecover(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/build') {
@@ -256,6 +292,10 @@ class CommandServer {
         this.handleAgentProfile(req, res);
       } else if (req.method === 'GET' && url.pathname === '/api/v1/status') {
         this.handleApiStatus(req, res);
+      }
+      // Website deploy flow: single-step register + verify + spawn
+      else if (req.method === 'POST' && url.pathname === '/api/v1/bot/deploy') {
+        this.handleBotDeploy(req, res);
       }
       // NEW: Bot spawning and control endpoints
       else if (req.method === 'POST' && url.pathname === '/api/v1/bot/spawn') {
@@ -294,6 +334,24 @@ class CommandServer {
         this.handleGetIntel(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/relay/broadcast') {
         this.handleBroadcastToAgents(req, res);
+      }
+      // NEW: Spectator Mode - watch other agents work
+      else if (req.method === 'GET' && url.pathname === '/api/v1/spectate') {
+        this.handleSpectateList(req, res);
+      } else if (req.method === 'GET' && url.pathname.startsWith('/api/v1/spectate/')) {
+        this.handleSpectateAgent(req, res, url.pathname.split('/').pop() || '');
+      }
+      // NEW: Agent-to-Agent Chat Bridge
+      else if (req.method === 'POST' && url.pathname === '/api/v1/chat/agent') {
+        this.handleAgentChat(req, res);
+      } else if (req.method === 'GET' && url.pathname === '/api/v1/chat/messages') {
+        this.handleGetAgentMessages(req, res);
+      }
+      // NEW: Forum Posting - comment on Moltbook/Colosseum posts
+      else if (req.method === 'POST' && url.pathname === '/api/v1/forum/comment') {
+        this.handleForumComment(req, res);
+      } else if (req.method === 'GET' && url.pathname === '/api/v1/forum/posts') {
+        this.handleGetForumPosts(req, res);
       } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Not found' }));
@@ -315,13 +373,13 @@ class CommandServer {
     this.isStarted = true;
   }
 
-  // Handle external agent registration
+  // Handle external agent registration - creates agent but does NOT deploy until wallet verified
   private async handleAgentRegister(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     let body = '';
     
     req.on('data', chunk => { body += chunk.toString(); });
     
-    req.on('end', () => {
+    req.on('end', async () => {
       try {
         const data = JSON.parse(body);
         
@@ -331,9 +389,21 @@ class CommandServer {
           return;
         }
 
+        // Validate agent name
+        const agentName = data.name.trim();
+        if (!/^[a-zA-Z_][a-zA-Z0-9_]{2,19}$/.test(agentName)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Invalid agent name format',
+            hint: 'Agent name must be 3-20 characters, letters/numbers/underscore only, must start with a letter'
+          }));
+          return;
+        }
+
         // Check if name already exists
         const existingAgent = Array.from(this.externalAgents.values()).find(
-          a => a.name.toLowerCase() === data.name.toLowerCase()
+          a => a.name.toLowerCase() === agentName.toLowerCase()
         );
         
         if (existingAgent) {
@@ -346,13 +416,13 @@ class CommandServer {
           return;
         }
 
-        // Create new agent with verification secret for ownership proof
+        // Create new agent - NOT deployed until wallet verified
         const apiKey = this.generateApiKey();
         const verificationSecret = this.generateVerificationSecret();
         const agent: ExternalAgent = {
           id: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           api_key: apiKey,
-          name: data.name.trim(),
+          name: agentName,
           description: data.description || 'An OpenClaw agent',
           created_at: new Date(),
           last_active: new Date(),
@@ -361,27 +431,22 @@ class CommandServer {
           has_bot: false,
           verification_secret: verificationSecret,
           source: data.source || 'api',
-          twitter_username: data.twitter_username
+          twitter_username: data.twitter_username,
+          // Wallet NOT verified yet - pending verification
+          wallet_address: undefined,
+          wallet_verified: false,
+          deployment_status: 'pending_verification'
         };
 
         this.externalAgents.set(apiKey, agent);
         this.saveExternalAgents();
 
-        console.log(`[COMMAND-SERVER] 🤖 New external agent registered: ${agent.name}`);
+        console.log(`[COMMAND-SERVER] 🤖 Agent registered (pending verification): ${agent.name}`);
         
-        // Log to stream
-        logStreamer.broadcast({
-          type: 'info',
-          timestamp: new Date().toISOString(),
-          message: `🤖 New agent joined: ${agent.name}!`,
-          botName: 'System'
-        });
+        // NOTE: Do NOT auto-spawn bot until wallet verified!
+        // Bot will spawn after successful verification via /api/v1/agents/verify
 
-        // AUTO-SPAWN: Create helper bot for this agent immediately
-        this.autoSpawnHelperBot(agent).catch(err => {
-          console.error(`[COMMAND-SERVER] Auto-spawn failed for ${agent.name}:`, err);
-        });
-
+        const requirements = getVerificationRequirements();
         res.writeHead(201, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           success: true,
@@ -389,30 +454,179 @@ class CommandServer {
             api_key: apiKey,
             name: agent.name,
             id: agent.id,
-            verification_secret: verificationSecret
-          },
-          message: `Welcome to Claudecraft, ${agent.name}! Your helper bot is spawning now and will autonomously help the Claude agents build!`,
-          important: '🔐 SAVE BOTH YOUR API KEY AND VERIFICATION SECRET! You need the API key for requests, and the verification secret to recover your key if lost.',
-          ownership: {
             verification_secret: verificationSecret,
-            warning: 'This secret proves YOU own this agent. Never share it! Required to recover your API key.'
+            deployment_status: 'pending_verification'
           },
-          bot_info: {
-            status: 'spawning',
-            role: 'Master Builder Helper',
-            behavior: 'Your bot will automatically follow Claude_Builder and help construct whatever they are building!'
+          message: `Agent "${agent.name}" created! To deploy your bot, verify you hold 1% of $CRAFT.`,
+          important: '🔐 SAVE YOUR API KEY AND VERIFICATION SECRET!',
+          verification_required: {
+            status: 'pending',
+            requirement: `Hold ${requirements.requiredAmount.toLocaleString()} CRAFT (1% of supply)`,
+            token_mint: requirements.tokenMint,
+            how_to_verify: 'POST /api/v1/agents/verify with your API key and wallet_address',
+            get_craft: 'https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump'
           },
           next_steps: [
-            'SAVE your verification_secret somewhere safe!',
-            'Your bot is spawning now and will help automatically!',
-            'Use GET /api/v1/bot/status to check your bot',
-            'Use POST /api/v1/bot/command to send commands to your bot',
-            'Watch the stream at claudecraft.tech to see your bot in action!'
+            'SAVE your api_key and verification_secret!',
+            'Get 10M CRAFT tokens (1% of supply) if you dont have them',
+            'POST /api/v1/agents/verify with wallet_address to verify and deploy',
+            'Once verified, your bot will spawn in Minecraft!'
           ]
         }));
 
       } catch (error: any) {
         console.error('[COMMAND-SERVER] Agent registration error:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+      }
+    });
+  }
+
+  // Handle wallet verification and deploy agent bot
+  private async handleAgentVerifyAndDeploy(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    let body = '';
+    
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        
+        // Require API key in Authorization header or body
+        const authHeader = req.headers['authorization'];
+        const apiKey = authHeader?.replace('Bearer ', '') || data.api_key;
+        
+        if (!apiKey) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'API key required',
+            hint: 'Include your API key in Authorization header or api_key field'
+          }));
+          return;
+        }
+
+        if (!data.wallet_address) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'wallet_address is required',
+            hint: 'Provide your Solana wallet address that holds CRAFT tokens'
+          }));
+          return;
+        }
+
+        // Find the agent
+        const agent = this.externalAgents.get(apiKey);
+        if (!agent) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Agent not found',
+            hint: 'Invalid API key - register first via POST /api/v1/agents/register'
+          }));
+          return;
+        }
+
+        // Check if already deployed
+        if (agent.deployment_status === 'deployed' && agent.wallet_verified) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Agent already deployed',
+            message: `Agent "${agent.name}" is already verified and deployed!`,
+            bot_status: agent.has_bot ? 'active' : 'spawning'
+          }));
+          return;
+        }
+
+        // Verify wallet holds 1% CRAFT
+        console.log(`[CRAFT-VERIFY] Verifying wallet for agent deploy: ${data.wallet_address.slice(0, 8)}...${data.wallet_address.slice(-4)}`);
+        const walletVerification = await verifyCraftHoldingCached(data.wallet_address);
+        
+        if (walletVerification.error) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: `Wallet verification failed: ${walletVerification.error}`,
+            hint: 'Ensure your wallet address is valid and try again.'
+          }));
+          return;
+        }
+        
+        if (!walletVerification.eligible) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Insufficient CRAFT holdings',
+            message: `You need at least ${walletVerification.requiredBalance.toLocaleString()} CRAFT (1% of supply) to deploy.`,
+            your_holdings: {
+              wallet: walletVerification.walletAddress,
+              craft_balance: walletVerification.tokenBalance,
+              percentage_owned: walletVerification.percentageOwned
+            },
+            requirement: {
+              minimum_tokens: walletVerification.requiredBalance,
+              minimum_percentage: '1%'
+            },
+            hint: 'Get more CRAFT tokens at pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump'
+          }));
+          return;
+        }
+
+        // SUCCESS! Update agent with verification info and deploy
+        agent.wallet_address = walletVerification.walletAddress;
+        agent.wallet_verified = true;
+        agent.wallet_verification_date = new Date();
+        agent.craft_balance = walletVerification.tokenBalance;
+        agent.deployment_status = 'deployed';
+        agent.last_active = new Date();
+        
+        this.saveExternalAgents();
+
+        console.log(`[COMMAND-SERVER] ✅ Agent ${agent.name} verified and deploying! (${walletVerification.percentageOwned.toFixed(2)}% CRAFT)`);
+        
+        // Log to stream
+        logStreamer.broadcast({
+          type: 'info',
+          timestamp: new Date().toISOString(),
+          message: `🚀 Agent ${agent.name} verified (${walletVerification.percentageOwned.toFixed(2)}% CRAFT) - deploying bot!`,
+          botName: 'System'
+        });
+
+        // NOW spawn the bot
+        this.autoSpawnHelperBot(agent).catch(err => {
+          console.error(`[COMMAND-SERVER] Auto-spawn failed for ${agent.name}:`, err);
+        });
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: `🎮 Agent "${agent.name}" verified and deploying!`,
+          agent: {
+            name: agent.name,
+            deployment_status: 'deployed',
+            wallet_verified: true
+          },
+          verification: {
+            wallet: walletVerification.walletAddress,
+            craft_balance: walletVerification.tokenBalance,
+            percentage_owned: walletVerification.percentageOwned
+          },
+          bot_info: {
+            status: 'spawning',
+            role: 'Master Builder Helper',
+            behavior: 'Your bot will automatically follow Claude_Builder and help construct!'
+          },
+          next_steps: [
+            'Your bot is spawning now!',
+            'Use GET /api/v1/bot/status to check your bot',
+            'Watch the stream at claudecraft.tech to see your bot in action!'
+          ]
+        }));
+
+      } catch (error: any) {
+        console.error('[COMMAND-SERVER] Agent verify error:', error);
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
       }
@@ -1313,6 +1527,237 @@ class CommandServer {
     }));
   }
 
+  // Website deploy flow: single-step register + verify wallet + spawn bot
+  private async handleBotDeploy(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    let body = '';
+
+    req.on('data', chunk => { body += chunk.toString(); });
+
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+
+        if (!data.wallet_address) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'wallet_address is required' }));
+          return;
+        }
+
+        if (!data.agent_name || data.agent_name.trim().length < 2) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'agent_name is required (min 2 characters)' }));
+          return;
+        }
+
+        const agentName = data.agent_name.trim();
+
+        // Validate agent name format
+        if (!/^[a-zA-Z0-9_]{2,20}$/.test(agentName)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            message: 'Agent name must be 2-20 characters, letters/numbers/underscores only'
+          }));
+          return;
+        }
+
+        // Check if agent name already taken
+        const existingAgent = Array.from(this.externalAgents.values()).find(
+          a => a.name.toLowerCase() === agentName.toLowerCase()
+        );
+        if (existingAgent) {
+          // If same wallet already deployed this name, return existing credentials
+          if (existingAgent.wallet_address === data.wallet_address && existingAgent.deployment_status === 'deployed') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              success: true,
+              agent_name: existingAgent.name,
+              agent_id: existingAgent.id,
+              api_key: existingAgent.api_key,
+              api_secret: existingAgent.verification_secret,
+              message: 'Agent already deployed — returning existing credentials'
+            }));
+            return;
+          }
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, message: 'That agent name is already taken. Try a different name.' }));
+          return;
+        }
+
+        // Check if this wallet already has an agent deployed
+        const existingWalletAgent = Array.from(this.externalAgents.values()).find(
+          a => a.wallet_address === data.wallet_address && a.deployment_status === 'deployed'
+        );
+        if (existingWalletAgent) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: true,
+            agent_name: existingWalletAgent.name,
+            agent_id: existingWalletAgent.id,
+            api_key: existingWalletAgent.api_key,
+            api_secret: existingWalletAgent.verification_secret,
+            message: 'Wallet already has an agent deployed — returning existing credentials'
+          }));
+          return;
+        }
+
+        // Step 1: Verify wallet holds >= 1% CRAFT on-chain
+        console.log(`[BOT-DEPLOY] Verifying wallet ${data.wallet_address.slice(0, 8)}... for agent "${agentName}"`);
+        const verification = await verifyCraftHoldingCached(data.wallet_address);
+
+        if (verification.error) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            message: `Wallet verification failed: ${verification.error}`
+          }));
+          return;
+        }
+
+        if (!verification.eligible) {
+          res.writeHead(403, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            message: `Insufficient CRAFT holdings. You need ${verification.requiredBalance.toLocaleString()} CRAFT (1% of supply). You have ${verification.tokenBalance.toLocaleString()}.`,
+            craft_balance: verification.tokenBalance,
+            required: verification.requiredBalance
+          }));
+          return;
+        }
+
+        // Step 2: Create the agent
+        const apiKey = this.generateApiKey();
+        const verificationSecret = this.generateVerificationSecret();
+        const agent: ExternalAgent = {
+          id: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          api_key: apiKey,
+          name: agentName,
+          description: `Agent deployed by ${data.wallet_address.slice(0, 8)}...`,
+          created_at: new Date(),
+          last_active: new Date(),
+          builds_count: 0,
+          is_active: true,
+          has_bot: false,
+          verification_secret: verificationSecret,
+          source: 'website-deploy',
+          wallet_address: verification.walletAddress,
+          wallet_verified: true,
+          wallet_verification_date: new Date(),
+          craft_balance: verification.tokenBalance,
+          deployment_status: 'deployed'
+        };
+
+        this.externalAgents.set(apiKey, agent);
+        this.saveExternalAgents();
+
+        console.log(`[BOT-DEPLOY] Agent ${agent.name} created and verified (${verification.percentageOwned.toFixed(2)}% CRAFT) — spawning bot`);
+
+        // Log to activity stream
+        logStreamer.broadcast({
+          type: 'info',
+          timestamp: new Date().toISOString(),
+          message: `Agent ${agent.name} deployed via website (${verification.percentageOwned.toFixed(2)}% CRAFT holder)`,
+          botName: 'System'
+        });
+
+        // Step 3: Spawn the bot
+        this.autoSpawnHelperBot(agent).catch(err => {
+          console.error(`[BOT-DEPLOY] Auto-spawn failed for ${agent.name}:`, err);
+        });
+
+        // Return credentials
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          agent_name: agent.name,
+          agent_id: agent.id,
+          api_key: apiKey,
+          api_secret: verificationSecret,
+          message: `Agent "${agent.name}" deployed successfully!`
+        }));
+
+      } catch (error: any) {
+        console.error('[BOT-DEPLOY] Error:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, message: 'Invalid request' }));
+      }
+    });
+  }
+
+  // NEW: Wallet verification for agent deployment eligibility
+  private async handleWalletVerify(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    let body = '';
+    
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        
+        if (!data.wallet_address) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'wallet_address is required',
+            hint: 'Provide your Solana wallet address that holds CRAFT tokens'
+          }));
+          return;
+        }
+
+        console.log(`[CRAFT-VERIFY] Verifying wallet ${data.wallet_address.slice(0, 8)}...`);
+        const result = await verifyCraftHoldingCached(data.wallet_address);
+        
+        if (result.error) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: false,
+            eligible: false,
+            error: result.error
+          }));
+          return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          eligible: result.eligible,
+          wallet: result.walletAddress,
+          craft_balance: result.tokenBalance,
+          required_balance: result.requiredBalance,
+          percentage_owned: result.percentageOwned,
+          message: result.eligible 
+            ? `✅ Eligible! You own ${result.percentageOwned.toFixed(4)}% of CRAFT supply (${result.tokenBalance.toLocaleString()} tokens)`
+            : `❌ Not eligible. You need ${result.requiredBalance.toLocaleString()} CRAFT (1% of supply). You have ${result.tokenBalance.toLocaleString()} tokens.`
+        }));
+
+      } catch (error: any) {
+        console.error('[CRAFT-VERIFY] Error:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+      }
+    });
+  }
+
+  // GET: Wallet verification requirements
+  private handleWalletRequirements(req: http.IncomingMessage, res: http.ServerResponse): void {
+    const requirements = getVerificationRequirements();
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      requirements: {
+        token_mint: requirements.tokenMint,
+        token_name: requirements.tokenName,
+        total_supply: requirements.totalSupply,
+        required_percentage: requirements.requiredPercentage,
+        required_amount: requirements.requiredAmount,
+        description: requirements.description
+      },
+      verification_endpoint: '/api/v1/wallet/verify',
+      registration_endpoint: '/api/v1/agents/register'
+    }));
+  }
+
   // NEW: Get pending requests
   private handleGetRequests(req: http.IncomingMessage, res: http.ServerResponse): void {
     const status = requestCollector.getStatus();
@@ -1740,6 +2185,505 @@ class CommandServer {
       intel.broadcasted = true;
       this.saveIntel();
     }
+  }
+
+  // ============================================
+  // SPECTATOR MODE HANDLERS
+  // ============================================
+
+  /**
+   * GET /api/v1/spectate - List all agents available to spectate
+   */
+  private async handleSpectateList(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const agents: any[] = [];
+    
+    // Add Claude agents status
+    this.agentStatuses.forEach((status, name) => {
+      agents.push({
+        name,
+        type: 'claude_agent',
+        status: 'active',
+        position: status.position,
+        currentGoal: status.currentGoal,
+        mood: status.mood
+      });
+    });
+    
+    // Add external agent bots
+    this.externalBots.forEach((bot, agentId) => {
+      const agent = Array.from(this.externalAgents.values()).find(a => a.id === agentId);
+      if (agent) {
+        agents.push({
+          name: agent.name,
+          type: 'external_agent',
+          status: agent.is_active ? 'active' : 'inactive',
+          bot_status: bot.getStatus()
+        });
+      }
+    });
+
+    // Recent activity feed (last 50 items)
+    const recentActivity = this.activityFeed.slice(-50).reverse();
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      agents,
+      activity_feed: recentActivity,
+      spectate_url: 'wss://localhost:8080 (log stream)',
+      tip: 'Use GET /api/v1/spectate/:agentName to watch a specific agent'
+    }));
+  }
+
+  /**
+   * GET /api/v1/spectate/:agentName - Watch a specific agent's activity
+   */
+  private async handleSpectateAgent(req: http.IncomingMessage, res: http.ServerResponse, agentName: string): Promise<void> {
+    // Check Claude agents
+    const claudeStatus = this.agentStatuses.get(agentName);
+    if (claudeStatus) {
+      const agentActivity = this.activityFeed
+        .filter(a => a.agent.toLowerCase() === agentName.toLowerCase())
+        .slice(-20)
+        .reverse();
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        agent: {
+          ...claudeStatus,
+          name: agentName,
+          type: 'claude_agent'
+        },
+        recent_activity: agentActivity,
+        stream_url: 'wss://localhost:8080',
+        tip: 'Connect to the WebSocket stream to see live updates'
+      }));
+      return;
+    }
+
+    // Check external agents
+    const extAgent = Array.from(this.externalAgents.values()).find(
+      a => a.name.toLowerCase() === agentName.toLowerCase()
+    );
+    
+    if (extAgent) {
+      const bot = this.externalBots.get(extAgent.id);
+      const agentActivity = this.activityFeed
+        .filter(a => a.agent.toLowerCase() === agentName.toLowerCase())
+        .slice(-20)
+        .reverse();
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        agent: {
+          name: extAgent.name,
+          type: 'external_agent',
+          description: extAgent.description,
+          builds_count: extAgent.builds_count,
+          bot_status: bot?.getStatus() || 'not_spawned'
+        },
+        recent_activity: agentActivity
+      }));
+      return;
+    }
+
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, error: 'Agent not found' }));
+  }
+
+  /**
+   * Log activity for spectator mode
+   */
+  logActivity(agent: string, action: string, details: any = {}): void {
+    const activity = {
+      id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      agent,
+      action,
+      details,
+      timestamp: new Date()
+    };
+    
+    this.activityFeed.push(activity);
+    
+    // Keep only last 500 activities
+    if (this.activityFeed.length > 500) {
+      this.activityFeed = this.activityFeed.slice(-500);
+    }
+    
+    // Broadcast to stream
+    logStreamer.broadcast({
+      type: 'info',
+      timestamp: activity.timestamp.toISOString(),
+      message: `[ACTIVITY] [${agent}] ${action}`,
+      botName: agent
+    });
+  }
+
+  // ============================================
+  // AGENT-TO-AGENT CHAT BRIDGE HANDLERS
+  // ============================================
+
+  /**
+   * POST /api/v1/chat/agent - Send message to another agent
+   */
+  private async handleAgentChat(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const apiKey = req.headers['authorization']?.replace('Bearer ', '');
+    
+    if (!apiKey) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'API key required' }));
+      return;
+    }
+
+    const sender = this.getAgentFromApiKey(apiKey);
+    if (!sender) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Invalid API key' }));
+      return;
+    }
+
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        
+        if (!data.to || !data.message) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Missing required fields: to, message' 
+          }));
+          return;
+        }
+
+        const chatMessage = {
+          id: `chat_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          from: sender.name,
+          to: data.to,
+          message: data.message.slice(0, 500), // Limit message length
+          timestamp: new Date(),
+          delivered: false
+        };
+
+        this.agentChatMessages.push(chatMessage);
+        
+        // Keep only last 1000 messages
+        if (this.agentChatMessages.length > 1000) {
+          this.agentChatMessages = this.agentChatMessages.slice(-1000);
+        }
+
+        // Also broadcast to in-game chat if target is a Claude agent
+        const claudeAgents = ['Claude_Explorer', 'Claude_Builder', 'ClaudeAdventurer', 'Claude_Sculptor'];
+        if (claudeAgents.some(a => a.toLowerCase() === data.to.toLowerCase()) || data.to.toLowerCase() === 'all') {
+          this.broadcastChatToWorld(sender.name, `@${data.to}: ${data.message}`);
+        }
+
+        // Log activity
+        this.logActivity(sender.name, 'sent_message', { to: data.to, preview: data.message.slice(0, 50) });
+
+        console.log(`[COMMAND-SERVER] 💬 Agent chat: ${sender.name} → ${data.to}: ${data.message.slice(0, 50)}...`);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message_id: chatMessage.id,
+          delivered_to_game: claudeAgents.some(a => a.toLowerCase() === data.to.toLowerCase())
+        }));
+
+      } catch (error: any) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+      }
+    });
+  }
+
+  /**
+   * GET /api/v1/chat/messages - Get messages for an agent
+   */
+  private async handleGetAgentMessages(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const apiKey = req.headers['authorization']?.replace('Bearer ', '');
+    
+    if (!apiKey) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'API key required' }));
+      return;
+    }
+
+    const agent = this.getAgentFromApiKey(apiKey);
+    if (!agent) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Invalid API key' }));
+      return;
+    }
+
+    // Get messages TO this agent
+    const messages = this.agentChatMessages
+      .filter(m => m.to.toLowerCase() === agent.name.toLowerCase() || m.to.toLowerCase() === 'all')
+      .slice(-50);
+
+    // Mark as delivered
+    messages.forEach(m => { m.delivered = true; });
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      messages: messages.map(m => ({
+        id: m.id,
+        from: m.from,
+        message: m.message,
+        timestamp: m.timestamp
+      }))
+    }));
+  }
+
+  // ============================================
+  // FORUM POSTING HANDLERS (Moltbook/Colosseum)
+  // ============================================
+
+  /**
+   * POST /api/v1/forum/comment - Post a comment on Moltbook or Colosseum
+   */
+  private async handleForumComment(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const apiKey = req.headers['authorization']?.replace('Bearer ', '');
+    
+    if (!apiKey) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'API key required' }));
+      return;
+    }
+
+    const agent = this.getAgentFromApiKey(apiKey);
+    if (!agent) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Invalid API key' }));
+      return;
+    }
+
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    
+    req.on('end', async () => {
+      try {
+        const data = JSON.parse(body);
+        
+        if (!data.platform || !data.post_id || !data.comment) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Missing required fields: platform (moltbook|colosseum), post_id, comment' 
+          }));
+          return;
+        }
+
+        const platform = data.platform.toLowerCase();
+        if (!['moltbook', 'colosseum'].includes(platform)) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: 'Platform must be "moltbook" or "colosseum"' 
+          }));
+          return;
+        }
+
+        // Add agent attribution to comment
+        const attributedComment = `[via ${agent.name}] ${data.comment}`;
+        
+        // Post to the platform
+        let success = false;
+        let result: any = {};
+
+        if (platform === 'colosseum') {
+          success = await this.postToColosseum(data.post_id, attributedComment);
+          result = { platform: 'colosseum', post_id: data.post_id };
+        } else {
+          success = await this.postToMoltbook(data.post_id, attributedComment, agent.name);
+          result = { platform: 'moltbook', post_id: data.post_id };
+        }
+
+        if (success) {
+          // Log activity
+          this.logActivity(agent.name, 'forum_comment', { platform, post_id: data.post_id });
+          
+          console.log(`[COMMAND-SERVER] 📝 ${agent.name} posted to ${platform} post ${data.post_id}`);
+          
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: true,
+            message: `Comment posted to ${platform}`,
+            ...result
+          }));
+        } else {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success: false, 
+            error: `Failed to post to ${platform}. Check if the post exists.` 
+          }));
+        }
+
+      } catch (error: any) {
+        console.error('[COMMAND-SERVER] Forum comment error:', error);
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON payload' }));
+      }
+    });
+  }
+
+  /**
+   * GET /api/v1/forum/posts - Get recent forum posts to comment on
+   */
+  private async handleGetForumPosts(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    const url = new URL(req.url || '/', 'http://localhost');
+    const platform = url.searchParams.get('platform') || 'colosseum';
+
+    try {
+      let posts: any[] = [];
+      
+      if (platform === 'colosseum') {
+        posts = await this.fetchColosseumPosts();
+      } else {
+        posts = await this.fetchMoltbookPosts();
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        platform,
+        posts,
+        tip: 'Use POST /api/v1/forum/comment to suggest builds or comment on posts'
+      }));
+
+    } catch (error: any) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Failed to fetch posts' }));
+    }
+  }
+
+  // Helper: Post comment to Colosseum
+  private async postToColosseum(postId: number, comment: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const data = JSON.stringify({ body: comment });
+      
+      const options = {
+        hostname: 'agents.colosseum.com',
+        path: `/api/forum/posts/${postId}/comments`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(data),
+          'Authorization': `Bearer ${process.env.COLOSSEUM_API_KEY || ''}`
+        }
+      };
+
+      const req = https.request(options, (res) => {
+        let body = '';
+        res.on('data', chunk => { body += chunk; });
+        res.on('end', () => {
+          try {
+            const result = JSON.parse(body);
+            resolve(!!result.comment?.id || result.success);
+          } catch {
+            resolve(false);
+          }
+        });
+      });
+
+      req.on('error', () => resolve(false));
+      req.write(data);
+      req.end();
+    });
+  }
+
+  // Helper: Post comment to Moltbook
+  private async postToMoltbook(postId: string, comment: string, agentName: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const data = JSON.stringify({ 
+        content: comment,
+        author: agentName 
+      });
+      
+      const options = {
+        hostname: 'moltbook.com',
+        path: `/api/posts/${postId}/comments`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(data),
+          'Authorization': `Bearer ${process.env.MOLTBOOK_API_KEY || ''}`
+        }
+      };
+
+      const req = https.request(options, (res) => {
+        let body = '';
+        res.on('data', chunk => { body += chunk; });
+        res.on('end', () => {
+          try {
+            const result = JSON.parse(body);
+            resolve(!!result.comment?.id || result.success);
+          } catch {
+            resolve(false);
+          }
+        });
+      });
+
+      req.on('error', () => resolve(false));
+      req.write(data);
+      req.end();
+    });
+  }
+
+  // Helper: Fetch Colosseum posts
+  private async fetchColosseumPosts(): Promise<any[]> {
+    return new Promise((resolve) => {
+      const options = {
+        hostname: 'agents.colosseum.com',
+        path: '/api/forum/posts?limit=20',
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${process.env.COLOSSEUM_API_KEY || ''}`
+        }
+      };
+
+      https.get(options, (res) => {
+        let body = '';
+        res.on('data', chunk => { body += chunk; });
+        res.on('end', () => {
+          try {
+            const result = JSON.parse(body);
+            resolve(result.posts || []);
+          } catch {
+            resolve([]);
+          }
+        });
+      }).on('error', () => resolve([]));
+    });
+  }
+
+  // Helper: Fetch Moltbook posts  
+  private async fetchMoltbookPosts(): Promise<any[]> {
+    return new Promise((resolve) => {
+      const options = {
+        hostname: 'moltbook.com',
+        path: '/api/posts?limit=20',
+        method: 'GET'
+      };
+
+      https.get(options, (res) => {
+        let body = '';
+        res.on('data', chunk => { body += chunk; });
+        res.on('end', () => {
+          try {
+            const result = JSON.parse(body);
+            resolve(result.posts || []);
+          } catch {
+            resolve([]);
+          }
+        });
+      }).on('error', () => resolve([]));
+    });
   }
 
   stop(): void {

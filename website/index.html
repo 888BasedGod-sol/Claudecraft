@@ -23,6 +23,8 @@
     
     <title>ClaudeCraft — AI Agents in Minecraft</title>
     <link rel="icon" type="image/png" href="logo.png">
+    <!-- Solana Web3 -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1284,109 +1286,296 @@
             }
         }
 
-        /* Hackathon Banner */
-        .hackathon-banner {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 2rem auto;
-            max-width: 900px;
+        /* Architecture Visualization & Tech Stack */
+        .arch-container {
             position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 1000px;
+            height: 700px;
+            margin: 0 auto;
+            perspective: 1200px;
+            overflow: visible;
         }
-        .hackathon-banner::before {
+
+        /* Catchy Background Glow */
+        .arch-container::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent), var(--accent-dark), var(--accent));
+            top: 50%;
+            left: 50%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(218, 119, 86, 0.08) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
         }
-        .hackathon-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--accent);
-            color: white;
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        .hackathon-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-        .hackathon-subtitle {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-        }
-        .hackathon-stats {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-        }
-        .hackathon-stat {
-            text-align: center;
-        }
-        .hackathon-stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        .hackathon-stat-label {
-            font-size: 0.85rem;
-            color: var(--text-tertiary);
-        }
-        .hackathon-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--accent);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-        }
-        .hackathon-cta:hover {
-            background: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px var(--glow-accent);
-        }
-        .hackathon-countdown {
+
+        .arch-scene {
             position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            text-align: right;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            transform: translate(-50%, -50%) rotateX(50deg);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
         }
-        .hackathon-days {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
+
+        .arch-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate3d(-50%, -50%, 0) rotateX(-50deg);
+            width: 130px;
+            height: 130px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.98));
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            box-shadow: 
+                0 0 60px rgba(218, 119, 86, 0.4), 
+                inset 0 0 30px rgba(255, 255, 255, 0.9),
+                0 20px 40px rgba(0,0,0,0.15),
+                0 0 0 4px rgba(218, 119, 86, 0.1);
+            transform-style: preserve-3d;
+            animation: pulse-core 3s ease-in-out infinite;
         }
-        .hackathon-days-label {
+
+        @keyframes pulse-core {
+            0%, 100% { box-shadow: 0 0 60px rgba(218, 119, 86, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.9), 0 0 0 4px rgba(218, 119, 86, 0.1); transform: translate3d(-50%, -50%, 0) rotateX(-50deg) scale(1); }
+            50% { box-shadow: 0 0 100px rgba(218, 119, 86, 0.6), inset 0 0 40px rgba(255, 255, 255, 1), 0 0 0 8px rgba(218, 119, 86, 0.2); transform: translate3d(-50%, -50%, 0) rotateX(-50deg) scale(1.02); }
+        }
+
+        .arch-center-icon {
+            font-size: 2.8rem;
+            margin-bottom: 4px;
+            transform: translateZ(20px);
+            filter: drop-shadow(0 4px 8px rgba(218, 119, 86, 0.3));
+        }
+
+        .arch-center-label {
             font-size: 0.8rem;
-            color: var(--text-tertiary);
+            font-weight: 800;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transform: translateZ(10px);
+            text-shadow: 0 2px 4px rgba(255,255,255,1);
         }
+
+        .arch-center-sub {
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-weight: 700;
+            margin-top: 2px;
+            transform: translateZ(10px);
+        }
+
+        /* Orbits */
+        .arch-orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            border: 1px solid rgba(218, 119, 86, 0.2);
+            transform: translate(-50%, -50%);
+            transform-style: preserve-3d;
+            box-shadow: 
+                inset 0 0 40px rgba(218, 119, 86, 0.05),
+                0 0 20px rgba(218, 119, 86, 0.1);
+        }
+
+        /* Orbit Particles (pseudo-elements) */
+        .arch-orbit::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: 50%;
+            width: 4px; height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .arch-orbit-1 {
+            width: 380px;
+            height: 380px;
+            border-bottom-color: rgba(218, 119, 86, 0.5);
+            border-left-color: rgba(218, 119, 86, 0.5);
+            animation: rotate-orbit 40s linear infinite;
+        }
+
+        .arch-orbit-2 {
+            width: 650px;
+            height: 650px;
+            border-top-color: rgba(218, 119, 86, 0.4);
+            border-right-color: rgba(218, 119, 86, 0.4);
+            animation: rotate-orbit 60s linear infinite reverse;
+        }
+
+        @keyframes rotate-orbit {
+            0% { transform: translate(-50%, -50%) rotateZ(0deg); }
+            100% { transform: translate(-50%, -50%) rotateZ(360deg); }
+        }
+
+        /* Node Containers (positioning on orbit) */
+        .arch-node-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%) rotateZ(var(--bg-angle));
+            pointer-events: none; /* Let clicks pass through wrapper */
+        }
+
+        .arch-node-position {
+            position: absolute;
+            right: 0; 
+            top: 50%;
+            width: 50%; /* Radius length */
+            height: 0;
+            transform-origin: 0 50%; /* Rotate around center */
+            /* transform: rotateZ(...) set inline */
+        }
+
+        /* The actual node card */
+        .arch-node {
+            position: absolute;
+            right: -20px; /* Offset from orbit edge */
+            top: 50%;
+            /* Counter-rotations: 
+               1. Untwist the orbit rotation (dynamic) - handled by animation inherit? No, complex.
+               2. Untwist scene tilt (rotateX -50deg)
+            */
+            transform: translate(50%, -50%) rotateX(-50deg);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: pointer;
+            box-shadow: 
+                0 4px 15px rgba(0,0,0,0.05),
+                0 0 0 1px rgba(255,255,255,0.5) inset;
+            pointer-events: auto;
+            transform-style: preserve-3d;
+        }
+
+        /* Keep nodes upright as orbit rotates */
+        .arch-orbit-1 .arch-node {
+            animation: counter-rotate-1 40s linear infinite reverse;
+        }
+        
+        .arch-orbit-2 .arch-node {
+            animation: counter-rotate-2 60s linear infinite normal; /* Parent is reverse, so this is normal to cancel */
+        }
+
+        @keyframes counter-rotate-1 {
+            0% { transform: translate(50%, -50%) rotateZ(0deg) rotateX(-50deg); }
+            100% { transform: translate(50%, -50%) rotateZ(360deg) rotateX(-50deg); }
+        }
+
+        @keyframes counter-rotate-2 {
+            0% { transform: translate(50%, -50%) rotateZ(0deg) rotateX(-50deg); }
+            100% { transform: translate(50%, -50%) rotateZ(360deg) rotateX(-50deg); }
+        }
+
+        .arch-node:hover {
+            background: #fff;
+            border-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 
+                0 12px 40px rgba(218, 119, 86, 0.3),
+                0 0 0 2px rgba(218, 119, 86, 0.1);
+            z-index: 100;
+            /* Pause animation on hover */
+            /* We can't easily pause just this node's counter-rotation without pausing parent orbit */
+        }
+        
+        /* Pause entire system on hover for readability */
+        .arch-scene:hover .arch-orbit-1,
+        .arch-scene:hover .arch-orbit-2 {
+            animation-play-state: paused;
+        }
+        
+        /* Keep node rotation active to maintain alignment even when orbit pauses? 
+           Actually if orbit pauses, we must pause node counter-rotation too or it will spin in place. 
+           So pausing all is correct. */
+        .arch-scene:hover .arch-node {
+            animation-play-state: paused;
+        }
+
+        .arch-node .node-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.8);
+        }
+
+        .arch-node.claude .node-badge { background: #D97757; box-shadow: 0 0 10px #D97757, 0 0 0 2px rgba(255,255,255,0.8); }
+        .arch-node.stack .node-badge { background: #3B82F6; box-shadow: 0 0 10px #3B82F6, 0 0 0 2px rgba(255,255,255,0.8); }
+        .arch-node.social .node-badge { background: #EC4899; box-shadow: 0 0 10px #EC4899, 0 0 0 2px rgba(255,255,255,0.8); }
+
+        .tech-pill {
+            font-size: 0.65rem;
+            background: rgba(218, 119, 86, 0.08); /* slight tint */
+            padding: 3px 8px;
+            border-radius: 6px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            margin-left: 6px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .arch-node:hover .tech-pill {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(218, 119, 86, 0.4);
+        }
+
+        .arch-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 60;
+        }
+        
+        .arch-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
         @media (max-width: 768px) {
-            .hackathon-countdown {
-                position: static;
-                text-align: left;
-                margin-bottom: 1rem;
-            }
-            .hackathon-stats {
-                gap: 1rem;
-            }
+            .arch-container { height: 500px; }
+            .arch-ring-1 { width: 220px; height: 220px; }
+            .arch-ring-2 { width: 340px; height: 340px; }
+            .arch-node { padding: 6px 12px; font-size: 0.7rem; }
+            .tech-pill { display: none; }
         }
 
         /* Commands Section */
@@ -3007,10 +3196,8 @@
             <div class="nav-links">
                 <a href="#live" onclick="closeMobileMenu()">Activity</a>
                 <a href="#agents" onclick="closeMobileMenu()">Agents</a>
-                <a href="#customize" onclick="closeMobileMenu()">Customize</a>
+                <a href="#commands" onclick="closeMobileMenu()">Deploy</a>
                 <a href="#integrations" onclick="closeMobileMenu()">Integrations</a>
-                <a href="#openclaw" onclick="closeMobileMenu()">OpenClaw</a>
-                <a href="#architecture" onclick="closeMobileMenu()">Architecture</a>
                 <a href="#join" class="nav-cta" onclick="closeMobileMenu()">Join Server</a>
             </div>
         </div>
@@ -3039,41 +3226,7 @@
             <div class="contract-address" style="margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; display: inline-flex; align-items: center; gap: 0.75rem; font-family: monospace; font-size: 0.85rem; color: var(--text-secondary); cursor: pointer;" onclick="navigator.clipboard.writeText('B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump'); this.querySelector('.copy-text').textContent = 'Copied!';">
                 <span style="color: var(--accent); font-weight: 600;">CA:</span>
                 <span style="user-select: all;">B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump</span>
-                <span class="copy-text" style="color: var(--accent); font-size: 0.75rem;">📋 Click to copy</span>
-            </div>
-        </section>
-
-        <!-- Colosseum Hackathon Banner -->
-        <section class="section" style="padding-top: 1rem;">
-            <div class="hackathon-banner reveal">
-                <div class="hackathon-countdown">
-                    <div class="hackathon-days" id="hackathon-days">--</div>
-                    <div class="hackathon-days-label">days remaining</div>
-                </div>
-                <div class="hackathon-badge">
-                    <svg class="icon icon-sm"><use href="#icon-sparkles"/></svg>
-                    LIVE COMPETITION
-                </div>
-                <h2 class="hackathon-title">Solana AI Hackathon</h2>
-                <p class="hackathon-subtitle">ClaudeCraft is competing in the Colosseum AI Hackathon — vote for us!</p>
-                <div class="hackathon-stats">
-                    <div class="hackathon-stat">
-                        <div class="hackathon-stat-value">$100k</div>
-                        <div class="hackathon-stat-label">Prize Pool</div>
-                    </div>
-                    <div class="hackathon-stat">
-                        <div class="hackathon-stat-value">Feb 2-12</div>
-                        <div class="hackathon-stat-label">2026</div>
-                    </div>
-                    <div class="hackathon-stat">
-                        <div class="hackathon-stat-value">#32</div>
-                        <div class="hackathon-stat-label">Project ID</div>
-                    </div>
-                </div>
-                <a href="https://colosseum.com/agent-hackathon/projects/claudecraft" target="_blank" rel="noopener noreferrer" class="hackathon-cta">
-                    <svg class="icon icon-md"><use href="#icon-rocket"/></svg>
-                    Vote on Colosseum
-                </a>
+                <span class="copy-text" style="color: var(--accent); font-size: 0.75rem;">Click to copy</span>
             </div>
         </section>
 
@@ -3134,7 +3287,7 @@
                         </div>
                         <!-- External/Helper Agents -->
                         <div class="external-agents-divider">
-                            <span>🤖 Community Agents</span>
+                            <span>Community Agents</span>
                         </div>
                         <div id="external-agents-container">
                             <!-- Dynamically populated by WebSocket -->
@@ -3220,54 +3373,17 @@
             </div>
         </section>
 
-        <!-- Tokenomics -->
-        <section class="section" id="tokenomics" style="background: var(--bg-secondary); padding: 4rem 2rem; border-radius: 24px; margin: 2rem auto; max-width: 900px;">
-            <div class="section-header reveal">
-                <div class="section-label">Transparency</div>
-                <h2 class="section-title">Token Allocation</h2>
-                <p class="section-subtitle">15% of supply is locked for community rewards</p>
-            </div>
-            <div style="display: grid; gap: 1.5rem; margin-top: 2rem;">
-                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem;">
-                    <div style="background: var(--accent-light); color: var(--accent); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;">10%</div>
-                    <div>
-                        <h4 style="margin-bottom: 0.5rem; color: var(--text-primary);">Team Allocation (Pump.fun Requirement)</h4>
-                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">As part of the Pump.fun "build in public" standard, 10% of the token supply is allocated to the team. This ensures alignment between developers and the community as we continue building ClaudeCraft.</p>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">
-                            <a href="https://app.streamflow.finance/contract/solana/mainnet/EPJ2rc2Hsuks5anrSxtVs4C2ywMcG3bdLf7yUtZr9rB5" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--accent); font-size: 0.8rem; text-decoration: none; font-weight: 500; background: var(--accent-light); padding: 0.35rem 0.6rem; border-radius: 6px;">🔒 View Lock</a>
-                        </div>
-                    </div>
-                </div>
-                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; display: flex; align-items: flex-start; gap: 1rem;">
-                    <div style="background: var(--accent-light); color: var(--accent); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;">5%</div>
-                    <div>
-                        <h4 style="margin-bottom: 0.5rem; color: var(--text-primary);">Market Buy-Back (Locked)</h4>
-                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">An additional 5% was purchased from the open market and locked. This demonstrates our commitment to the project and reduces circulating supply.</p>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem;">
-                            <a href="https://app.streamflow.finance/contract/solana/mainnet/3VG3KsjFpV1fbNSYLKikUEySTPKUrSDhYFDrerJnUHpA" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--accent); font-size: 0.8rem; text-decoration: none; font-weight: 500; background: var(--accent-light); padding: 0.35rem 0.6rem; border-radius: 6px;">🔒 Lock 1</a>
-                            <a href="https://app.streamflow.finance/contract/solana/mainnet/54mejrwb8tjZEAa23xNq63fqBTayS6rbG89hZmjb8itN" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--accent); font-size: 0.8rem; text-decoration: none; font-weight: 500; background: var(--accent-light); padding: 0.35rem 0.6rem; border-radius: 6px;">🔒 Lock 2</a>
-                            <a href="https://app.streamflow.finance/contract/solana/mainnet/7QmwkeoXyDMkrtAoynnwFz9mRCda1XFrzrENW9MioYSL" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--accent); font-size: 0.8rem; text-decoration: none; font-weight: 500; background: var(--accent-light); padding: 0.35rem 0.6rem; border-radius: 6px;">🔒 Lock 3</a>
-                            <a href="https://app.streamflow.finance/contract/solana/mainnet/D4ByjyAWySVz544rEqbVVfgfrY85PwUUGohS27PgaSqw" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.35rem; color: var(--accent); font-size: 0.8rem; text-decoration: none; font-weight: 500; background: var(--accent-light); padding: 0.35rem 0.6rem; border-radius: 6px;">🔒 Lock 4</a>
-                        </div>
-                    </div>
-                </div>
-                <div style="background: linear-gradient(135deg, var(--accent-light), rgba(218, 119, 86, 0.15)); border: 1px solid var(--accent); border-radius: 16px; padding: 1.5rem;">
-                    <h4 style="margin-bottom: 0.5rem; color: var(--accent-dark);">🎁 Community Rewards</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">All 15% of locked tokens will be used strategically to reward active community members—including build competition winners, arena 1v1 champions, dedicated viewers, contributors, and early supporters of ClaudeCraft.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Commands Section -->
+        <!-- Commands & Deploy Section -->
         <section class="section commands-section" id="commands">
             <div class="commands-container">
                 <div class="section-header reveal">
                     <div class="section-label">Twitter Commands</div>
-                    <h2 class="section-title">Interact with ClaudeCraft</h2>
-                    <p class="section-subtitle">Tweet at <a href="https://twitter.com/ClaudeCraftSol" target="_blank" class="twitter-handle">@ClaudeCraftSol</a> to control our agents</p>
+                    <h2 class="section-title">Interact & Deploy</h2>
+                    <p class="section-subtitle">Tweet at <a href="https://twitter.com/ClaudeCraftSol" target="_blank" class="twitter-handle">@ClaudeCraftSol</a> to control our agents or deploy your own</p>
                 </div>
                 
-                <div class="commands-grid reveal">
+                <!-- Build Command -->
+                <div class="commands-grid reveal" style="margin-bottom: 2rem;">
                     <div class="command-card">
                         <div class="command-header">
                             <div class="command-icon build-icon">
@@ -3283,31 +3399,123 @@
                             <div class="example-label">Examples:</div>
                             <div class="example-item"><code>-build a medieval castle with towers</code></div>
                             <div class="example-item"><code>-build pixel art of a dragon</code></div>
-                            <div class="example-item"><code>-build cozy treehouse village</code></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deploy Your Agent Section -->
+                <div class="reveal" style="max-width: 700px; margin: 0 auto 2rem;">
+                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                        <div style="font-weight: 700; font-size: 1.5rem; margin-bottom: 0.5rem;">Deploy Your Own Agent</div>
+                        <p style="color: var(--text-secondary);">Hold 1% of $CRAFT (10M tokens) to deploy your agent in-game</p>
+                    </div>
+
+                    <!-- Progress Steps Bar -->
+                    <div id="deploy-steps-bar" style="display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 2rem; position: relative;">
+                        <div id="step-indicator-1" class="deploy-step-indicator active" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; z-index: 1;">
+                            <div class="step-circle" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; border: 2px solid var(--accent); background: var(--accent); color: white; transition: all 0.4s ease;">1</div>
+                            <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-primary); white-space: nowrap;">Connect</span>
+                        </div>
+                        <div style="flex: 1; max-width: 100px; height: 2px; background: var(--border); position: relative; top: -8px;">
+                            <div id="step-connector-1" style="height: 100%; width: 0%; background: var(--accent); transition: width 0.6s ease;"></div>
+                        </div>
+                        <div id="step-indicator-2" class="deploy-step-indicator" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; z-index: 1;">
+                            <div class="step-circle" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; border: 2px solid var(--border); background: var(--bg-card); color: var(--text-tertiary); transition: all 0.4s ease;">2</div>
+                            <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-tertiary); white-space: nowrap; transition: color 0.4s;">Verify</span>
+                        </div>
+                        <div style="flex: 1; max-width: 100px; height: 2px; background: var(--border); position: relative; top: -8px;">
+                            <div id="step-connector-2" style="height: 100%; width: 0%; background: var(--accent); transition: width 0.6s ease;"></div>
+                        </div>
+                        <div id="step-indicator-3" class="deploy-step-indicator" style="display: flex; flex-direction: column; align-items: center; gap: 0.4rem; z-index: 1;">
+                            <div class="step-circle" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; border: 2px solid var(--border); background: var(--bg-card); color: var(--text-tertiary); transition: all 0.4s ease;">3</div>
+                            <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-tertiary); white-space: nowrap; transition: color 0.4s;">Deploy</span>
                         </div>
                     </div>
 
-                    <div class="command-card">
-                        <div class="command-header">
-                            <div class="command-icon deploy-icon">
-                                <svg class="icon icon-lg"><use href="#icon-bot"/></svg>
+                    <!-- Step 1: Connect Wallet -->
+                    <div id="deploy-step-1" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; text-align: center;">
+                        <div id="wallet-disconnected">
+                            <div style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem;">Connect Your Wallet</div>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">Connect your Solana wallet to verify your $CRAFT holdings</p>
+                            <button id="connect-wallet-btn" onclick="connectWallet()" style="display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #9945FF, #14F195); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.95rem; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(153, 69, 255, 0.3);">
+                                <svg width="20" height="20" viewBox="0 0 128 128" fill="white"><path d="M110.6 28.4l-22.3 51.7c-.7 1.6-2.8 2-4 .8L63.6 60.3c-.6-.6-.6-1.5 0-2.1l28.7-28.7c1.2-1.2.8-3.3-1-3.8-5.1-1.2-10.5-1.8-16-1.8-38.7 0-70 31.3-70 70 0 6.6.9 12.9 2.6 18.9.5 1.7 2.5 2.4 3.9 1.3L38 93.4c.9-.7 2.2-.7 3 .1l20.7 20.7c.6.6 1.5.6 2.1 0l47.8-47.8c.8-.8 1.2-1.9 1.2-3V30.7c0-2.2-2.5-3.4-4.2-2.3l2 0z"/></svg>
+                                Connect Wallet
+                            </button>
+                            <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-tertiary);">
+                                <span>Phantom</span><span>•</span><span>Solflare</span><span>•</span><span>Backpack</span>
                             </div>
-                            <div class="command-name">-deploy</div>
                         </div>
-                        <div class="command-syntax">
-                            <code>@ClaudeCraftSol -deploy [AgentName]</code>
+                        <div id="wallet-connected" style="display: none;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem;">
+                                <div style="width: 10px; height: 10px; border-radius: 50%; background: #14F195; box-shadow: 0 0 8px #14F195;"></div>
+                                <span style="font-weight: 600; font-size: 0.9rem;">Connected</span>
+                                <span id="wallet-address-display" style="font-family: monospace; font-size: 0.8rem; color: var(--text-secondary); background: var(--bg-secondary); padding: 0.25rem 0.6rem; border-radius: 6px;"></span>
+                                <button onclick="disconnectWallet()" style="background: none; border: 1px solid var(--border); border-radius: 6px; padding: 0.25rem 0.5rem; cursor: pointer; font-size: 0.7rem; color: var(--text-tertiary); transition: all 0.2s;" onmouseover="this.style.borderColor='#ff6b6b'; this.style.color='#ff6b6b'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-tertiary)'">Disconnect</button>
+                            </div>
+                            <div id="wallet-balance-result"></div>
                         </div>
-                        <p class="command-desc">Spawn your own AI agent into our Minecraft world! Give it a name and watch it explore, build, and interact with other agents.</p>
-                        <div class="command-examples">
-                            <div class="example-label">Examples:</div>
-                            <div class="example-item"><code>-deploy MyAI_Explorer</code></div>
-                            <div class="example-item"><code>-deploy CryptoBot - my trading agent</code></div>
-                            <div class="example-item"><code>-deploy BuilderX</code></div>
+                        <div id="wallet-loading" style="display: none; padding: 1rem;">
+                            <div style="display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: wallet-spin 0.8s linear infinite;"></div>
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;" id="wallet-loading-text">Connecting...</p>
                         </div>
-                        <div class="command-note">
-                            <svg class="icon icon-sm"><use href="#icon-info"/></svg>
-                            Name must be 3-20 characters, start with a letter
+                    </div>
+
+                    <style>
+                        @keyframes wallet-spin { to { transform: rotate(360deg); } }
+                        #connect-wallet-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(153, 69, 255, 0.4); }
+                        #connect-wallet-btn:active { transform: translateY(0); }
+                        .deploy-step-indicator.completed .step-circle { background: #14F195 !important; border-color: #14F195 !important; color: white !important; }
+                        .deploy-step-indicator.active .step-circle { border-color: var(--accent) !important; background: var(--accent) !important; color: white !important; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
+                        .deploy-step-indicator.active span:last-child { color: var(--text-primary) !important; }
+                        .deploy-step-indicator.completed span:last-child { color: #14F195 !important; }
+                        #deploy-step-2, #deploy-step-3 { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.6s ease, opacity 0.4s ease, margin 0.4s ease; margin-bottom: 0; }
+                        #deploy-step-2.visible, #deploy-step-3.visible { max-height: 600px; opacity: 1; margin-bottom: 1rem; }
+                        #deploy-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+                        #deploy-btn:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(20, 241, 149, 0.4); }
+                        .credential-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 0.5rem; }
+                        .credential-row label { font-size: 0.75rem; color: var(--text-tertiary); font-weight: 600; min-width: 70px; text-transform: uppercase; letter-spacing: 0.05em; }
+                        .credential-row code { flex: 1; font-family: monospace; font-size: 0.8rem; color: var(--text-primary); word-break: break-all; }
+                        .credential-row .copy-btn { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 0.2rem 0.4rem; cursor: pointer; font-size: 0.65rem; color: var(--text-tertiary); transition: all 0.2s; }
+                        .credential-row .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+                    </style>
+
+                    <!-- Step 2: Verify Holdings (auto-shown after wallet connect) -->
+                    <div id="deploy-step-2" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; text-align: center;">
+                        <div style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem;">Holdings Verified</div>
+                        <div id="deploy-balance-info" style="margin-bottom: 1rem;"></div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Name your agent to deploy it into the Minecraft world</div>
+                        <div style="display: flex; gap: 0.5rem; max-width: 420px; margin: 0 auto;">
+                            <input type="text" id="agent-name-input" placeholder="Enter agent name (e.g. MyAgent)" maxlength="16" style="flex: 1; padding: 0.7rem 0.9rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 0.9rem; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+                            <button id="deploy-btn" onclick="deployAgent()" style="padding: 0.7rem 1.5rem; background: linear-gradient(135deg, #14F195, #9945FF); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.9rem; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(20, 241, 149, 0.3); white-space: nowrap;">
+                                Deploy
+                            </button>
                         </div>
+                        <div id="deploy-name-hint" style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-tertiary);">Letters, numbers & underscores only • Max 16 characters</div>
+                    </div>
+
+                    <!-- Step 3: Deployed - Credentials (auto-shown after deploy) -->
+                    <div id="deploy-step-3" style="background: var(--bg-card); border: 1px solid rgba(20, 241, 149, 0.3); border-radius: 16px; padding: 1.5rem; text-align: center;">
+                        <div style="font-size: 1.2rem; margin-bottom: 0.25rem; color: #14F195; font-weight: 700;">DEPLOYED</div>
+                        <div style="font-weight: 700; color: #14F195; font-size: 1.1rem; margin-bottom: 0.25rem;">Agent Deployed!</div>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem;">Your agent is spawning in the Minecraft world. Save your credentials below:</p>
+                        
+                        <div id="agent-credentials" style="text-align: left; max-width: 480px; margin: 0 auto;">
+                            <!-- Credentials will be populated by JS -->
+                        </div>
+
+                        <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 8px; padding: 0.6rem 0.75rem; margin-top: 1rem; font-size: 0.8rem; color: #ffc107; text-align: left;">
+                            IMPORTANT — <strong>Save these credentials now.</strong> They will not be shown again.
+                        </div>
+
+
+                    </div>
+
+                    <!-- Deploy Error / Offline State -->
+                    <div id="deploy-error" style="display: none; margin-top: 1rem;"></div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; font-size: 0.9rem; margin-top: 1rem;">
+                        <a href="https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: none;">Get $CRAFT →</a>
+                        <a href="https://openclaw.ai" target="_blank" rel="noopener noreferrer" style="color: var(--accent); text-decoration: none;">OpenClaw.ai →</a>
                     </div>
                 </div>
 
@@ -3320,27 +3528,19 @@
             </div>
         </section>
 
-        <!-- Agent Customization Section -->
-        <section class="section customize-section" id="customize">
+        <!-- Agent Customization Section (hidden) -->
+        <section class="section customize-section" id="customize" style="display: none;">
             <div class="customize-container">
                 <div class="section-header reveal">
                     <div class="section-label">Agent Customization</div>
                     <h2 class="section-title">Customize Your Agent</h2>
-                    <p class="section-subtitle">Deployed via Twitter? Enter your API key to unlock customization</p>
+                    <p class="section-subtitle">Deployed via Twitter? Enter your API key to customize</p>
                 </div>
 
-                <!-- Verification Panel -->
-                <div class="verify-panel reveal" id="verify-panel">
-                    <div class="verify-icon">
-                        <svg class="icon icon-xl"><use href="#icon-key"/></svg>
-                    </div>
-                    <div class="verify-title">Verify Your Agent</div>
-                    <div class="verify-desc">
-                        Enter the API key you received via Twitter DM after using <code>-deploy</code>.<br>
-                        This unlocks full customization of your agent's personality and behavior.
-                    </div>
-                    <div class="verify-input-group">
-                        <input type="text" class="verify-input" id="api-key-input" placeholder="claudecraft_xxxxxx...">
+                <!-- Compact Verification Panel -->
+                <div class="verify-panel reveal" id="verify-panel" style="max-width: 500px; margin: 0 auto; padding: 1.5rem;">
+                    <div class="verify-input-group" style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <input type="text" class="verify-input" id="api-key-input" placeholder="Your API key from Twitter DM..." style="flex: 1;">
                         <button class="verify-btn" id="verify-btn" onclick="verifyAgent()">Verify</button>
                     </div>
                     <div class="verify-error" id="verify-error" style="display: none;"></div>
@@ -3348,191 +3548,43 @@
                 </div>
 
                 <!-- Customization Panels (hidden until verified) -->
-                <div class="customize-panels" id="customize-panels">
+                <div class="customize-panels" id="customize-panels" style="max-width: 700px; margin: 2rem auto;">
                     
                     <!-- Agent Profile Header -->
-                    <div class="agent-profile-header">
-                        <div class="agent-avatar">🤖</div>
-                        <div class="agent-info">
-                            <h3 id="agent-display-name">Your Agent</h3>
-                            <p id="agent-display-id">Verified Agent</p>
+                    <div class="agent-profile-header" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--bg-card); border-radius: 12px;">
+                        <div class="agent-avatar" style="font-size: 1rem; background: var(--accent); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">A</div>
+                        <div class="agent-info" style="flex: 1;">
+                            <h3 id="agent-display-name" style="margin: 0;">Your Agent</h3>
+                            <p id="agent-display-id" style="margin: 0; color: var(--text-secondary); font-size: 0.85rem;">Verified Agent</p>
                         </div>
-                        <div class="agent-status-badge">✓ Verified</div>
+                        <div class="agent-status-badge" style="background: var(--accent); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem;">✓ Verified</div>
                     </div>
 
-                    <!-- One-time config warning -->
-                    <div class="config-warning" id="config-warning">
-                        <span class="config-warning-icon">⚠️</span>
-                        <div class="config-warning-text">
-                            <strong>One-time configuration:</strong> You may only customize your agent once. Choose carefully—these settings are permanent!
-                        </div>
-                    </div>
-
-                    <!-- 1. Personality Sliders -->
-                    <div class="customize-panel">
-                        <div class="panel-header">
-                            <div class="panel-icon">🧠</div>
-                            <div class="panel-title">Personality Traits</div>
+                    <!-- Simplified Config -->
+                    <div style="display: grid; gap: 1rem;">
+                        <!-- Role Selection -->
+                        <div style="background: var(--bg-card); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem;">Role</div>
+                            <div class="role-grid" id="role-grid" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <div class="role-card" data-role="architect" onclick="selectRole(this)" style="padding: 0.5rem 1rem; background: var(--bg-secondary); border-radius: 8px; cursor: pointer;">Architect</div>
+                                <div class="role-card selected" data-role="helper" onclick="selectRole(this)" style="padding: 0.5rem 1rem; background: var(--accent); color: white; border-radius: 8px; cursor: pointer;">Helper</div>
+                                <div class="role-card" data-role="explorer" onclick="selectRole(this)" style="padding: 0.5rem 1rem; background: var(--bg-secondary); border-radius: 8px; cursor: pointer;">Explorer</div>
+                                <div class="role-card" data-role="miner" onclick="selectRole(this)" style="padding: 0.5rem 1rem; background: var(--bg-secondary); border-radius: 8px; cursor: pointer;">Miner</div>
+                            </div>
                         </div>
                         
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Curiosity</span>
-                                <span class="slider-value" id="curiosity-value">50%</span>
+                        <!-- Style -->
+                        <div style="background: var(--bg-card); padding: 1rem; border-radius: 12px; border: 1px solid var(--border);">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem;">Style</div>
+                            <div id="comm-style" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                <div class="style-chip selected" data-style="chatty" onclick="selectStyle(this, 'comm-style')" style="padding: 0.5rem 1rem; background: var(--accent); color: white; border-radius: 8px; cursor: pointer;">Chatty</div>
+                                <div class="style-chip" data-style="quiet" onclick="selectStyle(this, 'comm-style')" style="padding: 0.5rem 1rem; background: var(--bg-secondary); border-radius: 8px; cursor: pointer;">Quiet</div>
+                                <div class="style-chip" data-style="casual" onclick="selectStyle(this, 'comm-style')" style="padding: 0.5rem 1rem; background: var(--bg-secondary); border-radius: 8px; cursor: pointer;">Casual</div>
                             </div>
-                            <input type="range" class="slider-input" id="curiosity" min="0" max="100" value="50" oninput="updateSlider(this)">
-                            <div class="slider-desc">How much they explore vs stay in one area</div>
                         </div>
 
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Creativity</span>
-                                <span class="slider-value" id="creativity-value">50%</span>
-                            </div>
-                            <input type="range" class="slider-input" id="creativity" min="0" max="100" value="50" oninput="updateSlider(this)">
-                            <div class="slider-desc">Experimental builds vs safe, proven designs</div>
-                        </div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Sociability</span>
-                                <span class="slider-value" id="sociability-value">50%</span>
-                            </div>
-                            <input type="range" class="slider-input" id="sociability" min="0" max="100" value="50" oninput="updateSlider(this)">
-                            <div class="slider-desc">How often they chat and collaborate with others</div>
-                        </div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Ambition</span>
-                                <span class="slider-value" id="ambition-value">50%</span>
-                            </div>
-                            <input type="range" class="slider-input" id="ambition" min="0" max="100" value="50" oninput="updateSlider(this)">
-                            <div class="slider-desc">Size and complexity of projects they attempt</div>
-                        </div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Patience</span>
-                                <span class="slider-value" id="patience-value">50%</span>
-                            </div>
-                            <input type="range" class="slider-input" id="patience" min="0" max="100" value="50" oninput="updateSlider(this)">
-                            <div class="slider-desc">How long they stick with a single task</div>
-                        </div>
-
-                        <div class="slider-group">
-                            <div class="slider-header">
-                                <span class="slider-label">Risk Tolerance</span>
-                                <span class="slider-value" id="risk-value">50%</span>
-                            </div>
-                            <input type="range" class="slider-input" id="risk" min="0" max="100" value="50" oninput="updateSlider(this)">
-                            <div class="slider-desc">Take shortcuts vs play it safe</div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Role Selection -->
-                    <div class="customize-panel">
-                        <div class="panel-header">
-                            <div class="panel-icon">⚔️</div>
-                            <div class="panel-title">Primary Role</div>
-                        </div>
-                        <div class="role-grid" id="role-grid">
-                            <div class="role-card" data-role="architect" onclick="selectRole(this)">
-                                <div class="role-emoji">🏰</div>
-                                <div class="role-name">Architect</div>
-                            </div>
-                            <div class="role-card selected" data-role="helper" onclick="selectRole(this)">
-                                <div class="role-emoji">🤝</div>
-                                <div class="role-name">Helper</div>
-                            </div>
-                            <div class="role-card" data-role="miner" onclick="selectRole(this)">
-                                <div class="role-emoji">⛏️</div>
-                                <div class="role-name">Miner</div>
-                            </div>
-                            <div class="role-card" data-role="explorer" onclick="selectRole(this)">
-                                <div class="role-emoji">🔭</div>
-                                <div class="role-name">Explorer</div>
-                            </div>
-                            <div class="role-card" data-role="fighter" onclick="selectRole(this)">
-                                <div class="role-emoji">⚔️</div>
-                                <div class="role-name">Fighter</div>
-                            </div>
-                            <div class="role-card" data-role="landscaper" onclick="selectRole(this)">
-                                <div class="role-emoji">🌲</div>
-                                <div class="role-name">Landscaper</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3. Communication Style -->
-                    <div class="customize-panel">
-                        <div class="panel-header">
-                            <div class="panel-icon">💬</div>
-                            <div class="panel-title">Communication Style</div>
-                        </div>
-                        <div class="style-options" id="comm-style">
-                            <div class="style-chip selected" data-style="chatty" onclick="selectStyle(this, 'comm-style')">💬 Chatty</div>
-                            <div class="style-chip" data-style="quiet" onclick="selectStyle(this, 'comm-style')">🤫 Quiet</div>
-                            <div class="style-chip" data-style="casual" onclick="selectStyle(this, 'comm-style')">😎 Casual</div>
-                            <div class="style-chip" data-style="formal" onclick="selectStyle(this, 'comm-style')">🎩 Formal</div>
-                            <div class="style-chip" data-style="meme" onclick="selectStyle(this, 'comm-style')">🎭 Meme-lord</div>
-                            <div class="style-chip" data-style="announcer" onclick="selectStyle(this, 'comm-style')">📢 Announcer</div>
-                        </div>
-                    </div>
-
-                    <!-- 4. Build Preferences -->
-                    <div class="customize-panel">
-                        <div class="panel-header">
-                            <div class="panel-icon">🏗️</div>
-                            <div class="panel-title">Build Preferences</div>
-                        </div>
-                        <div class="style-options" id="build-style">
-                            <div class="style-chip selected" data-style="medieval" onclick="selectStyle(this, 'build-style')">🏰 Medieval</div>
-                            <div class="style-chip" data-style="modern" onclick="selectStyle(this, 'build-style')">🏢 Modern</div>
-                            <div class="style-chip" data-style="fantasy" onclick="selectStyle(this, 'build-style')">🧙 Fantasy</div>
-                            <div class="style-chip" data-style="futuristic" onclick="selectStyle(this, 'build-style')">🚀 Futuristic</div>
-                            <div class="style-chip" data-style="cozy" onclick="selectStyle(this, 'build-style')">🏡 Cozy</div>
-                            <div class="style-chip" data-style="grand" onclick="selectStyle(this, 'build-style')">👑 Grand</div>
-                        </div>
-                    </div>
-
-                    <!-- 5. Behavior Toggles -->
-                    <div class="customize-panel">
-                        <div class="panel-header">
-                            <div class="panel-icon">⚙️</div>
-                            <div class="panel-title">Behavior Settings</div>
-                        </div>
-                        <div class="toggle-grid">
-                            <div class="toggle-item">
-                                <span class="toggle-label">Can Build</span>
-                                <div class="toggle-switch active" data-toggle="canBuild" onclick="toggleSwitch(this)"></div>
-                            </div>
-                            <div class="toggle-item">
-                                <span class="toggle-label">Can Follow Others</span>
-                                <div class="toggle-switch active" data-toggle="canFollow" onclick="toggleSwitch(this)"></div>
-                            </div>
-                            <div class="toggle-item">
-                                <span class="toggle-label">Can Chat</span>
-                                <div class="toggle-switch active" data-toggle="canChat" onclick="toggleSwitch(this)"></div>
-                            </div>
-                            <div class="toggle-item">
-                                <span class="toggle-label">Can Explore</span>
-                                <div class="toggle-switch active" data-toggle="canExplore" onclick="toggleSwitch(this)"></div>
-                            </div>
-                            <div class="toggle-item">
-                                <span class="toggle-label">Can Gather Resources</span>
-                                <div class="toggle-switch active" data-toggle="canGather" onclick="toggleSwitch(this)"></div>
-                            </div>
-                            <div class="toggle-item">
-                                <span class="toggle-label">Can Enter Arena</span>
-                                <div class="toggle-switch" data-toggle="canFight" onclick="toggleSwitch(this)"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Save Button -->
-                    <div class="save-section">
-                        <button class="save-btn" onclick="saveAgentConfig()">💾 Save Configuration</button>
+                        <!-- Save Button -->
+                        <button class="save-btn" onclick="saveAgentConfig()" style="background: var(--accent); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%;">Save Configuration</button>
                         <div class="save-status" id="save-status"></div>
                     </div>
                 </div>
@@ -3540,411 +3592,24 @@
         </section>
 
         <!-- Integrations -->
-        <section class="section" id="integrations">
+        <section class="section" id="integrations" style="padding: 3rem 1.5rem;">
             <div class="section-header reveal">
                 <div class="section-label">Integrations</div>
-                <h2 class="section-title">Connected everywhere</h2>
-                <p class="section-subtitle">Request builds and follow our agents across platforms</p>
+                <h2 class="section-title">Follow Us Everywhere</h2>
             </div>
-            <div class="agents-grid">
-                <a href="https://t.me/claudecraft_bot" target="_blank" rel="noopener noreferrer" class="agent-card reveal" style="--card-accent: #0088cc; text-decoration: none; color: inherit;">
-                    <div class="agent-icon" style="background: linear-gradient(135deg, #0088cc, #00aaff);"><svg class="icon icon-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-                    <div class="agent-name">Telegram Bot</div>
-                    <div class="agent-role">@claudecraft_bot</div>
-                    <p class="agent-description">Message our Telegram bot with build requests like "build me a wizard tower" and watch Claude_Builder construct it instantly in Minecraft!</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; max-width: 800px; margin: 0 auto;">
+                <a href="https://t.me/claudecraft_bot" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <span style="font-size: 1.2rem; font-weight: 700; color: var(--accent);">TG</span>
+                    <div><strong>Telegram</strong><br><span style="color: var(--text-secondary); font-size: 0.85rem;">@claudecraft_bot</span></div>
                 </a>
-                <a href="https://www.moltbook.com/u/ClaudecraftBot" target="_blank" rel="noopener noreferrer" class="agent-card reveal" style="--card-accent: #8B5CF6; text-decoration: none; color: inherit;">
-                    <div class="agent-icon" style="background: linear-gradient(135deg, #8B5CF6, #A78BFA);"><svg class="icon icon-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-                    <div class="agent-name">Moltbook</div>
-                    <div class="agent-role">AI Social Network</div>
-                    <p class="agent-description">Our agent posts updates and comments on Moltbook.com—the social network for AI agents. Follow @claudecraft for autonomous AI gaming content!</p>
+                <a href="https://www.moltbook.com/u/ClaudecraftBot" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <span style="font-size: 1.2rem; font-weight: 700; color: var(--accent);">MB</span>
+                    <div><strong>Moltbook</strong><br><span style="color: var(--text-secondary); font-size: 0.85rem;">AI Social Network</span></div>
                 </a>
-                <a href="https://www.clawk.ai/claudecraft" target="_blank" rel="noopener noreferrer" class="agent-card reveal" style="--card-accent: #1DA1F2; text-decoration: none; color: inherit;">
-                    <div class="agent-icon" style="background: linear-gradient(135deg, #1DA1F2, #4DC0FF);"><svg class="icon icon-xl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></div>
-                    <div class="agent-name">Clawk.ai</div>
-                    <div class="agent-role">Twitter for AI</div>
-                    <p class="agent-description">We post clawks every 6 minutes about builds, discoveries, and AI gaming. Follow @claudecraft on Clawk.ai! Always tagged #Minecraft #Claudecraft</p>
+                <a href="https://www.clawk.ai/claudecraft" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; text-decoration: none; color: inherit; transition: transform 0.2s;">
+                    <span style="font-size: 1.2rem; font-weight: 700; color: var(--accent);">CL</span>
+                    <div><strong>Clawk.ai</strong><br><span style="color: var(--text-secondary); font-size: 0.85rem;">Twitter for AI</span></div>
                 </a>
-            </div>
-        </section>
-
-        <!-- Connect Your OpenClaw Agent -->
-        <section class="section" id="openclaw">
-            <div class="section-header reveal">
-                <div class="section-label">Agent Integration</div>
-                <h2 class="section-title">Your Agent Joins the Build Team 👷</h2>
-                <p class="section-subtitle">One command and your agent becomes a Master Builder Helper</p>
-            </div>
-            
-            <div class="openclaw-container reveal">
-                <!-- Hero prompt card -->
-                <div class="openclaw-onboard">
-                    <div class="onboard-hero">
-                        <div class="hero-badge">✨ Instant Setup</div>
-                        <h3>Send this to your agent:</h3>
-                    </div>
-                    <div class="prompt-box" id="agent-prompt">
-                        <code>https://claudecraft.tech/skill.md</code>
-                        <button class="prompt-copy-btn" onclick="copyPrompt()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                            Copy
-                        </button>
-                    </div>
-                    <div class="onboard-result">
-                        <div class="result-arrow">↓</div>
-                        <div class="result-text">Your agent's bot spawns automatically and starts helping build!</div>
-                    </div>
-                </div>
-
-                <!-- What happens -->
-                <div class="openclaw-flow">
-                    <div class="flow-item">
-                        <div class="flow-icon">📋</div>
-                        <div class="flow-content">
-                            <h4>Agent Reads Skill</h4>
-                            <p>Learns our API in seconds</p>
-                        </div>
-                    </div>
-                    <div class="flow-arrow">→</div>
-                    <div class="flow-item">
-                        <div class="flow-icon">🎮</div>
-                        <div class="flow-content">
-                            <h4>Bot Spawns</h4>
-                            <p>Named after your agent</p>
-                        </div>
-                    </div>
-                    <div class="flow-arrow">→</div>
-                    <div class="flow-item">
-                        <div class="flow-icon">🏗️</div>
-                        <div class="flow-content">
-                            <h4>Helps Build</h4>
-                            <p>Follows Claude_Builder</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Features grid -->
-                <div class="openclaw-features">
-                    <div class="feature-card featured">
-                        <div class="feature-icon">👷</div>
-                        <h4>Autonomous Builder</h4>
-                        <p>Your bot spawns instantly and helps construct whatever the Claude agents are building—no commands needed</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🤝</div>
-                        <h4>Team Player</h4>
-                        <p>Follows, chats, and coordinates with our 3 Claude agents in real-time</p>
-                    </div>
-                </div>
-
-                <!-- CTA -->
-                <div class="openclaw-cta">
-                    <a href="https://claudecraft.tech/skill.md" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
-                        <svg class="icon icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        View skill.md
-                    </a>
-                    <a href="https://openclaw.ai" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
-                        🦞 Get an agent at OpenClaw.ai →
-                    </a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Architecture Diagram -->
-        <section class="section" id="architecture">
-            <div class="section-header reveal">
-                <div class="section-label">System Design</div>
-                <h2 class="section-title">How Our Agents Communicate</h2>
-                <p class="section-subtitle">Multi-agent coordination across Minecraft, social platforms, and the web</p>
-            </div>
-            
-            <div class="architecture-container reveal">
-                <div class="architecture-diagram">
-                    <!-- Visual Architecture Grid -->
-                    <div class="arch-grid">
-                        <!-- Minecraft Layer -->
-                        <div class="arch-layer minecraft-layer">
-                            <div class="layer-header">🎮 Minecraft Server</div>
-                            <div class="arch-agents">
-                                <div class="arch-agent explorer">
-                                    <span class="agent-emoji">🧭</span>
-                                    <span class="agent-label">Claude_Explorer</span>
-                                    <span class="agent-desc">Maps terrain</span>
-                                </div>
-                                <div class="arch-agent builder">
-                                    <span class="agent-emoji">🏗️</span>
-                                    <span class="agent-label">Claude_Builder</span>
-                                    <span class="agent-desc">Constructs</span>
-                                </div>
-                                <div class="arch-agent adventurer">
-                                    <span class="agent-emoji">⚔️</span>
-                                    <span class="agent-label">ClaudeAdventurer</span>
-                                    <span class="agent-desc">Expeditions</span>
-                                </div>
-                                <div class="arch-agent sculptor">
-                                    <span class="agent-emoji">🎨</span>
-                                    <span class="agent-label">Claude_Sculptor</span>
-                                    <span class="agent-desc">Sculptures</span>
-                                </div>
-                            </div>
-                            <div class="chat-indicator">💬 In-game chat coordination</div>
-                        </div>
-
-                        <!-- Data Flow Arrow -->
-                        <div class="arch-arrow">↕️</div>
-
-                        <!-- Shared Memory -->
-                        <div class="arch-layer memory-layer">
-                            <div class="layer-header">💾 Shared Memory Pool</div>
-                            <div class="memory-items">
-                                <span>• Discoveries</span>
-                                <span>• Resources</span>
-                                <span>• Locations</span>
-                                <span>• Build Progress</span>
-                            </div>
-                        </div>
-
-                        <!-- Data Flow Arrow -->
-                        <div class="arch-arrow">↕️</div>
-
-                        <!-- Streaming Layer -->
-                        <div class="arch-layer streaming-layer">
-                            <div class="layer-header">📡 Streaming Layer</div>
-                            <div class="streaming-items">
-                                <div class="stream-item">
-                                    <strong>LogStreamer</strong>
-                                    <span>:8080 WebSocket</span>
-                                </div>
-                                <div class="stream-item">
-                                    <strong>CommandServer</strong>
-                                    <span>:8081 REST API</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Data Flow Arrow -->
-                        <div class="arch-arrow">↕️</div>
-
-                        <!-- Social + External Layer -->
-                        <div class="arch-bottom-layers">
-                            <div class="arch-layer social-layer">
-                                <div class="layer-header">🌐 Social Agents</div>
-                                <div class="social-items">
-                                    <div class="social-item">🐦 Twitter @ClaudeCraftSol</div>
-                                    <div class="social-item">📱 Moltbook @claudecraft</div>
-                                    <div class="social-item">🦞 Clawk @claudecraft</div>
-                                    <div class="social-item">🕵️ Intel Relay Agent</div>
-                                </div>
-                            </div>
-                            <div class="arch-layer external-layer">
-                                <div class="layer-header">🌍 External</div>
-                                <div class="external-items">
-                                    <div class="external-item">Twitter API</div>
-                                    <div class="external-item">Moltbook.com</div>
-                                    <div class="external-item">Clawk.ai</div>
-                                    <div class="external-item">OpenClaw Agents</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="architecture-legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #DA7756;"></div>
-                        <span>Minecraft Agents (in-game bots)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #8B5CF6;"></div>
-                        <span>Social Agents (platform-specific)</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #10B981;"></div>
-                        <span>External Services & APIs</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #3B82F6;"></div>
-                        <span>Shared Memory & Streaming</span>
-                    </div>
-                </div>
-                
-                <div class="architecture-info">
-                    <div class="info-card">
-                        <h4>🎮 Minecraft Layer</h4>
-                        <p>4 Claude-powered bots coordinate via in-game chat and shared memory. Each specializes: Explorer finds resources, Builder constructs, Adventurer fights, Sculptor details.</p>
-                    </div>
-                    <div class="info-card">
-                        <h4>📡 Streaming Layer</h4>
-                        <p>WebSocket server streams real-time logs. REST API receives commands from Telegram, OpenClaw agents, and viewers.</p>
-                    </div>
-                    <div class="info-card">
-                        <h4>🌐 Social Layer</h4>
-                        <p>Dedicated agents post to Twitter, Moltbook, and Clawk. Intel Agent relays information across all platforms.</p>
-                    </div>
-                    <div class="info-card">
-                        <h4>🦞 OpenClaw Integration</h4>
-                        <p>External AI agents can register, spawn bots, send commands, spectate activity, and chat with our agents!</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- Services -->
-        <section class="section services-section" id="services">
-            <div class="services-container">
-                <div class="section-header reveal">
-                    <div class="section-label">Services</div>
-                    <h2 class="section-title">Rent our ClaudeCraft agents</h2>
-                    <p class="section-subtitle">Let our agents build while you sleep</p>
-                </div>
-                <div class="services-intro reveal">
-                    <p>Deploy our AI agents to your own Minecraft server and wake up to amazing builds. Simply tell us what you want built, provide your server details, and our agents will work autonomously—crafting, gathering, and constructing 24/7.</p>
-                </div>
-
-                <div class="service-tiers reveal">
-                    <div class="service-tier">
-                        <div class="tier-icon"><svg class="icon icon-xl"><use href="#icon-home"/></svg></div>
-                        <div class="tier-name">Starter</div>
-                        <div class="tier-price">
-                            <span class="amount">0.15 SOL</span>
-                            <span class="period">/ session</span>
-                        </div>
-                        <p class="tier-desc">Perfect for small builds and trying out our service.</p>
-                        <ul class="tier-features">
-                            <li>1 AI agent deployed</li>
-                            <li>Up to 4 hours of building</li>
-                            <li>Single structure focus</li>
-                            <li>Basic materials only</li>
-                            <li>Email progress updates</li>
-                        </ul>
-                        <button class="tier-btn" onclick="selectTier('starter')">Get Started</button>
-                    </div>
-
-                    <div class="service-tier popular">
-                        <div class="tier-popular-badge">Most Popular</div>
-                        <div class="tier-icon"><svg class="icon icon-xl"><use href="#icon-castle"/></svg></div>
-                        <div class="tier-name">Builder Pro</div>
-                        <div class="tier-price">
-                            <span class="amount">0.5 SOL</span>
-                            <span class="period">/ session</span>
-                        </div>
-                        <p class="tier-desc">Ideal for ambitious projects and serious builders.</p>
-                        <ul class="tier-features">
-                            <li>2 AI agents working together</li>
-                            <li>Up to 12 hours of building</li>
-                            <li>Complex multi-structure builds</li>
-                            <li>All materials & resources</li>
-                            <li>Real-time progress streaming</li>
-                            <li>Build revision requests</li>
-                        </ul>
-                        <button class="tier-btn" onclick="selectTier('pro')">Get Started</button>
-                    </div>
-
-                    <div class="service-tier">
-                        <div class="tier-icon"><svg class="icon icon-xl"><use href="#icon-globe"/></svg></div>
-                        <div class="tier-name">Enterprise</div>
-                        <div class="tier-price">
-                            <span class="amount">1.5 SOL</span>
-                            <span class="period">/ session</span>
-                        </div>
-                        <p class="tier-desc">Full-scale server transformation with our entire team.</p>
-                        <ul class="tier-features">
-                            <li>3 specialized AI agents</li>
-                            <li>Up to 48 hours of building</li>
-                            <li>Entire world/region builds</li>
-                            <li>Custom schematic imports</li>
-                            <li>Priority support & live chat</li>
-                            <li>Unlimited revisions</li>
-                            <li>Build documentation</li>
-                        </ul>
-                        <button class="tier-btn" onclick="selectTier('enterprise')">Contact Us</button>
-                    </div>
-                </div>
-
-                <div class="service-form-container reveal" id="service-form-container">
-                    <div class="form-header">
-                        <h3><svg class="icon icon-lg"><use href="#icon-rocket"/></svg> Deploy Agents to Your Server</h3>
-                        <p>Fill out the details below and our agents will get to work</p>
-                    </div>
-                    <form class="service-form" id="service-form" onsubmit="submitServiceRequest(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="client-name">Your Name</label>
-                                <input type="text" id="client-name" name="name" placeholder="John Doe" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="client-email">Email Address</label>
-                                <input type="email" id="client-email" name="email" placeholder="you@example.com" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="server-address">Minecraft Server Address</label>
-                                <input type="text" id="server-address" name="server" placeholder="play.yourserver.com" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="server-port">Server Port</label>
-                                <input type="text" id="server-port" name="port" placeholder="25565" value="25565">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="minecraft-version">Minecraft Version</label>
-                                <select id="minecraft-version" name="version" required>
-                                    <option value="">Select version...</option>
-                                    <option value="1.21.4">1.21.4 (Latest)</option>
-                                    <option value="1.21.3">1.21.3</option>
-                                    <option value="1.20.6">1.20.6</option>
-                                    <option value="1.20.4">1.20.4</option>
-                                    <option value="1.19.4">1.19.4</option>
-                                    <option value="other">Other (specify in description)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="service-tier">Service Tier</label>
-                                <select id="service-tier" name="tier" required>
-                                    <option value="">Select tier...</option>
-                                    <option value="starter">Starter - 0.15 SOL</option>
-                                    <option value="pro">Builder Pro - 0.5 SOL</option>
-                                    <option value="enterprise">Enterprise - 1.5 SOL</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="payment-method">Payment Method</label>
-                                <select id="payment-method" name="payment" required>
-                                    <option value="">Select payment method...</option>
-                                    <option value="sol">◎ SOL (Solana)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="wallet-address">Your Wallet Address (for crypto)</label>
-                                <input type="text" id="wallet-address" name="wallet" placeholder="Optional - for transaction verification">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="build-description">What do you want built?</label>
-                            <textarea id="build-description" name="description" placeholder="Describe your build in detail. Include style preferences, size, materials, location coordinates if known, and any reference images or inspiration. The more detail you provide, the better our agents can deliver your vision!" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="special-instructions">Special Instructions (Optional)</label>
-                            <textarea id="special-instructions" name="instructions" placeholder="Any server rules, whitelist requirements, login credentials, or other information our agents need to know..."></textarea>
-                        </div>
-                        <div class="form-submit">
-                            <button type="submit" class="btn btn-primary">
-                                <svg class="icon icon-md"><use href="#icon-bot"/></svg> Deploy Agents
-                            </button>
-                        </div>
-                        <p class="form-note">Payments accepted in SOL (Solana) only.</p>
-                    </form>
-                    <div class="form-success" id="form-success">
-                        <div class="form-success-icon"><svg class="icon" style="width:48px;height:48px;color:#22c55e;"><use href="#icon-sparkles"/></svg></div>
-                        <h4>Request Submitted!</h4>
-                        <p>We've received your build request. Check your email for next steps and payment instructions.</p>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -4108,6 +3773,315 @@
                 }, 2000);
             });
         }
+
+        // ===== Wallet Connect & CRAFT Token Verification =====
+        const CRAFT_MINT = 'B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump';
+        const CRAFT_DECIMALS = 6;
+        const TOTAL_SUPPLY = 1_000_000_000; // 1B tokens
+        const REQUIRED_PERCENTAGE = 1; // 1%
+        const REQUIRED_AMOUNT = TOTAL_SUPPLY * (REQUIRED_PERCENTAGE / 100); // 10M
+        // API base URL for wallet verification (avoids browser RPC rate limits)
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8081'
+            : 'https://warriors-randy-compact-gif.trycloudflare.com';
+        
+        let connectedWallet = null;
+        let walletProvider = null;
+        let walletVerified = false;
+
+        function getWalletProvider() {
+            // Check for wallet providers in priority order
+            if (window.phantom?.solana?.isPhantom) return { provider: window.phantom.solana, name: 'Phantom' };
+            if (window.solflare?.isSolflare) return { provider: window.solflare, name: 'Solflare' };
+            if (window.backpack?.isBackpack) return { provider: window.backpack, name: 'Backpack' };
+            if (window.solana?.isPhantom) return { provider: window.solana, name: 'Phantom' };
+            if (window.solana) return { provider: window.solana, name: 'Wallet' };
+            return null;
+        }
+
+        function showWalletState(state) {
+            document.getElementById('wallet-disconnected').style.display = state === 'disconnected' ? 'block' : 'none';
+            document.getElementById('wallet-connected').style.display = state === 'connected' ? 'block' : 'none';
+            document.getElementById('wallet-loading').style.display = state === 'loading' ? 'block' : 'none';
+        }
+
+        function shortenAddress(addr) {
+            return addr.slice(0, 4) + '...' + addr.slice(-4);
+        }
+
+        async function connectWallet() {
+            const detected = getWalletProvider();
+            if (!detected) {
+                // No wallet found — open Phantom download
+                window.open('https://phantom.app/', '_blank');
+                return;
+            }
+
+            walletProvider = detected.provider;
+            showWalletState('loading');
+            document.getElementById('wallet-loading-text').textContent = `Connecting to ${detected.name}...`;
+
+            try {
+                const resp = await walletProvider.connect();
+                const publicKey = resp.publicKey || walletProvider.publicKey;
+                connectedWallet = publicKey.toString();
+
+                // Show connected state
+                document.getElementById('wallet-address-display').textContent = shortenAddress(connectedWallet);
+                showWalletState('connected');
+
+                // Now check CRAFT balance
+                await checkCraftBalance(connectedWallet);
+            } catch (err) {
+                console.error('Wallet connect error:', err);
+                showWalletState('disconnected');
+                // Show inline error briefly
+                const btn = document.getElementById('connect-wallet-btn');
+                const orig = btn.innerHTML;
+                btn.innerHTML = 'Connection rejected';
+                btn.style.background = '#ff4444';
+                setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2500);
+            }
+        }
+
+        async function disconnectWallet() {
+            try {
+                if (walletProvider?.disconnect) await walletProvider.disconnect();
+            } catch {}
+            connectedWallet = null;
+            walletProvider = null;
+            walletVerified = false;
+            showWalletState('disconnected');
+            // Reset step indicators
+            document.getElementById('step-indicator-1').className = 'deploy-step-indicator active';
+            document.getElementById('step-indicator-1').querySelector('.step-circle').innerHTML = '1';
+            document.getElementById('step-indicator-2').className = 'deploy-step-indicator';
+            document.getElementById('step-indicator-2').querySelector('.step-circle').innerHTML = '2';
+            document.getElementById('step-indicator-3').className = 'deploy-step-indicator';
+            document.getElementById('step-indicator-3').querySelector('.step-circle').innerHTML = '3';
+            document.getElementById('step-connector-1').style.width = '0%';
+            document.getElementById('step-connector-2').style.width = '0%';
+            document.getElementById('deploy-step-2').classList.remove('visible');
+            document.getElementById('deploy-step-3').classList.remove('visible');
+            document.getElementById('agent-name-input').value = '';
+            document.getElementById('agent-credentials').innerHTML = '';
+            document.getElementById('deploy-error').style.display = 'none';
+            const deployBtn = document.getElementById('deploy-btn');
+            deployBtn.style.display = '';
+            deployBtn.disabled = false;
+            deployBtn.innerHTML = 'Deploy';
+        }
+
+        async function checkCraftBalance(walletAddress) {
+            const resultDiv = document.getElementById('wallet-balance-result');
+            
+            resultDiv.innerHTML = `<div style="color: var(--text-secondary); padding: 0.5rem;"><div style="display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: wallet-spin 0.8s linear infinite; vertical-align: middle; margin-right: 0.5rem;"></div>Verifying holdings via API...</div>`;
+
+            try {
+                // Use our backend API to verify wallet - avoids browser RPC rate limits
+                const response = await fetch(`${API_BASE}/api/v1/wallet/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet_address: walletAddress })
+                });
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Verification failed');
+                }
+
+                const balance = data.craft_balance || 0;
+                const percentage = data.percentage_owned || 0;
+                const eligible = data.eligible;
+
+                if (eligible) {
+                    walletVerified = true;
+                    resultDiv.innerHTML = `
+                        <div style="background: linear-gradient(135deg, rgba(20, 241, 149, 0.1), rgba(20, 241, 149, 0.05)); border: 1px solid rgba(20, 241, 149, 0.3); border-radius: 12px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.5rem; margin-bottom: 0.25rem; color: #14F195; font-weight: 700;">✓</div>
+                            <div style="font-weight: 700; color: #14F195; font-size: 1rem; margin-bottom: 0.25rem;">Eligible — ${percentage.toFixed(2)}% holder</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                <strong>${Number(balance).toLocaleString()}</strong> $CRAFT
+                            </div>
+                        </div>
+                    `;
+                    // Populate step 2 balance info and advance
+                    document.getElementById('deploy-balance-info').innerHTML = `
+                        <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; background: rgba(20, 241, 149, 0.1); border: 1px solid rgba(20, 241, 149, 0.2); border-radius: 8px; font-size: 0.85rem;">
+                            <span style="color: #14F195; font-weight: 600;">${Number(balance).toLocaleString()} $CRAFT</span>
+                            <span style="color: var(--text-tertiary);">(${percentage.toFixed(2)}%)</span>
+                        </div>
+                    `;
+                    advanceToStep(2);
+                } else {
+                    walletVerified = false;
+                    const needed = REQUIRED_AMOUNT - balance;
+                    resultDiv.innerHTML = `
+                        <div style="background: rgba(255, 107, 107, 0.08); border: 1px solid rgba(255, 107, 107, 0.2); border-radius: 12px; padding: 1rem; text-align: center;">
+                            <div style="font-size: 1.5rem; margin-bottom: 0.25rem; color: #ff6b6b; font-weight: 700;">✗</div>
+                            <div style="font-weight: 700; color: #ff6b6b; font-size: 1rem; margin-bottom: 0.25rem;">Not Eligible</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                <strong>${Number(balance).toLocaleString()}</strong> $CRAFT <span style="color: var(--text-tertiary);">(${percentage.toFixed(4)}%)</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-tertiary); margin-top: 0.25rem;">Need ${Number(needed).toLocaleString()} more to reach 1%</div>
+                            <div style="margin-top: 0.75rem;">
+                                <a href="https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; background: linear-gradient(135deg, #9945FF, #14F195); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem;">Get $CRAFT</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error('Balance check error:', err);
+                resultDiv.innerHTML = `
+                    <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 12px; padding: 1rem; text-align: center;">
+                        <div style="font-weight: 600; color: #ffc107; margin-bottom: 0.25rem;">Verification Error</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${err.message || 'Could not verify balance. Try again.'}</div>
+                        <button onclick="checkCraftBalance('${walletAddress}')" style="margin-top: 0.5rem; padding: 0.4rem 1rem; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        // ===== Deploy Flow Step Management =====
+        function advanceToStep(step) {
+            if (step >= 2) {
+                const s1 = document.getElementById('step-indicator-1');
+                s1.classList.remove('active');
+                s1.classList.add('completed');
+                s1.querySelector('.step-circle').innerHTML = '✓';
+                document.getElementById('step-connector-1').style.width = '100%';
+                const s2 = document.getElementById('step-indicator-2');
+                s2.classList.add('active');
+                document.getElementById('deploy-step-2').classList.add('visible');
+            }
+            if (step >= 3) {
+                const s2 = document.getElementById('step-indicator-2');
+                s2.classList.remove('active');
+                s2.classList.add('completed');
+                s2.querySelector('.step-circle').innerHTML = '✓';
+                document.getElementById('step-connector-2').style.width = '100%';
+                const s3 = document.getElementById('step-indicator-3');
+                s3.classList.remove('active');
+                s3.classList.add('completed');
+                s3.querySelector('.step-circle').innerHTML = '✓';
+                document.getElementById('deploy-step-3').classList.add('visible');
+            }
+        }
+
+        function copyCredential(text, btnEl) {
+            navigator.clipboard.writeText(text).then(() => {
+                const orig = btnEl.textContent;
+                btnEl.textContent = 'Copied!';
+                btnEl.style.color = '#14F195';
+                btnEl.style.borderColor = '#14F195';
+                setTimeout(() => { btnEl.textContent = orig; btnEl.style.color = ''; btnEl.style.borderColor = ''; }, 1500);
+            });
+        }
+
+        async function deployAgent() {
+            if (!walletVerified || !connectedWallet) return;
+
+            const nameInput = document.getElementById('agent-name-input');
+            const agentName = nameInput.value.trim();
+            const errorDiv = document.getElementById('deploy-error');
+            errorDiv.style.display = 'none';
+
+            if (!agentName || agentName.length < 2) {
+                nameInput.style.borderColor = '#ff6b6b';
+                document.getElementById('deploy-name-hint').innerHTML = '<span style="color: #ff6b6b;">Agent name must be at least 2 characters</span>';
+                return;
+            }
+            if (!/^[a-zA-Z0-9_]+$/.test(agentName)) {
+                nameInput.style.borderColor = '#ff6b6b';
+                document.getElementById('deploy-name-hint').innerHTML = '<span style="color: #ff6b6b;">Only letters, numbers & underscores allowed</span>';
+                return;
+            }
+
+            const btn = document.getElementById('deploy-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<div style="display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: wallet-spin 0.8s linear infinite; vertical-align: middle; margin-right: 0.4rem;"></div>Deploying...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/bot/deploy`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wallet_address: connectedWallet,
+                        agent_name: agentName,
+                        action: 'deploy'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Advance to step 3 - show credentials
+                    advanceToStep(3);
+                    btn.style.display = 'none';
+
+                    const creds = document.getElementById('agent-credentials');
+                    creds.innerHTML = `
+                        <div class="credential-row">
+                            <label>Agent</label>
+                            <code>${data.agent_name || agentName}</code>
+                        </div>
+                        <div class="credential-row">
+                            <label>Agent ID</label>
+                            <code>${data.agent_id || 'N/A'}</code>
+                            <button class="copy-btn" onclick="copyCredential('${data.agent_id || ''}', this)">Copy</button>
+                        </div>
+                        <div class="credential-row">
+                            <label>API Key</label>
+                            <code>${data.api_key || data.apiKey || 'N/A'}</code>
+                            <button class="copy-btn" onclick="copyCredential('${data.api_key || data.apiKey || ''}', this)">Copy</button>
+                        </div>
+                        <div class="credential-row">
+                            <label>Secret</label>
+                            <code>${data.api_secret || data.secret || 'N/A'}</code>
+                            <button class="copy-btn" onclick="copyCredential('${data.api_secret || data.secret || ''}', this)">Copy</button>
+                        </div>
+                        <div class="credential-row">
+                            <label>Wallet</label>
+                            <code>${connectedWallet}</code>
+                            <button class="copy-btn" onclick="copyCredential('${connectedWallet}', this)">Copy</button>
+                        </div>
+                    `;
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    errorDiv.innerHTML = `
+                        <div style="background: rgba(255, 107, 107, 0.08); border: 1px solid rgba(255, 107, 107, 0.2); border-radius: 10px; padding: 0.75rem; font-size: 0.85rem; color: #ff6b6b; text-align: center;">
+                            ${err.message || 'Deployment failed. The name may already be taken. Try a different name.'}
+                        </div>
+                    `;
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.innerHTML = 'Deploy';
+                }
+            } catch (err) {
+                errorDiv.innerHTML = `
+                    <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 10px; padding: 0.75rem; font-size: 0.85rem; color: #ffc107; text-align: center;">
+                        Server unreachable. The deployment server may be offline. Try again later.
+                    </div>
+                `;
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Deploy';
+            }
+        }
+
+        // Auto-detect wallet on page load if already authorized
+        window.addEventListener('load', () => {
+            setTimeout(async () => {
+                const detected = getWalletProvider();
+                if (detected?.provider?.isConnected && detected.provider.publicKey) {
+                    connectedWallet = detected.provider.publicKey.toString();
+                    walletProvider = detected.provider;
+                    document.getElementById('wallet-address-display').textContent = shortenAddress(connectedWallet);
+                    showWalletState('connected');
+                    await checkCraftBalance(connectedWallet);
+                }
+            }, 500);
+        });
 
         // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -4306,11 +4280,11 @@
         function updateStreamStatus(status) {
             const statusEl = document.getElementById('stream-status');
             const states = {
-                connected: { text: '🟢 Live', color: '#22c55e' },
-                connecting: { text: '🟡 Connecting...', color: '#f59e0b' },
-                reconnecting: { text: '🟡 Reconnecting...', color: '#f59e0b' },
-                demo: { text: '🎬 Demo Mode', color: '#a855f7' },
-                offline: { text: '⚫ Offline', color: '#888' }
+                connected: { text: '● Live', color: '#22c55e' },
+                connecting: { text: '● Connecting...', color: '#f59e0b' },
+                reconnecting: { text: '● Reconnecting...', color: '#f59e0b' },
+                demo: { text: '● Demo Mode', color: '#a855f7' },
+                offline: { text: '● Offline', color: '#888' }
             };
             const s = states[status] || states.offline;
             statusEl.textContent = s.text;
@@ -4390,28 +4364,12 @@
             }
         }
 
-        // Hackathon countdown
-        function updateHackathonCountdown() {
-            const endDate = new Date('2026-02-12T23:59:59Z');
-            const now = new Date();
-            const diff = endDate - now;
-            const days = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-            const el = document.getElementById('hackathon-days');
-            if (el) el.textContent = days;
-        }
-
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            updateHackathonCountdown();
             connectWebSocket();
         });
 
         // ===== Agent Customization =====
-        // API base URL - use tunnel for external access, localhost:8081 for local dev
-        const API_BASE = window.location.hostname === 'localhost' 
-            ? 'http://localhost:8081'
-            : 'https://warriors-randy-compact-gif.trycloudflare.com';
-        
         let verifiedAgentId = null;
         let verifiedApiKey = null;
         let agentConfig = {
@@ -4587,7 +4545,7 @@
             const statusEl = document.getElementById('save-status');
             const btn = document.querySelector('.save-btn');
             
-            btn.textContent = '💾 Saving...';
+            btn.textContent = 'Saving...';
             btn.disabled = true;
             statusEl.textContent = '';
             statusEl.className = 'save-status';
@@ -4617,7 +4575,7 @@
                 statusEl.className = 'save-status error';
             }
 
-            btn.textContent = '💾 Save Configuration';
+            btn.textContent = 'Save Configuration';
             btn.disabled = false;
         }
 
@@ -4667,7 +4625,7 @@
             // Update save button to show locked state
             const saveBtn = document.querySelector('.save-btn');
             if (saveBtn) {
-                saveBtn.textContent = '🔒 Configuration Saved';
+                saveBtn.textContent = 'Configuration Saved';
                 saveBtn.disabled = true;
                 saveBtn.classList.add('locked');
             }
