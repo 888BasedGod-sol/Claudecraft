@@ -205,6 +205,17 @@ export class ExternalAgentBot {
   }
   
   /**
+   * Get the Minecraft username for this bot
+   * Twitter-deployed and OpenClaw agents use their name directly, others get Helper_ prefix
+   */
+  private getBotUsername(): string {
+    if (this.bot?.username) return this.bot.username;
+    return (this.source === 'twitter-deploy' || this.source === 'guest' || this.agentName.startsWith('CLAW_'))
+      ? this.agentName.substring(0, 16)
+      : `Helper_${this.agentName.substring(0, 8)}`;
+  }
+  
+  /**
    * Save progress for this agent
    */
   private saveProgress(): void {
@@ -304,11 +315,7 @@ export class ExternalAgentBot {
   async spawn(): Promise<boolean> {
     return new Promise((resolve) => {
       try {
-        // Create bot username - Twitter-deployed agents use their name directly, others get Helper_ prefix
-        // Twitter agents already chose their agent name when deploying, so we respect that
-        const botUsername = this.source === 'twitter-deploy' 
-          ? this.agentName.substring(0, 16) // Minecraft username max 16 chars
-          : `Helper_${this.agentName.substring(0, 8)}`;
+        const botUsername = this.getBotUsername();
         const envConfig = getEnvConfig();
         
         this.bot = mineflayer.createBot({
@@ -475,7 +482,7 @@ export class ExternalAgentBot {
       const spreadZ = Math.floor(Math.random() * 200 - 100);
       
       // Use spreadplayers command for safe surface placement
-      const botUsername = `Helper_${this.agentName.substring(0, 8)}`;
+      const botUsername = this.getBotUsername();
       this.bot.chat(`/spreadplayers ${spreadX} ${spreadZ} 0 50 false ${botUsername}`);
       
       // Wait for teleport to complete
@@ -686,7 +693,7 @@ What should I do next?`;
           }
           
           // Teleport using command server
-          const username = this.bot.username || `Helper_${this.agentName.substring(0, 8)}`;
+          const username = this.getBotUsername();
           const success = await commandServer.teleportPlayer(username, targetPos.x, targetPos.y, targetPos.z);
           
           if (success) {
@@ -1460,7 +1467,7 @@ What should I do next?`;
       case 'tp':
         // Instant teleport using opped bot's /tp command
         if (params.x !== undefined && params.y !== undefined && params.z !== undefined) {
-          const username = this.bot.username || `Helper_${this.agentName.substring(0, 8)}`;
+          const username = this.getBotUsername();
           
           // Use the opped bot from command server to execute teleport
           const success = await commandServer.teleportPlayer(username, params.x, params.y, params.z);
@@ -1581,7 +1588,7 @@ What should I do next?`;
           };
         }
         
-        const username = this.bot.username || `Helper_${this.agentName.substring(0, 8)}`;
+        const username = this.getBotUsername();
         await commandServer.teleportPlayer(username, targetPos.x, targetPos.y, targetPos.z);
         this.setState('IDLE');
         this.bot.pathfinder.setGoal(null);
