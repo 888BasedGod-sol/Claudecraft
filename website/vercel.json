@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://las-walter-brick-explorer.trycloudflare.com/api/:path*"
+      "destination": "https://mug-architectural-technical-nyc.trycloudflare.com/api/:path*"
     }
   ]
 }
