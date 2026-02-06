@@ -4171,8 +4171,11 @@
         }
 
         // WebSocket Activity Stream
-        // Note: In production, update this to your WebSocket server URL
-        const WS_URLS = ['wss://claudecraft.tech/ws', 'ws://localhost:8080'];
+        // The WebSocket server runs on port 8080, exposed via cloudflare tunnel
+        const WS_URLS = [
+            'wss://trance-fragrance-tackle-anymore.trycloudflare.com',
+            'ws://localhost:8080'
+        ];
         let currentWsUrlIndex = 0;
         const MAX_ACTIVITIES = 15;
         let activityLog = [];
