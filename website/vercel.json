@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://mug-architectural-technical-nyc.trycloudflare.com/api/:path*"
+      "destination": "https://legend-cutting-external-interface.trycloudflare.com/api/:path*"
     }
   ]
 }
