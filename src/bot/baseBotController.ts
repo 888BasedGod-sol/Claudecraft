@@ -63,6 +63,7 @@ export abstract class BaseBotController {
         username: this.botName,
         version: CONFIG.bot.version,
         hideErrors: false,
+        checkTimeoutInterval: 120000, // 2 minutes - prevent keepalive timeout
       });
 
       this.bot.loadPlugin(pathfinder);

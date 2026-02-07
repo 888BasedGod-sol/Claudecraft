@@ -169,6 +169,10 @@ export class AutonomousAgent {
   private actionPlanQueue: PlannedAction[] = [];
   private currentPlanGoal: string | null = null;
 
+  // Build progression tracking
+  private buildHistory: { shape: string; material: string; size: number; success: boolean; timestamp: number }[] = [];
+  private buildLevel: number = 1; // 1=beginner, 2=intermediate, 3=advanced, 4=master
+
   // Get structure blueprints for the prompt
   private getStructureBlueprintsPrompt(): string {
     if (!STRUCTURE_BLUEPRINTS.structures) return '';
@@ -328,8 +332,10 @@ ${tips.map((t: string) => `• ${t}`).join('\n')}
     }
     
     // Get relevant memories for context
+    // Include current goals + biome + blocks for better memory retrieval
+    const goalContext = this.currentGoals.slice(0, 3).map(g => g.description).join(' ');
     const relevantMemories = await this.memory.getRelevantMemories(
-      `${observation.biome} ${observation.nearbyBlocks.map(b => b.name).join(' ')}`
+      `${observation.biome} ${goalContext} ${observation.nearbyBlocks.slice(0, 5).map(b => b.name).join(' ')}`
     );
     
     // === OPTION 3: Get failure pattern memories to avoid repeating mistakes ===
@@ -631,6 +637,8 @@ ${memoriesDescription || "No relevant memories for this situation."}
 
 📢 SHARED MEMORIES FROM OTHER AGENTS:
 ${sharedMemoriesDescription || "No shared memories yet."}
+
+${this.getBuildProgressionPrompt()}
 
 🌐 WORLD KNOWLEDGE (CIVILIZATION MEMORY):
 ${worldContext || "No world context available."}
@@ -1079,6 +1087,74 @@ What do you want to do? Think about what interests you, what goals you have, and
       .join('\n');
   }
 
+  // === BUILD PROGRESSION SYSTEM ===
+  recordBuild(shape: string, material: string, size: number, success: boolean): void {
+    this.buildHistory.push({ shape, material, size, success, timestamp: Date.now() });
+    if (this.buildHistory.length > 50) this.buildHistory.shift();
+    
+    // Recalculate build level based on successful builds
+    const successes = this.buildHistory.filter(b => b.success);
+    const uniqueShapes = new Set(successes.map(b => b.shape)).size;
+    const avgSize = successes.length > 0 ? successes.reduce((s, b) => s + b.size, 0) / successes.length : 0;
+    const largestBuild = successes.length > 0 ? Math.max(...successes.map(b => b.size)) : 0;
+    
+    if (successes.length >= 15 && uniqueShapes >= 8 && largestBuild >= 20) this.buildLevel = 4;
+    else if (successes.length >= 8 && uniqueShapes >= 5 && avgSize >= 10) this.buildLevel = 3;
+    else if (successes.length >= 3 && uniqueShapes >= 2) this.buildLevel = 2;
+    else this.buildLevel = 1;
+  }
+
+  // Auto-store a structured build memory on success
+  async storeBuildMemory(shape: string, material: string, size: number, blocksPlaced: number, position: { x: number; y: number; z: number }): Promise<void> {
+    const content = `Successfully built a ${size}-block ${shape} using ${material} (${blocksPlaced} blocks placed). Build level: ${this.buildLevel}.`;
+    await this.memory.store({
+      type: 'build' as any,
+      content,
+      importance: Math.min(10, 5 + Math.floor(size / 5)),
+      location: position,
+      timestamp: Date.now(),
+      tags: this.extractTags(`build ${shape} ${material} success structure`)
+    });
+  }
+
+  private getBuildProgressionPrompt(): string {
+    const successes = this.buildHistory.filter(b => b.success);
+    if (successes.length === 0 && this.buildLevel <= 1) return '';
+    
+    const levelNames = ['', 'Beginner', 'Intermediate', 'Advanced', 'Master'];
+    const uniqueShapes = [...new Set(successes.map(b => b.shape))];
+    const avgSize = successes.length > 0 ? Math.round(successes.reduce((s, b) => s + b.size, 0) / successes.length) : 0;
+    const largestBuild = successes.length > 0 ? Math.max(...successes.map(b => b.size)) : 0;
+    const recentBuilds = successes.slice(-5).map(b => `${b.shape}(${b.material}, size ${b.size})`).join(', ');
+    
+    let progression = `📈 BUILD PROGRESSION (Level ${this.buildLevel}: ${levelNames[this.buildLevel]}):\n`;
+    progression += `- Successful builds: ${successes.length} | Unique shapes mastered: ${uniqueShapes.join(', ') || 'none'}\n`;
+    progression += `- Average size: ${avgSize} | Largest build: ${largestBuild} blocks\n`;
+    if (recentBuilds) progression += `- Recent: ${recentBuilds}\n`;
+    
+    // Progression guidance
+    if (this.buildLevel === 1) {
+      progression += `\n🎯 NEXT MILESTONE: Build 3+ successful structures with 2+ different shapes.\n`;
+      progression += `→ TRY: walls (size 8+), floors (size 10+), pillars (size 6+). Use sturdy materials like stone or deepslate.\n`;
+    } else if (this.buildLevel === 2) {
+      progression += `\n🎯 NEXT MILESTONE: Build 8+ structures, 5+ shapes, avg size 10+.\n`;
+      progression += `→ CHALLENGE: Try towers, pyramids, arches. Combine shapes — a tower ON a floor! Size 12+ shows mastery.\n`;
+    } else if (this.buildLevel === 3) {
+      progression += `\n🎯 NEXT MILESTONE: 15+ builds, 8+ shapes, at least one size 20+ build.\n`;
+      progression += `→ CHALLENGE: Build multi-shape compositions — a house with walls+floor+roof+chimney. Try sculptures, fountains, gazebos.\n`;
+    } else {
+      progression += `\n🏆 MASTER BUILDER! Push boundaries — combine 3+ shapes per build, try size 25+, experiment with new materials.\n`;
+    }
+    
+    // Anti-repetition: flag if recent builds are all the same shape
+    const lastThreeShapes = successes.slice(-3).map(b => b.shape);
+    if (lastThreeShapes.length >= 3 && new Set(lastThreeShapes).size === 1) {
+      progression += `\n⚠️ You've built 3 ${lastThreeShapes[0]}s in a row — try a DIFFERENT shape to level up! Variety = progression.\n`;
+    }
+    
+    return progression;
+  }
+
   private formatInventoryTop(inventory: Record<string, number>): string {
     const items = Object.entries(inventory)
       .filter(([_, count]) => count > 0)
@@ -1276,9 +1352,17 @@ What do you want to do? Think about what interests you, what goals you have, and
   }
 
   private extractTags(content: string): string[] {
-    const words = content.toLowerCase().split(/\s+/);
-    const keywords = ['cave', 'forest', 'mountain', 'village', 'water', 'build', 'danger', 'resource', 'player', 'structure'];
-    return words.filter(w => keywords.some(k => w.includes(k)));
+    const lower = content.toLowerCase();
+    const words = lower.split(/\s+/);
+    const keywords = [
+      'cave', 'forest', 'mountain', 'village', 'water', 'build', 'danger', 'resource', 'player', 'structure',
+      'tower', 'castle', 'house', 'bridge', 'wall', 'floor', 'pillar', 'pyramid', 'arch', 'fountain',
+      'statue', 'monument', 'garden', 'gate', 'staircase', 'roof', 'chimney', 'path', 'gazebo',
+      'stone', 'wood', 'quartz', 'deepslate', 'brick', 'gold', 'iron', 'diamond', 'glass',
+      'medieval', 'modern', 'fantasy', 'japanese', 'gothic', 'rustic',
+      'success', 'fail', 'learn', 'collaborate', 'explore', 'mine', 'craft', 'gather'
+    ];
+    return [...new Set(words.filter(w => keywords.some(k => w.includes(k))))];
   }
 
   private getFallbackDecision(state: BotState, observation: WorldObservation): AgentDecision {

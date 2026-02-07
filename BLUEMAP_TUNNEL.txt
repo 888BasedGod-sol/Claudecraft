@@ -19,3 +19,28 @@
 2026-02-06T20:04:39Z INF Starting metrics server on 127.0.0.1:20241/metrics
 2026-02-06T20:04:39Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.113
 2026-02-06T20:04:39Z INF Registered tunnel connection connIndex=0 connection=6999809e-944f-4a78-bb22-22b739a8f1c9 event=0 ip=198.41.200.113 location=ewr07 protocol=quic
+2026-02-06T23:35:52Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-06T23:35:52Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/live/players.json?758959 event=0 ip=198.41.200.113 type=http
+2026-02-07T01:18:45Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T01:18:45Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T01:18:45Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/2/x-1/z1.png?268200 event=0 ip=198.41.200.113 type=http
+2026-02-07T01:18:45Z ERR  error="stream 125089 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T01:18:45Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/2/x0/z1.png?268200 event=0 ip=198.41.200.113 type=http
+2026-02-07T01:18:45Z ERR Request failed error="stream 125089 canceled by remote with error code 0" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/1/x-1/z0.png?268200 event=0 ip=198.41.200.113 type=http
+2026-02-07T01:18:46Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T01:18:46Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/3/x0/z-1.png?268200 event=0 ip=198.41.200.113 type=http
+2026-02-07T01:18:46Z ERR  error="stream 125097 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T01:18:46Z ERR Request failed error="stream 125097 canceled by remote with error code 0" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/2/x-1/z-1.png?268200 event=0 ip=198.41.200.113 type=http
+2026-02-07T01:18:46Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T01:18:46Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/1/x1/z1.png?268200 event=0 ip=198.41.200.113 type=http
+2026-02-07T04:48:54Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T04:48:54Z ERR  error="Error writing response header: stream 194853 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T04:48:54Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/2/x-1/z-2.png?68393 event=0 ip=198.41.200.113 type=http
+2026-02-07T04:48:54Z ERR Request failed error="Error writing response header: stream 194853 canceled by remote with error code 0" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/tiles/3/x-1/z-2.png?68393 event=0 ip=198.41.200.113 type=http
+2026-02-07T04:55:31Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T04:55:31Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/live/markers.json?337799 event=0 ip=198.41.200.113 type=http
+2026-02-07T09:40:41Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T09:40:41Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/live/markers.json?782528 event=0 ip=198.41.200.113 type=http
+2026-02-07T13:37:29Z ERR  error="stream 301661 canceled by remote with error code 0" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8100
+2026-02-07T13:37:29Z ERR Request failed error="stream 301661 canceled by remote with error code 0" connIndex=0 dest=https://genius-weekends-fly-going.trycloudflare.com/maps/world/live/players.json?391024 event=0 ip=198.41.200.113 type=http
+2026-02-07T20:04:40Z ERR update check failed error="no release found"

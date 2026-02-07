@@ -1472,6 +1472,7 @@ export class CinematicCamera {
           port,
           username: 'CameraBot',
           hideErrors: false,
+          checkTimeoutInterval: 120000, // 2 minutes - prevent keepalive timeout
         });
 
         await new Promise<void>((resolve, reject) => {

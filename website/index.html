@@ -23,8 +23,7 @@
     
     <title>ClaudeCraft — AI Agents in Minecraft</title>
     <link rel="icon" type="image/png" href="logo.png">
-    <!-- Solana Web3 -->
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <!-- Solana Web3 - lazy loaded when deploy section is enabled -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -3811,10 +3810,10 @@
         const TOTAL_SUPPLY = 1_000_000_000; // 1B tokens
         const REQUIRED_PERCENTAGE = 1; // 1%
         const REQUIRED_AMOUNT = TOTAL_SUPPLY * (REQUIRED_PERCENTAGE / 100); // 10M
-        // API base URL for wallet verification (avoids browser RPC rate limits)
+        // API base URL - production uses relative paths via vercel.json rewrite
         const API_BASE = window.location.hostname === 'localhost' 
             ? 'http://localhost:8081'
-            : 'https://legend-cutting-external-interface.trycloudflare.com';
+            : '';
         
         let connectedWallet = null;
         let walletProvider = null;
@@ -3878,7 +3877,7 @@
         async function disconnectWallet() {
             try {
                 if (walletProvider?.disconnect) await walletProvider.disconnect();
-            } catch {}
+            } catch (_) { /* wallet disconnect can fail if extension unloaded */ }
             connectedWallet = null;
             walletProvider = null;
             walletVerified = false;
@@ -3964,13 +3963,18 @@
                 }
             } catch (err) {
                 console.error('Balance check error:', err);
+                const safeMsg = (err.message || 'Could not verify balance. Try again.').replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c]));
                 resultDiv.innerHTML = `
                     <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.2); border-radius: 12px; padding: 1rem; text-align: center;">
                         <div style="font-weight: 600; color: #ffc107; margin-bottom: 0.25rem;">Verification Error</div>
-                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${err.message || 'Could not verify balance. Try again.'}</div>
-                        <button onclick="checkCraftBalance('${walletAddress}')" style="margin-top: 0.5rem; padding: 0.4rem 1rem; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">Retry</button>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${safeMsg}</div>
                     </div>
                 `;
+                const retryBtn = document.createElement('button');
+                retryBtn.textContent = 'Retry';
+                retryBtn.style.cssText = 'margin-top: 0.5rem; padding: 0.4rem 1rem; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;';
+                retryBtn.addEventListener('click', () => checkCraftBalance(walletAddress));
+                resultDiv.querySelector('div').appendChild(retryBtn);
             }
         }
 
@@ -4051,37 +4055,31 @@
                     btn.style.display = 'none';
 
                     const creds = document.getElementById('agent-credentials');
-                    creds.innerHTML = `
+                    const esc = s => String(s).replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c]));
+                    const credData = [
+                        { label: 'Agent', value: data.agent_name || agentName },
+                        { label: 'Agent ID', value: data.agent_id || 'N/A' },
+                        { label: 'API Key', value: data.api_key || data.apiKey || 'N/A' },
+                        { label: 'Secret', value: data.api_secret || data.secret || 'N/A' },
+                        { label: 'Wallet', value: connectedWallet }
+                    ];
+                    creds.innerHTML = credData.map(c => `
                         <div class="credential-row">
-                            <label>Agent</label>
-                            <code>${data.agent_name || agentName}</code>
+                            <label>${esc(c.label)}</label>
+                            <code>${esc(c.value)}</code>
+                            ${c.label !== 'Agent' ? '<button class="copy-btn">Copy</button>' : ''}
                         </div>
-                        <div class="credential-row">
-                            <label>Agent ID</label>
-                            <code>${data.agent_id || 'N/A'}</code>
-                            <button class="copy-btn" onclick="copyCredential('${data.agent_id || ''}', this)">Copy</button>
-                        </div>
-                        <div class="credential-row">
-                            <label>API Key</label>
-                            <code>${data.api_key || data.apiKey || 'N/A'}</code>
-                            <button class="copy-btn" onclick="copyCredential('${data.api_key || data.apiKey || ''}', this)">Copy</button>
-                        </div>
-                        <div class="credential-row">
-                            <label>Secret</label>
-                            <code>${data.api_secret || data.secret || 'N/A'}</code>
-                            <button class="copy-btn" onclick="copyCredential('${data.api_secret || data.secret || ''}', this)">Copy</button>
-                        </div>
-                        <div class="credential-row">
-                            <label>Wallet</label>
-                            <code>${connectedWallet}</code>
-                            <button class="copy-btn" onclick="copyCredential('${connectedWallet}', this)">Copy</button>
-                        </div>
-                    `;
+                    `).join('');
+                    creds.querySelectorAll('.copy-btn').forEach((btn, i) => {
+                        const val = credData.filter(c => c.label !== 'Agent')[i].value;
+                        btn.addEventListener('click', () => copyCredential(val, btn));
+                    });
                 } else {
                     const err = await response.json().catch(() => ({}));
+                    const safeErrMsg = (err.message || 'Deployment failed. The name may already be taken. Try a different name.').replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c]));
                     errorDiv.innerHTML = `
                         <div style="background: rgba(255, 107, 107, 0.08); border: 1px solid rgba(255, 107, 107, 0.2); border-radius: 10px; padding: 0.75rem; font-size: 0.85rem; color: #ff6b6b; text-align: center;">
-                            ${err.message || 'Deployment failed. The name may already be taken. Try a different name.'}
+                            ${safeErrMsg}
                         </div>
                     `;
                     errorDiv.style.display = 'block';
@@ -4121,48 +4119,6 @@
                 document.querySelector(this.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
             });
         });
-
-        // Service tier selection
-        function selectTier(tier) {
-            const tierSelect = document.getElementById('service-tier');
-            tierSelect.value = tier;
-            document.getElementById('service-form-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Highlight the form briefly
-            const formContainer = document.getElementById('service-form-container');
-            formContainer.style.boxShadow = '0 0 0 3px rgba(218, 119, 86, 0.3), var(--shadow-md)';
-            setTimeout(() => {
-                formContainer.style.boxShadow = 'var(--shadow-md)';
-            }, 2000);
-        }
-
-        // Service form submission
-        function submitServiceRequest(event) {
-            event.preventDefault();
-            
-            const form = document.getElementById('service-form');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            // Log the data (in production, you'd send this to your backend)
-            console.log('Service Request:', data);
-            
-            // Show success message
-            form.style.display = 'none';
-            document.getElementById('form-success').classList.add('show');
-            
-            // In production, you would:
-            // 1. Send data to your backend API
-            // 2. Store the request in a database
-            // 3. Send confirmation email
-            // 4. Trigger agent deployment workflow
-            
-            // Reset after 5 seconds for demo purposes
-            setTimeout(() => {
-                form.reset();
-                form.style.display = 'grid';
-                document.getElementById('form-success').classList.remove('show');
-            }, 5000);
-        }
 
         // WebSocket Activity Stream
         // Permanent WebSocket tunnel at ws.claudecraft.tech

@@ -150,13 +150,39 @@ export async function callClaude(
  */
 export function parseClaudeJson<T>(response: string): T {
   const text = response.trim();
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
   
-  if (!jsonMatch) {
+  // Try parsing the entire response first (handles clean JSON)
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    // Fall through to extraction
+  }
+
+  // Strip markdown code blocks if present
+  let cleaned = text;
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/```json?\n?/g, '').replace(/```$/g, '').trim();
+    try {
+      return JSON.parse(cleaned) as T;
+    } catch {
+      // Fall through
+    }
+  }
+
+  // Try extracting JSON object or array
+  const objectMatch = text.match(/\{[\s\S]*\}/);
+  const arrayMatch = text.match(/\[[\s\S]*\]/);
+  
+  // Pick the match that starts earliest in the string
+  const match = objectMatch && arrayMatch
+    ? (text.indexOf(objectMatch[0]) <= text.indexOf(arrayMatch[0]) ? objectMatch : arrayMatch)
+    : objectMatch || arrayMatch;
+
+  if (!match) {
     throw new Error('No JSON found in Claude response');
   }
 
-  return JSON.parse(jsonMatch[0]) as T;
+  return JSON.parse(match[0]) as T;
 }
 
 /**

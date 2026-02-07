@@ -70,7 +70,7 @@ class GameEngine {
    * Generate unique game ID
    */
   private generateGameId(): string {
-    return `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `game_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**

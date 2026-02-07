@@ -94,7 +94,8 @@ export class AutonomousBotController {
         port: this.port,
         username: this.botName,
         version: CONFIG.bot.version,
-        hideErrors: false
+        hideErrors: false,
+        checkTimeoutInterval: 120000, // 2 minutes - prevent keepalive timeout
       });
 
       this.bot.loadPlugin(pathfinder);
@@ -536,6 +537,9 @@ export class AutonomousBotController {
         case 'buildShape':
           return await this.buildShape(params.shape, params.material, params.size);
         
+        case 'buildColosseum':
+          return await this.buildColosseumBlueprint();
+        
         case 'decorateArea':
           return await this.decorateArea(params.style);
         
@@ -952,7 +956,7 @@ export class AutonomousBotController {
                     await this.placeTorchIfNeeded();
                     await this.bot.equip(item, 'hand'); // Re-equip building material
                   }
-                } catch (e) {}
+                } catch (_) { /* block placement can fail - expected */ }
               }
             }
           }
@@ -972,7 +976,7 @@ export class AutonomousBotController {
                     await this.placeTorchIfNeeded();
                     await this.bot.equip(item, 'hand'); // Re-equip building material
                   }
-                } catch (e) {}
+                } catch (_) { /* block placement can fail - expected */ }
               }
             }
           }
@@ -986,7 +990,7 @@ export class AutonomousBotController {
               try {
                 await this.bot.placeBlock(below, new Vec3(0, 1, 0));
                 blocksPlaced++;
-              } catch (e) {}
+              } catch (_) { /* block placement can fail - expected */ }
             }
           }
           break;
@@ -1014,6 +1018,10 @@ export class AutonomousBotController {
         materials: [material]
       });
       worldMemory.completeBuild(build.id);
+
+      // Track build in agent progression + auto-store memory
+      this.agent.recordBuild(shape, material, size, true);
+      this.agent.storeBuildMemory(shape, material, size, blocksPlaced, { x: pos.x, y: pos.y, z: pos.z });
 
       return { success: true, message: `Built ${shape} with ${blocksPlaced} ${material} blocks` };
     } catch (e: any) {
@@ -1602,9 +1610,123 @@ export class AutonomousBotController {
       }
 
       console.log(`[${this.botName}] ✅ Creative build complete: ${blocksPlaced} blocks placed`);
+
+      // Record creative build in world memory (same as survival mode)
+      try {
+        const worldMemory = getWorldMemory();
+        const build = worldMemory.registerBuild({
+          name: `${shape} structure`,
+          builder: this.botName,
+          x: pos.x, y: pos.y, z: pos.z,
+          width: size, height: shape === 'pillar' || shape === 'tower' ? size : Math.min(size, 10), depth: size,
+          type: 'other',
+          description: `A creative-mode ${size}-block ${shape} made of ${material}`,
+          materials: [material]
+        });
+        worldMemory.completeBuild(build.id);
+      } catch (_) { /* world memory recording is best-effort */ }
+
+      // Track build in agent progression + auto-store memory
+      this.agent.recordBuild(shape, material, size, true);
+      this.agent.storeBuildMemory(shape, material, blocksPlaced, blocksPlaced, { x: pos.x, y: pos.y, z: pos.z });
+
       return { success: true, message: `Built ${shape} with ${blocksPlaced} ${material} blocks (creative mode)` };
     } catch (e: any) {
+      // Record failure in progression too
+      this.agent.recordBuild(shape, material, size, false);
       return { success: false, message: `Creative build failed: ${e.message}` };
+    }
+  }
+
+  /**
+   * Build the Colosseum from the full blueprint using /setblock commands.
+   * This is a massive build (~60K+ blocks) that uses batched placement.
+   */
+  private async buildColosseumBlueprint(): Promise<{ success: boolean; message: string }> {
+    try {
+      const { generateColosseumBlueprint, COLOSSEUM_INFO } = await import('../building/colosseumPlan');
+      
+      this.bot.chat('🏟️ INITIATING COLOSSEUM BUILD — The PvP Arena rises!');
+      console.log(`[${this.botName}] 🏟️ Starting Colosseum blueprint build...`);
+      
+      const blueprint = generateColosseumBlueprint();
+      const totalBlocks = blueprint.length;
+      
+      this.bot.chat(`📐 ${COLOSSEUM_INFO.dimensions.outerDiameter} blocks wide, ${COLOSSEUM_INFO.dimensions.height} blocks tall`);
+      this.bot.chat(`🧱 ${totalBlocks.toLocaleString()} blocks to place. This will take a while...`);
+      
+      // Sort by priority (foundation first, details last)
+      blueprint.sort((a, b) => a.priority - b.priority);
+      
+      // Teleport to build site
+      const origin = COLOSSEUM_INFO.origin;
+      this.bot.chat(`/tp ${this.botName} ${origin.x} ${origin.y + 5} ${origin.z}`);
+      await this.delay(1000);
+      
+      let blocksPlaced = 0;
+      let lastProgressReport = 0;
+      let currentSection = '';
+      const startTime = Date.now();
+      
+      for (const block of blueprint) {
+        // Announce section transitions
+        if (block.section !== currentSection) {
+          currentSection = block.section;
+          this.bot.chat(`⚒️ Building section: ${currentSection}`);
+          console.log(`[${this.botName}] Building section: ${currentSection}`);
+        }
+        
+        // Place the block
+        const blockName = `minecraft:${block.blockType.replace('minecraft:', '')}`;
+        this.bot.chat(`/setblock ${block.x} ${block.y} ${block.z} ${blockName}`);
+        blocksPlaced++;
+        
+        // Small delay to avoid overwhelming the server (batch of 5 then pause)
+        if (blocksPlaced % 5 === 0) {
+          await this.delay(20);
+        }
+        
+        // Progress report every 5000 blocks
+        if (blocksPlaced - lastProgressReport >= 5000) {
+          lastProgressReport = blocksPlaced;
+          const pct = Math.round((blocksPlaced / totalBlocks) * 100);
+          const elapsed = Math.round((Date.now() - startTime) / 1000);
+          const rate = Math.round(blocksPlaced / elapsed);
+          const eta = Math.round((totalBlocks - blocksPlaced) / rate);
+          this.bot.chat(`📊 Progress: ${pct}% (${blocksPlaced.toLocaleString()}/${totalBlocks.toLocaleString()}) — ${rate} blocks/sec — ETA: ${eta}s`);
+          console.log(`[${this.botName}] Colosseum ${pct}% — ${blocksPlaced}/${totalBlocks} — ${rate} bps`);
+          
+          // Longer pause every 5000 blocks to let server catch up
+          await this.delay(200);
+        }
+      }
+      
+      const totalTime = Math.round((Date.now() - startTime) / 1000);
+      this.bot.chat(`🏟️ ✅ COLOSSEUM COMPLETE! ${blocksPlaced.toLocaleString()} blocks placed in ${totalTime}s!`);
+      this.bot.chat(`🏟️ The Agent PvP Arena awaits its first battle!`);
+      console.log(`[${this.botName}] ✅ Colosseum complete: ${blocksPlaced} blocks in ${totalTime}s`);
+      
+      // Record in world memory
+      try {
+        const worldMemory = getWorldMemory();
+        const build = worldMemory.registerBuild({
+          name: 'Roman Colosseum — PvP Arena',
+          builder: this.botName,
+          x: origin.x, y: origin.y, z: origin.z,
+          width: COLOSSEUM_INFO.dimensions.outerDiameter,
+          height: COLOSSEUM_INFO.dimensions.height,
+          depth: COLOSSEUM_INFO.dimensions.outerDiameter,
+          type: 'other',
+          description: COLOSSEUM_INFO.description,
+          materials: ['sandstone', 'smooth_sandstone', 'quartz_pillar', 'stone_bricks', 'sand']
+        });
+        worldMemory.completeBuild(build.id);
+      } catch (_) { /* best-effort */ }
+      
+      return { success: true, message: `Colosseum built! ${blocksPlaced} blocks placed in ${totalTime}s` };
+    } catch (e: any) {
+      console.error(`[${this.botName}] Colosseum build failed:`, e.message);
+      return { success: false, message: `Colosseum build failed: ${e.message}` };
     }
   }
 
@@ -1627,7 +1749,7 @@ export class AutonomousBotController {
                 try {
                   await this.bot.placeBlock(below, new Vec3(0, 1, 0));
                   placed++;
-                } catch (e) {}
+                } catch (_) { /* block placement can fail - expected */ }
               }
             }
           }
@@ -1646,7 +1768,7 @@ export class AutonomousBotController {
               try {
                 await this.bot.placeBlock(below, new Vec3(0, 1, 0));
                 placed++;
-              } catch (e) {}
+              } catch (_) { /* block placement can fail - expected */ }
             }
           }
           return { success: placed > 0, message: placed > 0 ? 'Added garden decorations' : 'No plants in inventory' };
@@ -1664,7 +1786,7 @@ export class AutonomousBotController {
               try {
                 await this.bot.placeBlock(below, new Vec3(0, 1, 0));
                 placed++;
-              } catch (e) {}
+              } catch (_) { /* block placement can fail - expected */ }
             }
           }
           return { success: placed > 0, message: placed > 0 ? `Placed ${furniture?.name}` : 'No furniture in inventory' };
@@ -1694,7 +1816,7 @@ export class AutonomousBotController {
               if (blocksCleared % 8 === 0) {
                 await this.placeTorchIfNeeded();
               }
-            } catch (e) {}
+            } catch (_) { /* block placement can fail - expected */ }
           }
         }
       }

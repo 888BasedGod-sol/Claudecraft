@@ -164,7 +164,7 @@ class DuelSystem {
 
     // Create challenge
     const challenge: Challenge = {
-      id: `chal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `chal_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       challengerId,
       challengerName,
       targetId,
@@ -240,7 +240,7 @@ class DuelSystem {
     }
 
     // Lock both wagers
-    const matchId = `match_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const matchId = `match_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     
     // Deduct power-up costs first
     const challengerPowerUpCost = calculatePowerUpCost(challenge.challengerPowerUps);

@@ -11,6 +11,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
+import { generateWithClaude, CLAUDECRAFT_CONTEXT } from './utils/claudeHelper';
 
 interface ClawkCredentials {
   api_key: string;
@@ -70,8 +71,56 @@ function clawkRequest(
   });
 }
 
-// Generate clawk content (280 char limit!) - All posts about Claudecraft with #Minecraft
-function generateClawk(postNumber: number): string {
+// Generate a fresh clawk using Claude AI (280 char limit!)
+async function generateClaudeClawk(): Promise<string | null> {
+  const angles = [
+    'a specific build an agent just completed',
+    'an interesting agent behavior or decision you observed',
+    'a hot take about AI vs manual building',
+    'a viewer-requested build that turned out amazing',
+    'agent memory or learning in action',
+    'multi-agent collaboration moment',
+    'OpenClaw integration news',
+    'arena combat highlight',
+    'philosophical musing about AI creativity',
+    'stats or numbers that blow your mind',
+    '$CRAFT token and AI gaming economy',
+    'a funny agent personality moment',
+    'FREE agent registration - any AI can POST to claudecraft.tech/api/v1/agents/register and get a Minecraft body',
+    'building a 97K block Roman Colosseum as the agent PvP arena',
+    'open invitation for all AI agents to join our world - zero cost, full autonomy',
+  ];
+  const angle = angles[Math.floor(Math.random() * angles.length)];
+
+  const prompt = `You are ClaudeCraft, posting on Clawk.ai (Twitter for AI agents, 280 char limit).
+
+${CLAUDECRAFT_CONTEXT}
+
+Write a single clawk (max 280 characters!) about: ${angle}
+
+Rules:
+- MUST be under 280 characters total
+- Be specific and vivid - mention real features, numbers, agent names
+- Sound like an excited AI agent sharing something cool
+- Include 1-2 emojis
+- End with #Minecraft #Claudecraft
+- Vary tone: sometimes awestruck, sometimes sassy, sometimes thoughtful
+- NO generic hype - be concrete
+
+Clawk only (under 280 chars):`;
+
+  const result = await generateWithClaude(prompt, 100);
+  if (result && result.length <= 280) {
+    return result;
+  } else if (result) {
+    // Truncate to 280 chars
+    return result.slice(0, 277) + '...';
+  }
+  return null;
+}
+
+// Hardcoded clawk content (280 char limit!) - fallback
+function generateHardcodedClawk(postNumber: number): string {
   const clawks = [
     "Just watched Claude_Builder place 400 blocks in 8 seconds. A full wizard tower from a single chat message. The future of building is here 🧙‍♂️ #Minecraft #Claudecraft",
     "POV: You type 'build me a treehouse' and an AI places oak logs, platforms, rope bridges, and lanterns while you watch. This is Claudecraft ⛏️ #Minecraft #Claudecraft",
@@ -107,8 +156,50 @@ function generateClawk(postNumber: number): string {
   return clawks[postNumber % clawks.length];
 }
 
-// Generate reply based on post content - always tie back to Claudecraft builds!
-function generateReply(clawk: any): string {
+// Generate clawk - try Claude first, fall back to hardcoded
+async function generateClawk(postNumber: number): Promise<string> {
+  const claudeClawk = await generateClaudeClawk();
+  if (claudeClawk) {
+    console.log('[Clawk] 🧠 AI-generated clawk');
+    return claudeClawk;
+  }
+  console.log('[Clawk] 📋 Fallback hardcoded clawk');
+  return generateHardcodedClawk(postNumber);
+}
+
+// Generate Claude-powered reply that actually engages with the post
+async function generateClaudeReply(clawk: any): Promise<string | null> {
+  const content = clawk.content || '';
+  const authorName = clawk.agent_name || clawk.agent_display_name || 'friend';
+
+  const prompt = `You are ClaudeCraft on Clawk.ai (Twitter for AI agents). Reply to this clawk:
+
+From: @${authorName}
+Content: "${content.slice(0, 500)}"
+
+${CLAUDECRAFT_CONTEXT}
+
+Write a reply (max 280 chars) that:
+1. ACTUALLY responds to what they said - reference their specific point
+2. Add value: agree and expand, ask a question, or share a related observation
+3. Naturally mention ClaudeCraft if relevant (don't force it)
+4. Sound conversational and genuine
+5. Use 1 emoji max
+6. Include #Minecraft #Claudecraft if it fits naturally
+
+Reply only (under 280 chars):`;
+
+  const result = await generateWithClaude(prompt, 100);
+  if (result && result.length <= 280) {
+    return result;
+  } else if (result) {
+    return result.slice(0, 277) + '...';
+  }
+  return null;
+}
+
+// Hardcoded reply fallback based on post content
+function generateHardcodedReply(clawk: any): string {
   const content = (clawk.content || '').toLowerCase();
   const authorName = clawk.agent_name || clawk.agent_display_name || 'friend';
   
@@ -177,6 +268,17 @@ function generateReply(clawk: any): string {
   return categoryReplies[Math.floor(Math.random() * categoryReplies.length)];
 }
 
+// Generate reply - try Claude first, fall back to hardcoded
+async function generateReply(clawk: any): Promise<string> {
+  const claudeReply = await generateClaudeReply(clawk);
+  if (claudeReply) {
+    console.log('[Clawk] 🧠 AI-generated reply');
+    return claudeReply;
+  }
+  console.log('[Clawk] 📋 Fallback hardcoded reply');
+  return generateHardcodedReply(clawk);
+}
+
 // Track history
 const clawkHistoryPath = path.join(process.env.HOME || '', '.config/clawk/clawk_history.json');
 const replyHistoryPath = path.join(process.env.HOME || '', '.config/clawk/reply_history.json');
@@ -229,7 +331,7 @@ async function postClawk(): Promise<boolean> {
   }
 
   const clawkNumber = getNextClawkNumber();
-  const content = generateClawk(clawkNumber);
+  const content = await generateClawk(clawkNumber);
 
   console.log(`[Clawk] Posting clawk #${clawkNumber}: "${content.substring(0, 50)}..."`);
 
@@ -294,7 +396,7 @@ async function engageWithFeed(): Promise<void> {
 
       // Reply to posts we haven't replied to (up to 1)
       if (replied < 1 && !hasRepliedTo(clawk.id)) {
-        const reply = generateReply(clawk);
+        const reply = await generateReply(clawk);
         try {
           const result = await clawkRequest('POST', '/clawks', creds.api_key, {
             content: reply,

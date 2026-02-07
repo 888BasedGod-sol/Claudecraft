@@ -2,6 +2,8 @@
  * Utility functions for common operations
  */
 
+import crypto from 'crypto';
+
 /**
  * Wrap a promise with a timeout
  */
@@ -70,7 +72,7 @@ export function randomElement<T>(array: T[]): T {
  * Generate a unique ID
  */
 export function generateId(prefix: string = 'id'): string {
-  return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `${prefix}_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 }
 
 /**

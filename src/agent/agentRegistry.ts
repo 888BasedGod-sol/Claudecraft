@@ -133,7 +133,7 @@ export class AgentStateRegistry {
    * Submit a help request
    */
   requestHelp(requesterName: string, task: string, location: { x: number; y: number; z: number }): string {
-    const id = `help_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `help_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     this.helpRequests.push({
       id,
       requesterName,
@@ -189,7 +189,7 @@ export class AgentStateRegistry {
     description: string, 
     location: { x: number; y: number; z: number }
   ): string {
-    const id = `project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `project_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     this.projects.push({
       id,
       proposerName,
@@ -238,7 +238,7 @@ export class AgentStateRegistry {
     description: string,
     location: { x: number; y: number; z: number }
   ): string {
-    const id = `discovery_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `discovery_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     this.discoveries.push({
       id,
       discovererName,

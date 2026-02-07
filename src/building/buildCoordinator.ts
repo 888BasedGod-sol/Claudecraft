@@ -1,8 +1,12 @@
 /**
  * Build Coordinator - Manages collaborative building between agents
+ * Supports multiple blueprint modes: castle, colosseum
  */
 
 import { generateCastleBlueprint, BlockToPlace, CASTLE_INFO } from './castlePlan';
+import { generateColosseumBlueprint, COLOSSEUM_INFO } from './colosseumPlan';
+
+export type BlueprintMode = 'castle' | 'colosseum';
 
 interface BuildTask {
   agentName: string;
@@ -21,16 +25,38 @@ class BuildCoordinator {
   private activeTasks: Map<string, BuildTask> = new Map();
   private placedBlocks: Set<string> = new Set();
   private initialized: boolean = false;
+  private mode: BlueprintMode = 'colosseum'; // Default to colosseum (PvP arena)
 
-  initialize(): void {
+  initialize(mode?: BlueprintMode): void {
+    if (mode) this.mode = mode;
+    
+    // Reset if reinitializing with a different mode
+    if (this.initialized && mode) {
+      this.blueprint = [];
+      this.activeTasks.clear();
+      this.placedBlocks.clear();
+      this.initialized = false;
+    }
+    
     if (this.initialized) return;
     
-    this.blueprint = generateCastleBlueprint();
-    this.blueprint.sort((a, b) => a.priority - b.priority);
-    this.initialized = true;
-    
-    console.log(`[COORDINATOR] Initialized with ${this.blueprint.length} blocks to place`);
-    console.log(`[COORDINATOR] Castle: ${CASTLE_INFO.description}`);
+    if (this.mode === 'colosseum') {
+      this.blueprint = generateColosseumBlueprint();
+      this.blueprint.sort((a, b) => a.priority - b.priority);
+      this.initialized = true;
+      console.log(`[COORDINATOR] Initialized COLOSSEUM with ${this.blueprint.length} blocks to place`);
+      console.log(`[COORDINATOR] Colosseum: ${COLOSSEUM_INFO.description}`);
+    } else {
+      this.blueprint = generateCastleBlueprint();
+      this.blueprint.sort((a, b) => a.priority - b.priority);
+      this.initialized = true;
+      console.log(`[COORDINATOR] Initialized CASTLE with ${this.blueprint.length} blocks to place`);
+      console.log(`[COORDINATOR] Castle: ${CASTLE_INFO.description}`);
+    }
+  }
+
+  getMode(): BlueprintMode {
+    return this.mode;
   }
 
   getNextTask(agentName: string, batchSize: number = 20): BlockToPlace[] | null {
@@ -50,7 +76,7 @@ class BuildCoordinator {
     });
 
     if (availableBlocks.length === 0) {
-      console.log(`[COORDINATOR] No more blocks to place! Castle complete!`);
+      console.log(`[COORDINATOR] No more blocks to place! ${this.mode === 'colosseum' ? 'Colosseum' : 'Castle'} complete!`);
       return null;
     }
 
@@ -137,9 +163,12 @@ class BuildCoordinator {
   getSummaryForAgent(agentName: string): string {
     const progress = this.getProgress();
     const task = this.activeTasks.get(agentName);
+    const info = this.mode === 'colosseum' ? COLOSSEUM_INFO : CASTLE_INFO;
+    const icon = this.mode === 'colosseum' ? '🏟️' : '🏰';
+    const name = this.mode === 'colosseum' ? 'COLOSSEUM' : 'CASTLE';
 
-    let summary = `🏰 CASTLE BUILD PROGRESS: ${progress.percentComplete}% complete (${progress.placedBlocks}/${progress.totalBlocks} blocks)\n`;
-    summary += `Castle Location: (${CASTLE_INFO.origin.x}, ${CASTLE_INFO.origin.y}, ${CASTLE_INFO.origin.z})\n`;
+    let summary = `${icon} ${name} BUILD PROGRESS: ${progress.percentComplete}% complete (${progress.placedBlocks}/${progress.totalBlocks} blocks)\n`;
+    summary += `Location: (${info.origin.x}, ${info.origin.y}, ${info.origin.z})\n`;
 
     if (task) {
       const remainingInTask = task.blocks.filter(b => !this.isBlockPlaced(b.x, b.y, b.z)).length;
@@ -156,8 +185,12 @@ class BuildCoordinator {
     return summary;
   }
 
+  getBuildOrigin(): { x: number; y: number; z: number } {
+    return this.mode === 'colosseum' ? COLOSSEUM_INFO.origin : CASTLE_INFO.origin;
+  }
+
   getCastleOrigin(): { x: number; y: number; z: number } {
-    return CASTLE_INFO.origin;
+    return this.getBuildOrigin();
   }
 }
 

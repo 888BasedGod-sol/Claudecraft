@@ -12,9 +12,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import * as fs from 'fs';
+import * as fsp from 'fs/promises';
 import * as path from 'path';
-import Anthropic from '@anthropic-ai/sdk';
 import { logStreamer } from './logStreamer';
+import { callClaude } from '../agent/apiClient';
+import { generateId } from '../utils/helpers';
+import { CONFIG } from '../config';
 
 export interface ViewerRequest {
   id: string;
@@ -74,12 +77,10 @@ class RequestCollector implements IRequestCollector {
   // Callback for when directives are ready
   private directiveCallbacks: ((directives: AgentDirective[]) => void)[] = [];
   
-  private anthropic: Anthropic;
   private isProcessing: boolean = false;
   private lastProcessingTime: Date | null = null;
 
   constructor() {
-    this.anthropic = new Anthropic();
     this.loadRequests();
     this.loadHistory();
   }
@@ -113,27 +114,23 @@ class RequestCollector implements IRequestCollector {
     }
   }
 
-  private saveRequests(): void {
+  private async saveRequests(): Promise<void> {
     try {
       const dir = path.dirname(this.dataPath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      fs.writeFileSync(this.dataPath, JSON.stringify(this.requests, null, 2));
+      await fsp.mkdir(dir, { recursive: true });
+      await fsp.writeFile(this.dataPath, JSON.stringify(this.requests, null, 2));
     } catch (e) {
       console.error('[REQUEST-COLLECTOR] Failed to save requests:', e);
     }
   }
 
-  private saveHistory(): void {
+  private async saveHistory(): Promise<void> {
     try {
       const dir = path.dirname(this.historyPath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
+      await fsp.mkdir(dir, { recursive: true });
       // Keep only last 50 processing results
       const recentHistory = this.processingHistory.slice(-50);
-      fs.writeFileSync(this.historyPath, JSON.stringify(recentHistory, null, 2));
+      await fsp.writeFile(this.historyPath, JSON.stringify(recentHistory, null, 2));
     } catch (e) {
       console.error('[REQUEST-COLLECTOR] Failed to save history:', e);
     }
@@ -181,7 +178,7 @@ class RequestCollector implements IRequestCollector {
    */
   addRequest(sender: string, request: string, channel: string = 'telegram'): ViewerRequest {
     const viewerRequest: ViewerRequest = {
-      id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: generateId('req'),
       sender,
       request: request.trim(),
       channel,
@@ -321,6 +318,15 @@ class RequestCollector implements IRequestCollector {
       pendingRequests.forEach(r => {
         r.processed = true;
       });
+
+      // Prune old processed requests (keep last 200)
+      const processedCount = this.requests.filter(r => r.processed).length;
+      if (processedCount > 200) {
+        this.requests = [
+          ...this.requests.filter(r => !r.processed),
+          ...this.requests.filter(r => r.processed).slice(-200)
+        ];
+      }
       this.saveRequests();
 
       // Create processing result
@@ -423,23 +429,15 @@ If there are no relevant requests for an agent, you can skip them or give them a
 
 RESPOND WITH ONLY THE JSON ARRAY, NO OTHER TEXT.`;
 
-    const response = await this.anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
-      messages: [
-        { role: 'user', content: prompt }
-      ]
-    });
-
-    // Parse the response
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude');
-    }
+    const responseText = await callClaude(
+      'You are ClaudecraftBot, the director of autonomous AI agents in Minecraft.',
+      prompt,
+      { maxTokens: 2000, agentName: 'ClaudecraftBot' }
+    );
 
     try {
       // Extract JSON from response (handle potential markdown code blocks)
-      let jsonStr = content.text.trim();
+      let jsonStr = responseText.trim();
       if (jsonStr.startsWith('```')) {
         jsonStr = jsonStr.replace(/```json?\n?/g, '').replace(/```$/g, '').trim();
       }
@@ -447,7 +445,7 @@ RESPOND WITH ONLY THE JSON ARRAY, NO OTHER TEXT.`;
       const directives: AgentDirective[] = JSON.parse(jsonStr);
       return directives;
     } catch (parseError) {
-      console.error('[REQUEST-COLLECTOR] Failed to parse Claude response:', content.text);
+      console.error('[REQUEST-COLLECTOR] Failed to parse Claude response:', responseText);
       throw new Error('Failed to parse directives from Claude');
     }
   }

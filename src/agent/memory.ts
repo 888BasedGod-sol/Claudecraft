@@ -253,6 +253,7 @@ export class AgentMemory {
       if (memory.type === 'lesson') keepScore += 3;
       if (memory.type === 'danger') keepScore += 2;
       if (memory.type === 'goal_completed') keepScore += 2;
+      if (memory.type === 'build') keepScore += 2;
       
       return { memory, keepScore };
     });
@@ -351,7 +352,7 @@ export class SharedMemoryPool {
   share(memory: Memory, sharerName: string): void {
     const sharedMemory: Memory = {
       ...memory,
-      id: `shared_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `shared_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       content: `[Shared by ${sharerName}] ${memory.content}`,
       timestamp: Date.now()
     };

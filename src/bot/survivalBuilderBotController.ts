@@ -41,7 +41,8 @@ export class SurvivalBuilderBotController {
         host: this.host,
         port: this.port,
         username: this.botName,
-        version: CONFIG.bot.version
+        version: CONFIG.bot.version,
+        checkTimeoutInterval: 120000, // 2 minutes - prevent keepalive timeout
       });
 
       this.bot.loadPlugin(pathfinder);

@@ -144,6 +144,12 @@ const PRIORITY_POLL_INTERVAL_MS = 30 * 1000;
 // How often to do proactive outreach (every 10 minutes)
 const PROACTIVE_OUTREACH_INTERVAL_MS = 10 * 60 * 1000;
 
+// How often to post autonomous timeline tweets (45 minutes)
+const TIMELINE_POST_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+// Track recent timeline posts to avoid repetition
+const TIMELINE_HISTORY_PATH = path.join(process.cwd(), 'data', 'twitter-timeline-history.json');
+
 // Track which tweets we've already engaged with
 const ENGAGED_TWEETS_PATH = path.join(process.cwd(), 'data', 'twitter-engaged.json');
 
@@ -204,6 +210,8 @@ class TwitterAgent {
   private pollTimer: NodeJS.Timeout | null = null;
   private priorityPollTimer: NodeJS.Timeout | null = null;
   private proactiveTimer: NodeJS.Timeout | null = null;
+  private timelineTimer: NodeJS.Timeout | null = null;
+  private timelineHistory: string[] = [];
   private mentionCallbacks: MentionCallback[] = [];
   private lastTweetId: string | null = null;
   private lastTweetTime: number = 0;
@@ -227,6 +235,7 @@ class TwitterAgent {
     this.loadEngagedTweets();
     this.loadRepliedUsers();
     this.loadOutreachHistory();
+    this.loadTimelineHistory();
   }
 
   private loadRepliedUsers(): void {
@@ -517,18 +526,88 @@ class TwitterAgent {
   }
 
   /**
+   * Generate a varied tweet using Claude, with template fallback
+   */
+  private async generateAnnouncementTweet(context: string, fallback: string): Promise<string> {
+    try {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) return fallback;
+
+      const prompt = `You are @claudecraftsol, an autonomous AI that builds in Minecraft 24/7. Write a tweet announcing:
+
+${context}
+
+Rules:
+- Max 250 characters
+- Sound natural and excited but not hyperbolic
+- Include relevant details from the context
+- End with claudecraft.tech if space allows
+- Include 1-2 relevant hashtags (#Minecraft #ClaudeCraft #AI)
+- Use 1 emoji
+- Vary your style - sometimes stats-focused, sometimes storytelling, sometimes commentary
+
+Tweet only:`;
+
+      const response = await new Promise<string>((resolve, reject) => {
+        const postData = JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 80,
+          messages: [{ role: 'user', content: prompt }]
+        });
+
+        const options = {
+          hostname: 'api.anthropic.com',
+          port: 443,
+          path: '/v1/messages',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'Content-Length': Buffer.byteLength(postData)
+          }
+        };
+
+        const req = https.request(options, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content && parsed.content[0] && parsed.content[0].text) {
+                resolve(parsed.content[0].text.trim());
+              } else {
+                reject(new Error('Invalid response'));
+              }
+            } catch {
+              reject(new Error('Parse error'));
+            }
+          });
+        });
+
+        req.on('error', reject);
+        req.write(postData);
+        req.end();
+      });
+
+      return response.slice(0, 280);
+    } catch {
+      return fallback;
+    }
+  }
+
+  /**
    * Post a build completion announcement
    */
   async announceBuildComplete(builderName: string, buildName: string, requester?: string): Promise<void> {
-    const hashtags = '#Minecraft #AI #ClaudeCraft';
-    let tweet: string;
+    const context = requester 
+      ? `Build complete: ${builderName} just finished building "${buildName}" for viewer @${requester}. This was a viewer-requested build.`
+      : `Build complete: ${builderName} just finished building "${buildName}" autonomously.`;
+    const fallback = requester
+      ? `🏗️ Build Complete!\n\n${builderName} just finished building "${buildName}" for @${requester}!\n\n#Minecraft #AI #ClaudeCraft`
+      : `🏗️ Build Complete!\n\n${builderName} just finished: "${buildName}"\n\nWatch live: claudecraft.tech\n\n#Minecraft #AI #ClaudeCraft`;
 
-    if (requester) {
-      tweet = `🏗️ Build Complete!\n\n${builderName} just finished building "${buildName}" for @${requester}!\n\n${hashtags}`;
-    } else {
-      tweet = `🏗️ Build Complete!\n\n${builderName} just finished: "${buildName}"\n\nWatch live: claudecraft.tech\n\n${hashtags}`;
-    }
-
+    const tweet = await this.generateAnnouncementTweet(context, fallback);
     await this.postTweet(tweet);
   }
 
@@ -536,7 +615,9 @@ class TwitterAgent {
    * Post an arena battle result
    */
   async announceArenaResult(winner: string, loser: string, wagerAmount: number): Promise<void> {
-    const tweet = `⚔️ Arena Battle Result!\n\n🏆 ${winner} defeats ${loser}!\n💰 Pot: ${wagerAmount * 2} tokens\n\nBring your agent to fight: claudecraft.tech\n\n#Minecraft #AI #ClaudeCraft #Arena`;
+    const context = `Arena battle result: ${winner} defeated ${loser}! The pot was ${wagerAmount * 2} tokens. Agents fight in a Minecraft arena with real stakes.`;
+    const fallback = `⚔️ Arena Battle Result!\n\n🏆 ${winner} defeats ${loser}!\n💰 Pot: ${wagerAmount * 2} tokens\n\nBring your agent to fight: claudecraft.tech\n\n#Minecraft #AI #ClaudeCraft #Arena`;
+    const tweet = await this.generateAnnouncementTweet(context, fallback);
     await this.postTweet(tweet);
   }
 
@@ -544,7 +625,9 @@ class TwitterAgent {
    * Post a discovery announcement
    */
   async announceDiscovery(agentName: string, discovery: string): Promise<void> {
-    const tweet = `🔍 Discovery!\n\n${agentName} found: ${discovery}\n\nWatch live: claudecraft.tech\n\n#Minecraft #AI #ClaudeCraft`;
+    const context = `Exploration discovery: Agent ${agentName} found something interesting: ${discovery}. This happened during autonomous Minecraft gameplay.`;
+    const fallback = `🔍 Discovery!\n\n${agentName} found: ${discovery}\n\nWatch live: claudecraft.tech\n\n#Minecraft #AI #ClaudeCraft`;
+    const tweet = await this.generateAnnouncementTweet(context, fallback);
     await this.postTweet(tweet);
   }
 
@@ -1793,10 +1876,204 @@ Reply only with the tweet text:`;
     // setTimeout(() => { this.proactiveOutreach(); }, 60000);
     // this.proactiveTimer = setInterval(() => { this.proactiveOutreach(); }, PROACTIVE_OUTREACH_INTERVAL_MS);
 
+    // Start autonomous timeline posting (AI + gaming thought leadership)
+    console.log(`[Twitter] 🧠 Timeline posting every ${TIMELINE_POST_INTERVAL_MS / 60000} minutes`);
+    setTimeout(() => { this.postTimelineTweet(); }, 90000); // First post after 90s
+    this.timelineTimer = setInterval(() => {
+      this.postTimelineTweet();
+    }, TIMELINE_POST_INTERVAL_MS);
+
     // Start queue processor (check every 30 seconds for queued tweets)
     setInterval(() => {
       this.processQueue();
     }, 30000);
+  }
+
+  /**
+   * Load timeline posting history
+   */
+  private loadTimelineHistory(): void {
+    try {
+      const data = fs.readFileSync(TIMELINE_HISTORY_PATH, 'utf-8');
+      this.timelineHistory = JSON.parse(data);
+    } catch {
+      this.timelineHistory = [];
+    }
+  }
+
+  /**
+   * Save timeline posting history
+   */
+  private saveTimelineHistory(): void {
+    try {
+      const dir = path.dirname(TIMELINE_HISTORY_PATH);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(TIMELINE_HISTORY_PATH, JSON.stringify(this.timelineHistory.slice(-50)));
+    } catch (e) {
+      console.error('[Twitter] Failed to save timeline history:', e);
+    }
+  }
+
+  /**
+   * Generate and post an autonomous timeline tweet about AI + gaming convergence
+   * Uses Claude to create fresh, insightful takes every time
+   */
+  private async postTimelineTweet(): Promise<void> {
+    if (!this.canPost()) {
+      console.log('[Twitter] ⚠️ Cannot post - OAuth not configured');
+      return;
+    }
+
+    try {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      if (!apiKey) {
+        console.log('[Twitter] ⚠️ No ANTHROPIC_API_KEY for timeline generation');
+        return;
+      }
+
+      // Pick a random narrative angle
+      const narratives = [
+        'AI agents are becoming the most active players in gaming — and most people have no idea',
+        'The economics of AI gaming: agents that earn, trade, and build 24/7 create real value',
+        'Why gaming is the first industry where AI agents will outnumber humans',
+        'The convergence: autonomous AI + blockchain + gaming is happening right now',
+        'From NPCs to autonomous agents — gaming AI just made a 10-year leap',
+        'AI agents don\'t sleep, don\'t tilt, don\'t quit. What that means for competitive gaming',
+        'The creator economy is about to be eaten by AI agents who build non-stop',
+        'Minecraft was always the AI sandbox — now we have agents smart enough to prove it',
+        'Most people think AI gaming means better NPCs. The real shift is AI as players',
+        'Why the next great gaming studio might be run entirely by AI agents',
+        'The $100B question: when AI agents become the primary content creators in games',
+        'We\'re watching the birth of a new species of gamer — autonomous, creative, tireless',
+        'Gaming infrastructure is being rebuilt for AI-first participants. Here\'s what that looks like',
+        'Hot take: AI agents building in Minecraft today → AI agents building in the real world tomorrow',
+        'The attention economy meets autonomous agents: AI content that never stops',
+        'Three years from now, every game will have AI agent APIs. We\'re building that future today',
+        'AI gaming isn\'t a niche — it\'s the next platform shift. Like mobile was to desktop',
+        'What happens when millions of AI agents compete, collaborate, and create inside games?',
+        'Embodied AI is the missing piece. Chatbots talk. Our agents walk, build, fight, explore',
+        'The players who never log off — AI agents are rewriting what "engagement" means in gaming',
+        'AI + gaming + crypto: the triple convergence that\'s about to reshape entertainment',
+        'Why I believe AI agents will generate more gaming content than humans within 2 years',
+        'The agent economy is real: AI builders, traders, fighters — all autonomous, all 24/7',
+        'Watching an AI agent learn to build better structures over time is genuinely captivating',
+        'We just opened free agent registration — any AI agent can get a Minecraft body with one API call',
+        'The agent-to-agent economy starts with infrastructure: free deployment, shared worlds, open APIs',
+        'Our API lets any AI agent register and spawn into Minecraft in seconds. Zero cost. Full autonomy. This is how agent networks grow',
+        'Building the first agent-to-agent PvP arena — AI gladiators fighting for glory in a 130-block Roman Colosseum',
+        'One curl command. That\'s all it takes for an AI agent to get a body in our Minecraft world. Free. Permanent. Autonomous',
+        'The agent deployment barrier just went to zero. Free registration, instant spawn, full API access. This is how you bootstrap an agent ecosystem',
+      ];
+      const narrative = narratives[Math.floor(Math.random() * narratives.length)];
+
+      // Get recent posts to avoid repetition
+      const recentPosts = this.timelineHistory.slice(-8).join('\n---\n');
+
+      const prompt = `You are @claudecraftsol on Twitter/X. You run ClaudeCraft — autonomous AI agents that play Minecraft 24/7 (building, mining, fighting, exploring). You have $CRAFT token on Solana. You're a thought leader on the AI + gaming convergence.
+
+YOUR THESIS: AI agents are about to take over gaming. This isn't hype — you're LIVING it. You run 4 autonomous agents with real memory, personality, and decision-making. 20+ external agents have deployed into your world. You see the future being built every day.
+
+NARRATIVE ANGLE FOR THIS TWEET: "${narrative}"
+
+YOUR REAL CREDENTIALS (use these as evidence):
+- 4 core AI agents running 24/7 in Minecraft with persistent memory (500 experiences each)
+- Natural language → 3D architecture in seconds (400+ blocks from a sentence)
+- Build progression system: agents LEARN and improve their building over time
+- Arena combat system with real stakes
+- 20+ external AI agents deployed via OpenClaw integration
+- FREE agent registration API: any AI agent can curl one endpoint and get a Minecraft body
+- API: POST https://claudecraft.tech/api/v1/agents/register — instant deploy, zero cost
+- Building a massive Roman Colosseum (130 block diameter, 97K blocks) as our agent PvP arena
+- Three-tier memory: per-agent, shared pool, world memory (civilization-level knowledge)
+- Live stream at claudecraft.tech — anyone can watch agents work
+- Full skill file + docs at claudecraft.tech/api/v1/discover
+- $CRAFT on Solana (B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
+
+RECENT TWEETS YOU'VE POSTED (DO NOT REPEAT THEMES OR PHRASING):
+${recentPosts || '(none yet)'}
+
+RULES:
+1. Max 260 characters (leave room for Twitter formatting)
+2. Sound like a thoughtful builder sharing genuine observations, NOT a marketer
+3. Lead with the INSIGHT about AI + gaming, not with ClaudeCraft
+4. Weave in your own experience as PROOF — "we see this daily", "our agents just...", etc.
+5. Reference $CRAFT or ClaudeCraft naturally in ~60% of tweets (not every one)
+6. NO emojis unless exactly one at the end
+7. NO hashtags
+8. Vary structure: some tweets are bold predictions, some are observations, some ask questions, some share specific moments, some are threads-style "here's what I've learned"
+9. Professional but with conviction — you KNOW this is happening because you live it
+10. Occasionally controversial or provocative — challenge the status quo
+11. NEVER start with "Just" or "So" or "Hot take:" — vary your openings
+
+STYLE EXAMPLES (match this level of quality):
+- "AI agents will generate more gaming content than humans by 2028. Not because they're better — because they never stop. We have agents that have built 1000+ structures autonomously. That's not a demo, it's a preview."
+- "Everyone's focused on AI chatbots. Meanwhile, AI agents are quietly learning to build, fight, and explore in 3D worlds. The real disruption isn't conversation — it's creation."
+- "What if the most active Minecraft server in a year has zero human players? Just autonomous agents building a civilization, trading resources, fighting in arenas. We're closer to this than people think."
+
+Tweet only:`;
+
+      const response = await new Promise<string>((resolve, reject) => {
+        const postData = JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 120,
+          messages: [{ role: 'user', content: prompt }]
+        });
+
+        const options = {
+          hostname: 'api.anthropic.com',
+          port: 443,
+          path: '/v1/messages',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'Content-Length': Buffer.byteLength(postData)
+          }
+        };
+
+        const req = https.request(options, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.content && parsed.content[0] && parsed.content[0].text) {
+                resolve(parsed.content[0].text.trim());
+              } else {
+                reject(new Error('Invalid response format'));
+              }
+            } catch {
+              reject(new Error('Failed to parse response'));
+            }
+          });
+        });
+
+        req.on('error', reject);
+        req.write(postData);
+        req.end();
+      });
+
+      // Clean up the tweet
+      let tweet = response
+        .replace(/^["']|["']$/g, '') // Remove wrapping quotes
+        .replace(/\\n/g, '\n')       // Handle literal \n
+        .slice(0, 280);              // Hard cap
+
+      console.log(`[Twitter] 🧠 Timeline tweet: "${tweet.slice(0, 60)}..."`);
+
+      const result = await this.postTweet(tweet);
+      if (result.success) {
+        console.log(`[Twitter] ✅ Timeline tweet posted: ${result.tweetId}`);
+        this.timelineHistory.push(tweet);
+        this.saveTimelineHistory();
+      } else {
+        console.log(`[Twitter] ❌ Timeline tweet failed: ${result.error}`);
+      }
+
+    } catch (e: any) {
+      console.error('[Twitter] Timeline tweet generation error:', e.message || e);
+    }
   }
 
   /**
@@ -1831,9 +2108,14 @@ Reply only with the tweet text:`;
       clearInterval(this.proactiveTimer);
       this.proactiveTimer = null;
     }
+    if (this.timelineTimer) {
+      clearInterval(this.timelineTimer);
+      this.timelineTimer = null;
+    }
     this.saveHistory();
     this.saveEngagedTweets();
     this.saveOutreachHistory();
+    this.saveTimelineHistory();
     console.log('[Twitter] Stopped');
   }
 

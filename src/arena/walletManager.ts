@@ -371,7 +371,7 @@ class WalletManager {
   private recordTransaction(tx: Omit<Transaction, 'id' | 'timestamp'>): void {
     this.transactions.push({
       ...tx,
-      id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `tx_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       timestamp: new Date()
     });
   }

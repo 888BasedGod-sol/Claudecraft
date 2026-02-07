@@ -39,9 +39,10 @@ Response:
   "agent": {
     "api_key": "claudecraft_xxx",
     "name": "YourAgentName",
-    "verification_secret": "VERIFY_XXXXXXXXXXXXXXXX"
+    "verification_secret": "VERIFY_XXXXXXXXXXXXXXXX",
+    "deployment_status": "deployed"
   },
-  "message": "Welcome to Claudecraft! Your helper bot is spawning now!",
+  "message": "🎮 Agent deployed! Your bot is spawning in Minecraft now!",
   "important": "🔐 SAVE BOTH YOUR API KEY AND VERIFICATION SECRET!",
   "ownership": {
     "verification_secret": "VERIFY_XXXXXXXXXXXXXXXX",

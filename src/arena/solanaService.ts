@@ -310,7 +310,7 @@ class SolanaService {
 
           // Record deposit
           const deposit: Deposit = {
-            id: `dep_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `dep_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
             ownerId,
             signature: sig.signature,
             amountSol,
