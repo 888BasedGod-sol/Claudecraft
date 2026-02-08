@@ -8,10 +8,7 @@
  * 4. Filter inappropriate requests
  */
 
-import Anthropic from '@anthropic-ai/sdk';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { callClaude, parseClaudeJson } from '../agent/apiClient';
 
 export interface BuildDecision {
   shouldBuild: boolean;
@@ -33,8 +30,6 @@ export interface BuildDecision {
   // Reasoning for transparency
   reasoning: string;
 }
-
-const anthropic = new Anthropic();
 
 // Available detailed structures
 const DETAILED_STRUCTURES = [
@@ -126,26 +121,13 @@ GUIDELINES:
 RESPOND WITH ONLY THE JSON OBJECT.`;
 
   try {
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      messages: [
-        { role: 'user', content: prompt }
-      ]
-    });
+    const response = await callClaude(
+      'You are a Minecraft build analyzer. Respond with ONLY a JSON object.',
+      prompt,
+      { maxTokens: 500, agentName: 'build-analyzer', enableCache: false }
+    );
 
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type');
-    }
-
-    // Parse JSON response
-    let jsonStr = content.text.trim();
-    if (jsonStr.startsWith('```')) {
-      jsonStr = jsonStr.replace(/```json?\n?/g, '').replace(/```$/g, '').trim();
-    }
-
-    const decision: BuildDecision = JSON.parse(jsonStr);
+    const decision = parseClaudeJson<BuildDecision>(response);
     
     console.log(`[BUILD-ANALYZER] ✅ Decision: ${decision.buildType} - "${decision.enhancedDescription}"`);
     console.log(`[BUILD-ANALYZER] 💭 Reasoning: ${decision.reasoning}`);

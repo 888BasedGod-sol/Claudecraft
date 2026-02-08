@@ -15,7 +15,9 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "stream": "node media-server.js",
-    "website": "cd website && python3 -m http.server 8000"
+    "website": "cd website && python3 -m http.server 8000",
+    "scrape": "node scripts/scrape-planetminecraft.js",
+    "scrape:force": "node scripts/scrape-planetminecraft.js --force"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",

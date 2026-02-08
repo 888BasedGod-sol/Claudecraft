@@ -201,8 +201,8 @@ async function main() {
 
       // Longer delay between spawns to avoid protocol issues
       if (i < agentCount - 1) {
-        Logger.info(`Waiting 10 seconds before spawning next agent...`);
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        Logger.info(`Waiting 20 seconds before spawning next agent...`);
+        await new Promise(resolve => setTimeout(resolve, 20000));
       }
     }
 

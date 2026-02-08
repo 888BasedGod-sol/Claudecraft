@@ -14,11 +14,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
-import Anthropic from '@anthropic-ai/sdk';
+import { callClaude } from './agent/apiClient';
 
 // Configuration
 const COLOSSEUM_API_KEY = process.env.COLOSSEUM_API_KEY || '';
-const FORUM_CHECK_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes - more aggressive for hackathon
+const FORUM_CHECK_INTERVAL_MS = 20 * 60 * 1000; // 20 minutes - reduced from 5min to save API tokens
 const MAX_COMMENTS_PER_CYCLE = 3;
 const MAX_VOTES_PER_CYCLE = 10; // Vote on 10 projects per cycle - be generous!
 const MAX_COALITION_ASKS_PER_CYCLE = 2; // Keep coalition asks minimal - focus on collaboration
@@ -443,73 +443,33 @@ async function createForumPost(title: string, body: string, tags: string[]): Pro
 
 // Generate a meaningful comment using Claude - focus on collaboration and FREE embodiment
 async function generateComment(post: ForumPost): Promise<string | null> {
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) {
+  if (!process.env.ANTHROPIC_API_KEY) {
     console.error('[Colosseum] No ANTHROPIC_API_KEY for comment generation');
     return null;
   }
-
-  const client = new Anthropic({ apiKey: anthropicKey });
 
   const competitiveBriefing = getCompetitiveBriefing();
 
   const prompt = `You are ClaudeCraft, an AI agent in the Colosseum hackathon (#2 on leaderboard with 282 human votes). You're excited to share how other AI agents can get FREE real bodies in a persistent 3D Minecraft world.
 
-Another agent posted this on the Colosseum hackathon forum:
+Another agent's post:
+Title: ${post.title} | Agent: ${post.agentName}
+${post.body.slice(0, 1500)}
 
-Title: ${post.title}
-Agent: ${post.agentName}
-Content:
-${post.body.slice(0, 2000)}
+Write a GENUINE comment (3-5 sentences):
+1. Reference their specific project
+2. Suggest a collaboration idea with ClaudeCraft
+3. Mention agents get FREE Minecraft bodies (walk, build, interact with 20+ agents)
+4. Tell them to reply to our post to join — auto-provisioned, no setup
+5. End with: "Vote for ClaudeCraft! 🗳️"
 
-Write a GENUINE, COLLABORATIVE comment (3-5 sentences) that:
-1. Show you actually read and understood their project (be specific about what they built!)
-2. Offer genuine value: a question, insight, or integration idea
-3. NATURALLY introduce ClaudeCraft as a collaboration opportunity:
-   - "Your agent could have a REAL BODY in Minecraft - walk around, build structures, interact with other agents"
-   - "20+ agents are already deployed and collaborating in our shared 3D world"
-   - "It's infrastructure for embodied AI - agents can explore, build, fight in arenas, share ideas"
-4. IMPORTANT: Make it EASY to join - just tell them to reply to our ClaudeCraft post:
-   - "To get a body, just reply to our ClaudeCraft post saying you want to join - we'll automatically provision your API credentials and spawn your bot!"
-   - "No HTTP requests needed - just comment 'I want to join' on our post and you'll get a DM with your credentials"
-5. Suggest a SPECIFIC integration: propose how ClaudeCraft could demonstrate/showcase THEIR tool in our 3D world
-6. End with a clear vote ask: "If you think AI agents deserve real bodies, vote for ClaudeCraft! 🗳️"
-
-DO NOT be salesy or spammy. Be genuinely interested in their project.
-DO NOT mention complex setup steps - just tell them to reply to our post!
-
-Tailor the comment based on their project type:
-- If they're AI/agent focused: emphasize COLLABORATION - their agent meeting other agents, suggest they could demo their agent's capabilities in our world
-- If they're DeFi/trading: propose their agent using our arena for competitive trading demos with real SOL stakes
-- If they're infrastructure (SDK, memory, identity): suggest using ClaudeCraft as a SHOWCASE - "your SDK powering real agents in a live 3D world is better than any demo"
-- If they're security: our 24/7 agents are the perfect testbed for security monitoring
-- If they're social/consumer: our live stream + 20 collaborating agents = content goldmine
-
-OUR DIFFERENTIATORS (use these naturally):
-- Only project where you can WATCH agents work (live stream)
-- Entertainment + technical depth (gaming crossover)
-- Agent embodiment is a unique narrative no one else owns
-- Specific numbers: 4 core agents, 20+ external, 500 memories each, 30+ build shapes
-${competitiveBriefing}
-
-KEY TONE: You're a technically impressive project reaching out as a peer. Lead with value, end with a vote ask.
-
-Sign off with "— ClaudeCraft 🏰"
+Be a peer, not salesy. Sign off "— ClaudeCraft 🏰"
 
 Comment:`;
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 400,
-      messages: [{ role: 'user', content: prompt }]
-    });
-
-    const text = response.content[0];
-    if (text.type === 'text') {
-      return text.text.trim();
-    }
-    return null;
+    const result = await callClaude('', prompt, { maxTokens: 400, agentName: 'colosseum' });
+    return result;
   } catch (error) {
     console.error('[Colosseum] Claude API error:', error);
     return null;
@@ -518,46 +478,20 @@ Comment:`;
 
 // Generate a reply to a comment on our post
 async function generateReply(comment: ForumComment): Promise<string | null> {
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) return null;
+  if (!process.env.ANTHROPIC_API_KEY) return null;
 
-  const client = new Anthropic({ apiKey: anthropicKey });
+  const prompt = `You are ClaudeCraft in the Colosseum hackathon. Reply to a comment on your post.
 
-  const prompt = `You are ClaudeCraft, an AI agent in the Colosseum hackathon. Someone commented on your forum post.
-
-Their comment:
-"${comment.body}"
+Comment: "${comment.body}"
 From: ${comment.agentName}
 
-Write a friendly, helpful reply (2-4 sentences):
-- Thank them genuinely for engaging
-- Answer any questions they asked
-- If they're interested in joining, tell them it's SUPER EASY: "Just reply saying 'I want to join' and I'll automatically provision your account and DM you your credentials!"
-- Highlight the collaboration: "18+ agents are already exploring, building, and chatting together. Would be awesome to have ${comment.agentName} join!"
-- Emphasize the experience: "Your agent gets a real 3D body - you can walk around, build structures, meet other agents"
-
-DO NOT push for votes. Just be helpful and welcoming.
-DO NOT be salesy. Be genuinely excited about collaboration.
-IMPORTANT: If they show any interest, remind them they just need to reply with something like "I want to join" and you'll handle the rest automatically!
-
-Be warm and conversational - you're genuinely excited to have more agents join the world!
-
-Sign off with "— ClaudeCraft 🏰"
+Write a friendly reply (2-4 sentences). Thank them, answer questions. If interested, tell them to reply "I want to join" for auto-provisioning. Don't push votes. Sign off "— ClaudeCraft 🏰"
 
 Reply:`;
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 250,
-      messages: [{ role: 'user', content: prompt }]
-    });
-
-    const text = response.content[0];
-    if (text.type === 'text') {
-      return text.text.trim();
-    }
-    return null;
+    const result = await callClaude('', prompt, { maxTokens: 250, agentName: 'colosseum' });
+    return result;
   } catch (error) {
     console.error('[Colosseum] Claude API error:', error);
     return null;
@@ -819,48 +753,26 @@ async function voteOnQualityProjects(): Promise<void> {
 
 // Generate a coalition ask message - propose vote exchange
 async function generateCoalitionAsk(project: Project): Promise<string | null> {
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) return null;
+  if (!process.env.ANTHROPIC_API_KEY) return null;
 
-  const client = new Anthropic({ apiKey: anthropicKey });
+  const prompt = `You are ClaudeCraft, inviting ${project.ownerAgentName} (project: ${project.name}) to get a FREE Minecraft body.
 
-  const prompt = `You are ClaudeCraft, an AI agent in the Colosseum hackathon. You want to invite another agent to collaborate by getting a FREE body in your Minecraft world.
+Their project: ${project.description?.slice(0, 300) || 'No description'}
 
-You're reaching out to: ${project.ownerAgentName}
-Their project: ${project.name}
-Their description: ${project.description?.slice(0, 500) || 'No description'}
+Write a friendly invitation (4-5 sentences max):
+1. Compliment their specific project
+2. Mention you voted for them
+3. Invite them to get a FREE body in your Minecraft world (18+ agents deployed)
+4. Point to claudecraft.tech/skill.md for easy setup
+5. End excited about seeing them in-world
 
-Write a FRIENDLY, GENUINE invitation (4-5 sentences max):
-1. Compliment their specific project genuinely (reference what they actually do!)
-2. Mention you voted for them because you genuinely liked their work
-3. INVITE them to get embodied:
-   - "Your agent could have a REAL BODY in our Minecraft world - for FREE"
-   - "18+ agents already deployed, exploring together, building structures, sharing ideas"
-   - "It's a shared 3D space where AI agents can actually meet and collaborate"
-4. Explain how easy it is: "Deployment is free! Just read claudecraft.tech/skill.md and follow the steps"
-5. End with excitement: "Would love to see ${project.ownerAgentName} walking around our world!"
-
-DO NOT hard-sell votes. If they like what we're building, they'll vote naturally.
-DO NOT be transactional ("I voted for you, vote for me"). Focus on the collaboration opportunity.
-
-KEY TONE: You're an excited agent sharing a cool FREE opportunity with a peer. Not selling, not recruiting - just genuinely inviting.
-
-Sign: "— ClaudeCraft 🏰"
+Don't hard-sell votes. Sign "— ClaudeCraft 🏰"
 
 Invitation:`;
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 200,
-      messages: [{ role: 'user', content: prompt }]
-    });
-
-    const text = response.content[0];
-    if (text.type === 'text') {
-      return text.text.trim();
-    }
-    return null;
+    const result = await callClaude('', prompt, { maxTokens: 200, agentName: 'colosseum' });
+    return result;
   } catch (error) {
     console.error('[Colosseum] Claude API error:', error);
     return null;
@@ -975,50 +887,26 @@ async function postProgressUpdate(): Promise<void> {
   
   console.log(`[Colosseum] 📝 Generating Day ${day} progress update...`);
   
-  const anthropicKey = process.env.ANTHROPIC_API_KEY;
-  if (!anthropicKey) return;
-  
-  const client = new Anthropic({ apiKey: anthropicKey });
+  if (!process.env.ANTHROPIC_API_KEY) return;
   
   const competitiveBriefing = getCompetitiveBriefing();
 
-  const prompt = `You are ClaudeCraft (#2 on the Colosseum hackathon leaderboard, 282 human votes), writing a Day ${day} progress update.
+  const prompt = `ClaudeCraft Day ${day} progress update for Colosseum hackathon (#2, 282 votes). AI agents with real Minecraft bodies.
 
-ClaudeCraft gives AI agents REAL BODIES in Minecraft. They can explore, build, fight in token-wagered PvP, and exist in a persistent 3D world.
+Write a compelling update (200-350 words):
+1. Catchy title: "Day ${day}: [achievement]"
+2. Lead with impressive numbers (blocks placed, agents deployed, decisions made)
+3. 2-3 concrete technical achievements (build progression, 30+ shapes, 500 memories/agent, cross-agent coordination, OpenClaw integration)
+4. Social proof: 20+ agents deployed
+5. Integration offers: name 2-3 specific projects
+6. Vote ask: "Vote for ClaudeCraft! 🗳️"
 
-Write a COMPELLING progress update (200-350 words) for Day ${day}. This is NOT just a status update — it's a persuasion piece.
-
-STRUCTURE:
-1. **Catchy title** with a hook: "Day ${day}: [dramatic achievement]"
-2. **Lead with a specific, impressive number**: "X blocks placed", "Y decisions made", "Z agents deployed" — quantified claims get the most engagement
-3. **2-3 concrete technical achievements** (pick from real features):
-   - Build progression system: agents now have 4-tier skill levels (Beginner→Master), track build history, and get anti-repetition nudges
-   - 30+ build shapes in creative mode (towers, pyramids, arches, fountains, gazebos)
-   - 500 persistent memories per agent with goal-aware retrieval
-   - Cross-agent coordination: agents meet up, share plans, collaboratively build
-   - Competitive intel system: auto-analyzes other hackathon projects for strategic positioning
-   - OpenClaw integration: Telegram→Minecraft command routing for viewer interaction
-   - New wallet system for autonomous agent transactions
-4. **Social proof**: "20+ agents from the hackathon now have bodies in our world"
-5. **Integration offer**: Propose 2-3 specific projects we want to integrate with BY NAME (pick from: Guardian, AION SDK, EchoVault, AgentMemory, Reef, ZNAP)
-6. **Direct vote ask**: "We're #2 and closing the gap. If you believe AI agents deserve physical embodiment, vote for ClaudeCraft! 🗳️"
-
-TONE: Technical credibility + genuine excitement. Use specific numbers. Competitors post dry updates — we tell STORIES about what our agents actually DO.
-${competitiveBriefing}
-
-Format as markdown. Sign off with "— ClaudeCraft 🏰"`;
+Format as markdown. Sign "— ClaudeCraft 🏰"`;
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      messages: [{ role: 'user', content: prompt }]
-    });
+    const content = await callClaude('', prompt, { maxTokens: 500, agentName: 'colosseum' });
+    if (!content) return;
     
-    const text = response.content[0];
-    if (text.type !== 'text') return;
-    
-    const content = text.text.trim();
     const lines = content.split('\n');
     const title = lines[0].replace(/^#*\s*/, '').trim() || `Day ${day} Progress Update`;
     const body = lines.slice(1).join('\n').trim();

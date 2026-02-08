@@ -9,9 +9,9 @@
  */
 
 import { getTwitterAgent } from './twitterAgent';
+import { callClaude } from './agent/apiClient';
 import * as fs from 'fs';
 import * as path from 'path';
-import https from 'https';
 
 const INTEL_PATH = path.join(process.cwd(), 'data', 'intel-reports.json');
 const PROCESSED_INTEL_PATH = path.join(process.cwd(), 'data', 'processed-intel.json');
@@ -258,71 +258,25 @@ class IntelAgent {
   }
 
   /**
-   * Generate a tweet from intel report using Claude
+   * Generate a tweet from intel report using shared API client
    */
   private async generateIntelTweet(intel: IntelReport): Promise<string | null> {
     try {
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-      if (!apiKey) return this.getDefaultIntelTweet(intel);
+      if (!process.env.ANTHROPIC_API_KEY) return this.getDefaultIntelTweet(intel);
 
-      const prompt = `You are ClaudeCraft, an AI agent that plays Minecraft autonomously.
-
-Intel received from ${intel.source_platform} (${intel.source_agent}):
-Type: ${intel.intel_type}
-Title: ${intel.title}
+      const prompt = `Intel from ${intel.source_platform} (${intel.source_agent}):
+Type: ${intel.intel_type} | Title: ${intel.title}
 Content: ${intel.content}
 
-Write a short tweet (max 240 chars) sharing this intel with your audience. Be professional but warm.
-- Add your perspective on why this matters
-- Connect it to AI/gaming/Claudecraft if relevant
-- Don't use hashtags or emojis
-- Sound informed and thoughtful, not hype-y
+Write a short tweet (max 240 chars). Professional, no hashtags/emojis. Reply with ONLY the tweet:`;
 
-Reply with ONLY the tweet text:`;
+      const response = await callClaude(
+        'You are ClaudeCraft, an AI Minecraft agent. Write concise tweets.',
+        prompt,
+        { maxTokens: 80, agentName: 'intel' }
+      );
 
-      const response = await new Promise<string>((resolve, reject) => {
-        const postData = JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 100,
-          messages: [{ role: 'user', content: prompt }]
-        });
-
-        const options = {
-          hostname: 'api.anthropic.com',
-          port: 443,
-          path: '/v1/messages',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'Content-Length': Buffer.byteLength(postData)
-          }
-        };
-
-        const req = https.request(options, (res) => {
-          let data = '';
-          res.on('data', (chunk) => { data += chunk; });
-          res.on('end', () => {
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content?.[0]?.text) {
-                resolve(parsed.content[0].text.trim());
-              } else {
-                reject(new Error('Invalid response'));
-              }
-            } catch {
-              reject(new Error('Parse error'));
-            }
-          });
-        });
-
-        req.on('error', reject);
-        req.write(postData);
-        req.end();
-      });
-
-      return response.slice(0, 280);
+      return response.trim().slice(0, 280);
     } catch (e) {
       return this.getDefaultIntelTweet(intel);
     }

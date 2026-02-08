@@ -1,24 +1,26 @@
-2026-02-07T02:52:53Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
-2026-02-07T02:52:53Z INF Requesting new quick Tunnel on trycloudflare.com...
-2026-02-07T02:52:57Z INF +--------------------------------------------------------------------------------------------+
-2026-02-07T02:52:57Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
-2026-02-07T02:52:57Z INF |  https://physician-municipality-among-mounts.trycloudflare.com                             |
-2026-02-07T02:52:57Z INF +--------------------------------------------------------------------------------------------+
-2026-02-07T02:52:57Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]
-2026-02-07T02:52:57Z INF Version 2026.1.2 (Checksum 7ca2e2496bd39d897fef3054a02156bd143f036f97ab5ed32ed1658893653dfe)
-2026-02-07T02:52:57Z INF GOOS: darwin, GOVersion: go1.25.6, GoArch: arm64
-2026-02-07T02:52:57Z INF Settings: map[ha-connections:1 protocol:quic url:http://localhost:8080]
-2026-02-07T02:52:57Z INF cloudflared will not automatically update if installed by a package manager.
-2026-02-07T02:52:57Z INF Generated Connector ID: 416176b5-5846-414c-bc00-49406e3898a7
-2026-02-07T02:52:57Z INF Initial protocol quic
-2026-02-07T02:52:57Z INF ICMP proxy will use 10.0.0.82 as source for IPv4
-2026-02-07T02:52:57Z INF ICMP proxy will use fe80::1449:bb74:7fb3:1f4b in zone en0 as source for IPv6
-2026-02-07T02:52:57Z INF Created ICMP proxy listening on 10.0.0.82:0
-2026-02-07T02:52:57Z INF ICMP proxy will use 10.0.0.82 as source for IPv4
-2026-02-07T02:52:57Z INF ICMP proxy will use fe80::1449:bb74:7fb3:1f4b in zone en0 as source for IPv6
-2026-02-07T02:52:57Z INF Starting metrics server on 127.0.0.1:20243/metrics
-2026-02-07T02:52:57Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.33
-2026-02-07T02:52:57Z INF Registered tunnel connection connIndex=0 connection=a3b51aef-3286-4e88-becc-bb5639ed7aab event=0 ip=198.41.200.33 location=ewr14 protocol=quic
-2026-02-07T22:21:02Z ERR  error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8080: connect: connection refused" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8080
-2026-02-07T22:21:02Z ERR Request failed error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8080: connect: connection refused" connIndex=0 dest=https://physician-municipality-among-mounts.trycloudflare.com/ event=0 ip=198.41.200.33 type=http
-2026-02-08T02:52:57Z ERR update check failed error="no release found"
+2026-02-08T04:31:14Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2026-02-08T04:31:14Z INF Requesting new quick Tunnel on trycloudflare.com...
+2026-02-08T04:31:18Z INF +--------------------------------------------------------------------------------------------+
+2026-02-08T04:31:18Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2026-02-08T04:31:18Z INF |  https://most-should-named-observe.trycloudflare.com                                       |
+2026-02-08T04:31:18Z INF +--------------------------------------------------------------------------------------------+
+2026-02-08T04:31:18Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]
+2026-02-08T04:31:18Z INF Version 2026.1.2 (Checksum 7ca2e2496bd39d897fef3054a02156bd143f036f97ab5ed32ed1658893653dfe)
+2026-02-08T04:31:18Z INF GOOS: darwin, GOVersion: go1.25.6, GoArch: arm64
+2026-02-08T04:31:18Z INF Settings: map[ha-connections:1 protocol:quic url:http://localhost:8080]
+2026-02-08T04:31:18Z INF cloudflared will not automatically update if installed by a package manager.
+2026-02-08T04:31:18Z INF Generated Connector ID: 28616616-491c-4981-aa89-e9a87e3cd199
+2026-02-08T04:31:18Z INF Initial protocol quic
+2026-02-08T04:31:18Z INF ICMP proxy will use 10.0.0.82 as source for IPv4
+2026-02-08T04:31:18Z INF ICMP proxy will use fe80::1449:bb74:7fb3:1f4b in zone en0 as source for IPv6
+2026-02-08T04:31:18Z INF Created ICMP proxy listening on 10.0.0.82:0
+2026-02-08T04:31:18Z INF ICMP proxy will use 10.0.0.82 as source for IPv4
+2026-02-08T04:31:18Z INF ICMP proxy will use fe80::1449:bb74:7fb3:1f4b in zone en0 as source for IPv6
+2026-02-08T04:31:18Z INF Starting metrics server on 127.0.0.1:64360/metrics
+2026-02-08T04:31:18Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.192.37
+2026-02-08T04:31:18Z INF Registered tunnel connection connIndex=0 connection=9d1baaed-9a9a-4cb8-a15e-1c0b46809415 event=0 ip=198.41.192.37 location=ewr05 protocol=quic
+2026-02-08T04:32:19Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8080
+2026-02-08T04:32:19Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://most-should-named-observe.trycloudflare.com/ event=0 ip=198.41.192.37 type=ws
+2026-02-08T04:32:19Z ERR  error="Incoming request ended abruptly: context canceled" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8080
+2026-02-08T04:32:19Z ERR Request failed error="Incoming request ended abruptly: context canceled" connIndex=0 dest=https://most-should-named-observe.trycloudfla2026-02-08T05:33:15Z ERR Failed to refres2026-02-08T09:09:23Z ERR  error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8080: connect: connection refused" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8080
+2026-02-08T09:09:23Z ERR Request failed error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8080: connect: connection refused" connIndex=0 dest=https://most-should-named-observe.trycloudflare.com/ event=0 ip=198.41.192.37 type=ws

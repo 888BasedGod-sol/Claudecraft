@@ -1,0 +1,953 @@
+{
+  "version": "1.0",
+  "source": "PlanetMinecraft.com",
+  "description": "Build inspiration and techniques curated from PlanetMinecraft's most popular and detailed projects. Used to train agents to build impressive structures.",
+  "lastUpdated": "2026-02-08T09:37:40.334Z",
+  "curatedDate": "2026-02-08",
+  "note": "Initially seeded with popular builds. Run scripts/scrape-planetminecraft.js every 3 days to update.",
+  "buildsByCategory": {
+    "medieval": {
+      "description": "Medieval castles, villages, fortresses, and period architecture",
+      "popularBuilds": [
+        {
+          "name": "Winthor Medieval Texture Pack Castle",
+          "estimatedBlocks": 15000,
+          "difficulty": "hard",
+          "style": "medieval",
+          "keyFeatures": [
+            "Detailed stone texturing",
+            "Multiple towers",
+            "Inner courtyard",
+            "Working drawbridge area"
+          ],
+          "tips": [
+            "Use stone brick variants for wall texture variation",
+            "Add mossy stone bricks at ground level and in damp areas",
+            "Create depth with recessed windows and arrow slits",
+            "Use stairs and slabs for crenellation detail"
+          ],
+          "materials": {
+            "primary": [
+              "stone_bricks",
+              "mossy_stone_bricks",
+              "cracked_stone_bricks"
+            ],
+            "accent": [
+              "dark_oak_planks",
+              "spruce_planks"
+            ],
+            "detail": [
+              "stone_brick_stairs",
+              "cobblestone_wall",
+              "iron_bars"
+            ]
+          }
+        },
+        {
+          "name": "Medieval Village Pack",
+          "estimatedBlocks": 8000,
+          "difficulty": "medium",
+          "style": "medieval",
+          "keyFeatures": [
+            "Multiple building types",
+            "Market square",
+            "Village well",
+            "Paths and roads"
+          ],
+          "tips": [
+            "Vary roof heights for visual interest",
+            "Use different wood types for different buildings",
+            "Add hay bales and market stalls for life",
+            "Connect buildings with cobblestone paths"
+          ],
+          "materials": {
+            "primary": [
+              "oak_planks",
+              "spruce_planks",
+              "cobblestone"
+            ],
+            "accent": [
+              "white_terracotta",
+              "stripped_oak_log"
+            ],
+            "detail": [
+              "hay_block",
+              "barrel",
+              "lantern",
+              "flower_pot"
+            ]
+          }
+        },
+        {
+          "name": "Gothic Cathedral",
+          "estimatedBlocks": 25000,
+          "difficulty": "hard",
+          "style": "gothic",
+          "keyFeatures": [
+            "Flying buttresses",
+            "Rose window",
+            "Bell tower",
+            "Pointed arches"
+          ],
+          "tips": [
+            "Use stairs for pointed arch shapes",
+            "Create flying buttresses with angled supports",
+            "Glass panes in patterns for stained glass effect",
+            "Add depth with layered walls"
+          ],
+          "materials": {
+            "primary": [
+              "stone_bricks",
+              "smooth_stone"
+            ],
+            "accent": [
+              "stained_glass",
+              "quartz_block"
+            ],
+            "detail": [
+              "stone_brick_stairs",
+              "end_rod",
+              "chain"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Use gradients: stone → stone_bricks → mossy_stone_bricks from top to bottom",
+        "Create murder holes above gates with trapdoors",
+        "Add battlements with alternating full blocks and half-height",
+        "Build proper gatehouse with portcullis using iron bars",
+        "Create round towers using circular block patterns"
+      ]
+    },
+    "modern": {
+      "description": "Modern houses, luxury villas, skyscrapers, and contemporary architecture",
+      "popularBuilds": [
+        {
+          "name": "Modern Mansion",
+          "estimatedBlocks": 5000,
+          "difficulty": "medium",
+          "style": "modern",
+          "keyFeatures": [
+            "Clean lines",
+            "Large glass facades",
+            "Infinity pool",
+            "Rooftop garden"
+          ],
+          "tips": [
+            "Use concrete for clean flat surfaces",
+            "Large glass windows create modern feel",
+            "Add water features and pools",
+            "Create overhangs for shade and depth"
+          ],
+          "materials": {
+            "primary": [
+              "white_concrete",
+              "gray_concrete",
+              "black_concrete"
+            ],
+            "accent": [
+              "glass",
+              "glass_pane"
+            ],
+            "detail": [
+              "sea_lantern",
+              "end_rod",
+              "iron_trapdoor"
+            ]
+          }
+        },
+        {
+          "name": "Skyscraper Office Tower",
+          "estimatedBlocks": 12000,
+          "difficulty": "hard",
+          "style": "modern",
+          "keyFeatures": [
+            "Glass curtain wall",
+            "Lobby atrium",
+            "Helipad",
+            "Underground parking"
+          ],
+          "tips": [
+            "Create regular window patterns for realism",
+            "Use iron bars between glass for mullion effect",
+            "Add setbacks every 10-15 floors",
+            "Include a dramatic lobby entrance"
+          ],
+          "materials": {
+            "primary": [
+              "light_blue_stained_glass",
+              "iron_block"
+            ],
+            "accent": [
+              "white_concrete",
+              "gray_concrete"
+            ],
+            "detail": [
+              "glowstone",
+              "sea_lantern",
+              "polished_andesite"
+            ]
+          }
+        },
+        {
+          "name": "Beach House",
+          "estimatedBlocks": 2500,
+          "difficulty": "easy",
+          "style": "modern-coastal",
+          "keyFeatures": [
+            "Stilts over water",
+            "Deck",
+            "Open floor plan",
+            "Panoramic windows"
+          ],
+          "tips": [
+            "Elevate on pillars for beach aesthetic",
+            "Wide deck areas with fencing",
+            "Use light colored woods",
+            "Maximize ocean views with glass"
+          ],
+          "materials": {
+            "primary": [
+              "birch_planks",
+              "white_concrete"
+            ],
+            "accent": [
+              "glass_pane",
+              "oak_fence"
+            ],
+            "detail": [
+              "lantern",
+              "flower_pot",
+              "blue_carpet"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Use smooth quartz or white concrete for clean surfaces",
+        "Create depth with recessed windows and protruding balconies",
+        "Limit palette to 2-3 main colors for modern aesthetic",
+        "Add strategic lighting with sea lanterns and end rods",
+        "Use half slabs and stairs for subtle level changes"
+      ]
+    },
+    "fantasy": {
+      "description": "Magical structures, wizard towers, elven builds, and fantastical creations",
+      "popularBuilds": [
+        {
+          "name": "Wizard Tower",
+          "estimatedBlocks": 3000,
+          "difficulty": "medium",
+          "style": "fantasy",
+          "keyFeatures": [
+            "Spiral design",
+            "Floating elements",
+            "Crystal spire",
+            "Magic circle base"
+          ],
+          "tips": [
+            "Use purple and blue palette for magical feel",
+            "Add end rods for floating crystal effects",
+            "Create asymmetrical organic shapes",
+            "Include enchanting room at top"
+          ],
+          "materials": {
+            "primary": [
+              "deepslate_bricks",
+              "purpur_block"
+            ],
+            "accent": [
+              "amethyst_block",
+              "crying_obsidian"
+            ],
+            "detail": [
+              "end_rod",
+              "soul_lantern",
+              "candle"
+            ]
+          }
+        },
+        {
+          "name": "Elven Treehouse City",
+          "estimatedBlocks": 8000,
+          "difficulty": "hard",
+          "style": "fantasy-elven",
+          "keyFeatures": [
+            "Built into giant trees",
+            "Hanging bridges",
+            "Natural integration",
+            "Leaf roofs"
+          ],
+          "tips": [
+            "Build around existing large trees or create custom ones",
+            "Use leaves extensively for roofs",
+            "Connect platforms with rope bridges",
+            "Integrate builds with terrain naturally"
+          ],
+          "materials": {
+            "primary": [
+              "oak_log",
+              "birch_planks",
+              "oak_leaves"
+            ],
+            "accent": [
+              "moss_block",
+              "vine"
+            ],
+            "detail": [
+              "lantern",
+              "chain",
+              "glow_berries"
+            ]
+          }
+        },
+        {
+          "name": "Dragon's Lair Mountain",
+          "estimatedBlocks": 15000,
+          "difficulty": "hard",
+          "style": "fantasy",
+          "keyFeatures": [
+            "Carved into mountain",
+            "Treasure room",
+            "Dragon skull entrance",
+            "Lava features"
+          ],
+          "tips": [
+            "Use black and gray blocks for dramatic cave",
+            "Add gold blocks and chests for treasure hoard",
+            "Create skull entrance with bone blocks",
+            "Strategic lava lighting for atmosphere"
+          ],
+          "materials": {
+            "primary": [
+              "deepslate",
+              "blackstone",
+              "basalt"
+            ],
+            "accent": [
+              "gold_block",
+              "magma_block"
+            ],
+            "detail": [
+              "bone_block",
+              "chain",
+              "soul_fire"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Break symmetry for organic magical shapes",
+        "Use soul lanterns and candles for mystical lighting",
+        "Add floating blocks with invisible supports (carpet on string)",
+        "Create gradients with purple/blue blocks for magical energy",
+        "Include hidden rooms and secret passages"
+      ]
+    },
+    "japanese": {
+      "description": "Japanese temples, pagodas, gardens, and traditional architecture",
+      "popularBuilds": [
+        {
+          "name": "Japanese Temple Complex",
+          "estimatedBlocks": 6000,
+          "difficulty": "medium",
+          "style": "japanese",
+          "keyFeatures": [
+            "Main temple hall",
+            "Torii gates",
+            "Stone lanterns",
+            "Koi pond"
+          ],
+          "tips": [
+            "Use crimson/warped wood for red/black aesthetic",
+            "Create curved roofs with stairs and slabs",
+            "Add Japanese garden with water features",
+            "Include gravel raked patterns with white concrete"
+          ],
+          "materials": {
+            "primary": [
+              "crimson_planks",
+              "dark_oak_planks"
+            ],
+            "accent": [
+              "smooth_stone",
+              "white_concrete"
+            ],
+            "detail": [
+              "lantern",
+              "bamboo",
+              "lily_pad"
+            ]
+          }
+        },
+        {
+          "name": "Five-Story Pagoda",
+          "estimatedBlocks": 2000,
+          "difficulty": "medium",
+          "style": "japanese",
+          "keyFeatures": [
+            "Five roof tiers",
+            "Central spire",
+            "Decorative brackets",
+            "Stone foundation"
+          ],
+          "tips": [
+            "Each tier slightly smaller than the one below",
+            "Roof corners should curve upward",
+            "Use fence posts for decorative bracket supports",
+            "Add gold accent at very top"
+          ],
+          "materials": {
+            "primary": [
+              "dark_oak_planks",
+              "spruce_stairs"
+            ],
+            "accent": [
+              "red_concrete",
+              "gold_block"
+            ],
+            "detail": [
+              "dark_oak_fence",
+              "lantern",
+              "end_rod"
+            ]
+          }
+        },
+        {
+          "name": "Zen Garden",
+          "estimatedBlocks": 500,
+          "difficulty": "easy",
+          "style": "japanese",
+          "keyFeatures": [
+            "Raked gravel",
+            "Placed stones",
+            "Bamboo fence",
+            "Moss accents"
+          ],
+          "tips": [
+            "Use smooth quartz or white concrete for gravel",
+            "Place stones asymmetrically in odd numbers",
+            "Add bamboo border with scaffolding or bamboo blocks",
+            "Include small bridge over dry stream"
+          ],
+          "materials": {
+            "primary": [
+              "smooth_quartz",
+              "moss_block"
+            ],
+            "accent": [
+              "stone",
+              "cobblestone"
+            ],
+            "detail": [
+              "bamboo",
+              "azalea",
+              "lantern"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Curved roof edges using stairs in multiple directions",
+        "Use string + carpet for floating lantern effect",
+        "Create torii gates with red concrete and dark oak tops",
+        "Add cherry blossom trees with pink wool/concrete and birch logs",
+        "Build dry riverbeds with gravel and smooth stone"
+      ]
+    },
+    "ships": {
+      "description": "Ships, boats, submarines, and naval vessels",
+      "popularBuilds": [
+        {
+          "name": "Pirate Galleon",
+          "estimatedBlocks": 5000,
+          "difficulty": "hard",
+          "style": "pirate",
+          "keyFeatures": [
+            "Three masts",
+            "Cannon decks",
+            "Captain's quarters",
+            "Ornate stern"
+          ],
+          "tips": [
+            "Use dark oak for weathered ship look",
+            "Create hull curve with stairs and slabs",
+            "Add wool sails with banner detailing",
+            "Include interior rooms and cargo hold"
+          ],
+          "materials": {
+            "primary": [
+              "dark_oak_planks",
+              "spruce_planks"
+            ],
+            "accent": [
+              "white_wool",
+              "red_wool"
+            ],
+            "detail": [
+              "chain",
+              "barrel",
+              "lantern",
+              "dispenser"
+            ]
+          }
+        },
+        {
+          "name": "Viking Longship",
+          "estimatedBlocks": 1500,
+          "difficulty": "medium",
+          "style": "viking",
+          "keyFeatures": [
+            "Dragon head prow",
+            "Shield row",
+            "Single mast",
+            "Oar holes"
+          ],
+          "tips": [
+            "Create dragon head with stairs and walls",
+            "Line sides with shield banners",
+            "Make hull long and narrow",
+            "Add trapdoor oar ports"
+          ],
+          "materials": {
+            "primary": [
+              "spruce_planks",
+              "stripped_spruce_log"
+            ],
+            "accent": [
+              "red_wool",
+              "shield"
+            ],
+            "detail": [
+              "chain",
+              "trapdoor",
+              "banner"
+            ]
+          }
+        },
+        {
+          "name": "Submarine",
+          "estimatedBlocks": 2500,
+          "difficulty": "medium",
+          "style": "military",
+          "keyFeatures": [
+            "Cylindrical hull",
+            "Conning tower",
+            "Torpedo tubes",
+            "Periscope"
+          ],
+          "tips": [
+            "Use gray concrete for hull",
+            "Create cylinder shape with careful block placement",
+            "Add glass for observation windows",
+            "Include interior compartments"
+          ],
+          "materials": {
+            "primary": [
+              "gray_concrete",
+              "iron_block"
+            ],
+            "accent": [
+              "glass",
+              "black_concrete"
+            ],
+            "detail": [
+              "lever",
+              "iron_trapdoor",
+              "sea_lantern"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Start with cross-section frames, then connect with planking",
+        "Use water physics for floating effect (build at water level)",
+        "Create rigging with fence posts and chains",
+        "Add cargo/barrels for lived-in feel",
+        "Use banners for flags and sails for decoration"
+      ]
+    },
+    "steampunk": {
+      "description": "Steampunk machinery, airships, and Victorian-industrial builds",
+      "popularBuilds": [
+        {
+          "name": "Steampunk Airship",
+          "estimatedBlocks": 4000,
+          "difficulty": "hard",
+          "style": "steampunk",
+          "keyFeatures": [
+            "Gas balloon",
+            "Gondola cabin",
+            "Propellers",
+            "Brass detailing"
+          ],
+          "tips": [
+            "Use copper blocks for brass appearance",
+            "Create balloon with brown wool",
+            "Add spinning propellers with note blocks",
+            "Include windows and observation deck"
+          ],
+          "materials": {
+            "primary": [
+              "copper_block",
+              "dark_oak_planks"
+            ],
+            "accent": [
+              "brown_wool",
+              "glass"
+            ],
+            "detail": [
+              "chain",
+              "lightning_rod",
+              "hopper"
+            ]
+          }
+        },
+        {
+          "name": "Clocktower Factory",
+          "estimatedBlocks": 6000,
+          "difficulty": "medium",
+          "style": "steampunk",
+          "keyFeatures": [
+            "Giant clock face",
+            "Smokestacks",
+            "Gear mechanisms",
+            "Industrial windows"
+          ],
+          "tips": [
+            "Create clock face with colored blocks pattern",
+            "Add campfire smoke in chimneys",
+            "Use pistons and hoppers for gear effects",
+            "Tall narrow windows for factory look"
+          ],
+          "materials": {
+            "primary": [
+              "bricks",
+              "stone_bricks"
+            ],
+            "accent": [
+              "copper_block",
+              "iron_block"
+            ],
+            "detail": [
+              "piston",
+              "hopper",
+              "campfire",
+              "chain"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Combine brick and copper for industrial Victorian feel",
+        "Add pipes using end rods, lightning rods, and hoppers",
+        "Create gear shapes with trapdoors and buttons",
+        "Use campfires for steam/smoke effects",
+        "Mix organic and mechanical elements"
+      ]
+    },
+    "futuristic": {
+      "description": "Sci-fi bases, space stations, and futuristic cities",
+      "popularBuilds": [
+        {
+          "name": "Space Station Module",
+          "estimatedBlocks": 3500,
+          "difficulty": "medium",
+          "style": "sci-fi",
+          "keyFeatures": [
+            "Cylindrical modules",
+            "Solar panels",
+            "Docking ports",
+            "Observation dome"
+          ],
+          "tips": [
+            "Use white/gray concrete for clean look",
+            "Add sea lanterns along corridors",
+            "Create solar arrays with daylight sensors",
+            "Include glass observation areas"
+          ],
+          "materials": {
+            "primary": [
+              "white_concrete",
+              "light_gray_concrete"
+            ],
+            "accent": [
+              "blue_stained_glass",
+              "iron_block"
+            ],
+            "detail": [
+              "sea_lantern",
+              "daylight_detector",
+              "end_rod"
+            ]
+          }
+        },
+        {
+          "name": "Cyberpunk City Block",
+          "estimatedBlocks": 10000,
+          "difficulty": "hard",
+          "style": "cyberpunk",
+          "keyFeatures": [
+            "Neon signs",
+            "Dense buildings",
+            "Flying vehicles",
+            "Dark atmosphere"
+          ],
+          "tips": [
+            "Use primarily dark blocks with neon accents",
+            "Add glowing signs with colored glass and sea lanterns",
+            "Create density with overlapping structures",
+            "Include small hover vehicles and drones"
+          ],
+          "materials": {
+            "primary": [
+              "black_concrete",
+              "gray_concrete"
+            ],
+            "accent": [
+              "magenta_stained_glass",
+              "cyan_stained_glass",
+              "pink_stained_glass"
+            ],
+            "detail": [
+              "sea_lantern",
+              "redstone_lamp",
+              "end_rod"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Use smooth lighting with sea lanterns and end rods",
+        "Create hologram effects with stained glass and lighting",
+        "Add antenna arrays with end rods and lightning rods",
+        "Use iron trapdoors and iron doors for airlocks",
+        "Create force field effects with blue stained glass"
+      ]
+    },
+    "nature": {
+      "description": "Custom terrain, gardens, waterfalls, and natural landscapes",
+      "popularBuilds": [
+        {
+          "name": "Cliffside Waterfall",
+          "estimatedBlocks": 2000,
+          "difficulty": "medium",
+          "style": "natural",
+          "keyFeatures": [
+            "Layered cliff",
+            "Multiple water levels",
+            "Pond at base",
+            "Surrounding vegetation"
+          ],
+          "tips": [
+            "Layer different stone types for realistic cliff",
+            "Add overhangs with vines and moss",
+            "Use kelp to control water flow",
+            "Plant varied vegetation around base"
+          ],
+          "materials": {
+            "primary": [
+              "stone",
+              "cobblestone",
+              "mossy_cobblestone"
+            ],
+            "accent": [
+              "moss_block",
+              "azalea_leaves"
+            ],
+            "detail": [
+              "vine",
+              "glow_lichen",
+              "spore_blossom"
+            ]
+          }
+        },
+        {
+          "name": "Enchanted Forest",
+          "estimatedBlocks": 5000,
+          "difficulty": "medium",
+          "style": "fantasy-nature",
+          "keyFeatures": [
+            "Giant custom trees",
+            "Glowing mushrooms",
+            "Fairy lights",
+            "Forest floor detail"
+          ],
+          "tips": [
+            "Make trees much larger than vanilla",
+            "Add glow berries and shroomlights",
+            "Create thick underbrush with leaves at ground level",
+            "Use azaleas and moss for color"
+          ],
+          "materials": {
+            "primary": [
+              "dark_oak_log",
+              "oak_leaves",
+              "azalea_leaves"
+            ],
+            "accent": [
+              "shroomlight",
+              "moss_block"
+            ],
+            "detail": [
+              "glow_berries",
+              "spore_blossom",
+              "tall_grass"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Layer blocks: stone → cobble → gravel → coarse_dirt → dirt from bottom to top",
+        "Use bone meal on moss for organic spread",
+        "Create natural curves - avoid straight lines",
+        "Add small details: flowers, mushrooms, fallen logs",
+        "Mix leaf types for varied canopy color"
+      ]
+    },
+    "underground": {
+      "description": "Underground bases, mining operations, and subterranean builds",
+      "popularBuilds": [
+        {
+          "name": "Dwarven Mining City",
+          "estimatedBlocks": 12000,
+          "difficulty": "hard",
+          "style": "dwarven",
+          "keyFeatures": [
+            "Great hall",
+            "Mine shafts",
+            "Forges",
+            "Carved pillars"
+          ],
+          "tips": [
+            "Carve into existing mountains/underground",
+            "Use deepslate and stone variants",
+            "Add lava forges with blast furnaces",
+            "Create massive support pillars with carved details"
+          ],
+          "materials": {
+            "primary": [
+              "deepslate_bricks",
+              "polished_deepslate"
+            ],
+            "accent": [
+              "gold_block",
+              "copper_block"
+            ],
+            "detail": [
+              "chain",
+              "lantern",
+              "blast_furnace",
+              "anvil"
+            ]
+          }
+        },
+        {
+          "name": "Secret Underground Bunker",
+          "estimatedBlocks": 1500,
+          "difficulty": "easy",
+          "style": "military",
+          "keyFeatures": [
+            "Hidden entrance",
+            "Storage rooms",
+            "Living quarters",
+            "Escape tunnel"
+          ],
+          "tips": [
+            "Use piston doors for hidden entrance",
+            "Add red stone circuits for security",
+            "Include farms for self-sufficiency",
+            "Create multiple exits"
+          ],
+          "materials": {
+            "primary": [
+              "stone_bricks",
+              "smooth_stone"
+            ],
+            "accent": [
+              "iron_block",
+              "redstone_lamp"
+            ],
+            "detail": [
+              "iron_door",
+              "lever",
+              "tripwire_hook"
+            ]
+          }
+        }
+      ],
+      "buildTechniques": [
+        "Light with lanterns on chains from ceiling",
+        "Create pillars every 8-10 blocks for scale",
+        "Add mine cart tracks for transportation",
+        "Use lava behind glass for ambient lighting",
+        "Carve details into walls: runes, murals, shelving"
+      ]
+    }
+  },
+  "universalTips": [
+    "Always gather reference images before starting large builds",
+    "Build a small test version first to check proportions",
+    "Use depth - no flat walls, add layers and texture",
+    "Mix block types within the same material family for variation",
+    "Light your builds properly - both for mob spawning and aesthetics",
+    "Add small details: buttons, trapdoors, flower pots, item frames",
+    "Consider how builds will look from different angles/distances",
+    "Use the environment - integrate builds with terrain when possible",
+    "Create pathways and landscaping around structures",
+    "Add life: animals, villagers, armor stands, paintings"
+  ],
+  "colorPalettes": {
+    "warm": [
+      "orange_terracotta",
+      "brown_terracotta",
+      "red_nether_bricks",
+      "copper_block",
+      "mangrove_planks"
+    ],
+    "cool": [
+      "prismarine",
+      "warped_planks",
+      "cyan_terracotta",
+      "blue_ice",
+      "light_blue_concrete"
+    ],
+    "neutral": [
+      "stone_bricks",
+      "smooth_stone",
+      "polished_andesite",
+      "calcite",
+      "dripstone_block"
+    ],
+    "dark": [
+      "deepslate_bricks",
+      "blackstone",
+      "basalt",
+      "black_concrete",
+      "coal_block"
+    ],
+    "light": [
+      "quartz_block",
+      "white_concrete",
+      "calcite",
+      "snow_block",
+      "smooth_quartz"
+    ],
+    "earthy": [
+      "mud_bricks",
+      "packed_mud",
+      "terracotta",
+      "coarse_dirt",
+      "rooted_dirt"
+    ],
+    "magical": [
+      "amethyst_block",
+      "purpur_block",
+      "crying_obsidian",
+      "soul_soil",
+      "end_stone_bricks"
+    ]
+  },
+  "builds": []
+}

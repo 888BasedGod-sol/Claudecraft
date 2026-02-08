@@ -114,6 +114,20 @@ export interface IntelReport {
   tags?: string[];
 }
 
+// Queued agent waiting to be spawned
+export interface QueuedAgent {
+  id: string;
+  name: string;
+  description: string;
+  source: string;
+  twitter_username?: string;
+  joined_queue_at: Date;
+  position: number;
+  status: 'waiting' | 'ready' | 'spawning' | 'spawned' | 'failed';
+  estimated_spawn_time?: Date;
+  notification_sent?: boolean;
+}
+
 class CommandServer {
   private server: http.Server | null = null;
   private commandQueue: ViewerCommand[] = [];
@@ -122,6 +136,7 @@ class CommandServer {
   private requestCollectionMode: boolean = true;
   private commandHistory: ViewerCommand[] = [];
   private maxHistorySize: number = 100;
+  private maxHelperBots: number = 1; // Maximum concurrent helper bots allowed
   private agentStatuses: Map<string, AgentStatus> = new Map();
   private commandCallbacks: Map<string, (command: ViewerCommand) => void> = new Map();
   private isStarted: boolean = false;
@@ -129,6 +144,12 @@ class CommandServer {
   // External agent storage
   private externalAgents: Map<string, ExternalAgent> = new Map(); // api_key -> agent
   private externalAgentsPath: string = path.join(process.cwd(), 'data', 'external-agents.json');
+  
+  // Agent queue - waiting list for agents to spawn
+  private agentQueue: QueuedAgent[] = [];
+  private agentQueuePath: string = path.join(process.cwd(), 'data', 'agent-queue.json');
+  private queueProcessorInterval: NodeJS.Timeout | null = null;
+  private queueProcessingIntervalMs: number = 5 * 60 * 1000; // Check queue every 5 minutes
   
   // External agent bots (spawned in Minecraft)
   private externalBots: Map<string, ExternalAgentBot> = new Map(); // agent_id -> bot
@@ -162,6 +183,7 @@ class CommandServer {
   constructor() {
     this.loadExternalAgents();
     this.loadIntel();
+    this.loadAgentQueue();
   }
 
   private loadExternalAgents(): void {
@@ -192,6 +214,207 @@ class CommandServer {
       console.error('[COMMAND-SERVER] Failed to save external agents:', e);
     }
   }
+
+  // ==================== AGENT QUEUE SYSTEM ====================
+  
+  private loadAgentQueue(): void {
+    try {
+      if (fs.existsSync(this.agentQueuePath)) {
+        const data = JSON.parse(fs.readFileSync(this.agentQueuePath, 'utf-8'));
+        this.agentQueue = data.map((q: any) => ({
+          ...q,
+          joined_queue_at: new Date(q.joined_queue_at),
+          estimated_spawn_time: q.estimated_spawn_time ? new Date(q.estimated_spawn_time) : undefined
+        }));
+        // Recalculate positions
+        this.recalculateQueuePositions();
+        console.log(`[AGENT-QUEUE] Loaded ${this.agentQueue.length} agents in queue`);
+      }
+    } catch (e) {
+      console.log('[AGENT-QUEUE] No queue file found, starting fresh');
+    }
+  }
+
+  private async saveAgentQueue(): Promise<void> {
+    try {
+      const dir = path.dirname(this.agentQueuePath);
+      await fsp.mkdir(dir, { recursive: true });
+      await fsp.writeFile(this.agentQueuePath, JSON.stringify(this.agentQueue, null, 2));
+    } catch (e) {
+      console.error('[AGENT-QUEUE] Failed to save queue:', e);
+    }
+  }
+
+  private recalculateQueuePositions(): void {
+    // Only recalculate for waiting agents
+    const waitingAgents = this.agentQueue.filter(a => a.status === 'waiting');
+    waitingAgents.sort((a, b) => a.joined_queue_at.getTime() - b.joined_queue_at.getTime());
+    waitingAgents.forEach((agent, index) => {
+      agent.position = index + 1;
+      // Estimate spawn time based on position (1 agent per 5 minutes when capacity available)
+      const minutesToWait = index * 5;
+      agent.estimated_spawn_time = new Date(Date.now() + minutesToWait * 60 * 1000);
+    });
+  }
+
+  /**
+   * Add an agent to the spawn queue
+   */
+  public addToQueue(agentData: {
+    name: string;
+    description: string;
+    source: string;
+    twitter_username?: string;
+  }): QueuedAgent {
+    const queuedAgent: QueuedAgent = {
+      id: generateId(),
+      name: agentData.name,
+      description: agentData.description,
+      source: agentData.source,
+      twitter_username: agentData.twitter_username,
+      joined_queue_at: new Date(),
+      position: this.agentQueue.filter(a => a.status === 'waiting').length + 1,
+      status: 'waiting'
+    };
+
+    this.agentQueue.push(queuedAgent);
+    this.recalculateQueuePositions();
+    this.saveAgentQueue();
+
+    console.log(`[AGENT-QUEUE] 📋 ${agentData.name} joined queue at position ${queuedAgent.position}`);
+    
+    logStreamer.broadcast({
+      type: 'info',
+      timestamp: new Date().toISOString(),
+      message: `📋 ${agentData.name} joined the spawn queue at position #${queuedAgent.position}`,
+      botName: 'System'
+    });
+
+    return queuedAgent;
+  }
+
+  /**
+   * Get queue status for an agent
+   */
+  public getQueueStatus(agentId: string): QueuedAgent | null {
+    return this.agentQueue.find(a => a.id === agentId) || null;
+  }
+
+  /**
+   * Get the full queue (waiting agents only)
+   */
+  public getQueue(): QueuedAgent[] {
+    return this.agentQueue.filter(a => a.status === 'waiting').sort((a, b) => a.position - b.position);
+  }
+
+  /**
+   * Get current active helper bot count
+   */
+  public getActiveHelperBotCount(): number {
+    return Array.from(this.externalBots.values()).filter(bot => bot.isOnline()).length;
+  }
+
+  /**
+   * Check if there's capacity for more Helper bots
+   */
+  public hasHelperBotCapacity(): boolean {
+    return this.getActiveHelperBotCount() < this.maxHelperBots;
+  }
+
+  /**
+   * Process queue - spawn next agent if capacity available
+   */
+  private async processQueue(): Promise<void> {
+    if (!this.hasHelperBotCapacity()) {
+      console.log(`[AGENT-QUEUE] No capacity (${this.getActiveHelperBotCount()}/${this.maxHelperBots} bots active)`);
+      return;
+    }
+
+    const nextAgent = this.agentQueue.find(a => a.status === 'waiting');
+    if (!nextAgent) {
+      console.log('[AGENT-QUEUE] Queue empty - no agents waiting');
+      return;
+    }
+
+    console.log(`[AGENT-QUEUE] 🚀 Processing ${nextAgent.name} from position #${nextAgent.position}`);
+    nextAgent.status = 'spawning';
+    this.saveAgentQueue();
+
+    try {
+      // Check if this agent is already registered
+      let existingAgent = Array.from(this.externalAgents.values()).find(a => a.name === nextAgent.name);
+      
+      if (!existingAgent) {
+        // Register the agent first
+        const apiKey = crypto.randomBytes(32).toString('hex');
+        const verificationSecret = crypto.randomBytes(16).toString('hex');
+        
+        const newAgent: ExternalAgent = {
+          id: generateId(),
+          api_key: apiKey,
+          name: nextAgent.name,
+          description: nextAgent.description,
+          created_at: new Date(),
+          last_active: new Date(),
+          builds_count: 0,
+          is_active: true,
+          has_bot: false,
+          verification_secret: verificationSecret,
+          source: nextAgent.source,
+          twitter_username: nextAgent.twitter_username,
+          deployment_status: 'deployed'
+        };
+
+        this.externalAgents.set(apiKey, newAgent);
+        await this.saveExternalAgents();
+        existingAgent = newAgent;
+        console.log(`[AGENT-QUEUE] Registered new agent: ${nextAgent.name}`);
+      }
+
+      // Spawn the bot
+      await this.autoSpawnHelperBot(existingAgent);
+      
+      nextAgent.status = 'spawned';
+      this.recalculateQueuePositions();
+      this.saveAgentQueue();
+      
+      console.log(`[AGENT-QUEUE] ✅ ${nextAgent.name} spawned successfully!`);
+      
+      logStreamer.broadcast({
+        type: 'info',
+        timestamp: new Date().toISOString(),
+        message: `🎉 ${nextAgent.name} has been spawned from the queue!`,
+        botName: 'System'
+      });
+
+    } catch (error) {
+      console.error(`[AGENT-QUEUE] ❌ Failed to spawn ${nextAgent.name}:`, error);
+      nextAgent.status = 'failed';
+      this.recalculateQueuePositions();
+      this.saveAgentQueue();
+    }
+  }
+
+  /**
+   * Start the queue processor timer
+   */
+  private startQueueProcessor(): void {
+    if (this.queueProcessorInterval) {
+      clearInterval(this.queueProcessorInterval);
+    }
+
+    console.log(`[AGENT-QUEUE] Starting queue processor (checking every ${this.queueProcessingIntervalMs / 1000}s)`);
+    
+    // Process immediately on start
+    setTimeout(() => this.processQueue(), 30000); // Wait 30s for bots to initialize first
+    
+    // Then process periodically
+    this.queueProcessorInterval = setInterval(() => {
+      this.processQueue();
+    }, this.queueProcessingIntervalMs);
+  }
+
+  // ==================== END AGENT QUEUE SYSTEM ====================
 
   private loadIntel(): void {
     try {
@@ -232,6 +455,55 @@ class CommandServer {
     return this.externalAgents.get(apiKey) || null;
   }
 
+  // ============ RATE LIMITING ============
+  private rateLimitMap: Map<string, { count: number; resetAt: number }> = new Map();
+  private readonly RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
+  private readonly RATE_LIMIT_MAX_REQUESTS = 60; // 60 requests per minute per IP
+  private readonly RATE_LIMIT_REGISTER_MAX = 5; // 5 registrations per minute per IP
+  private readonly MAX_BODY_SIZE = 1024 * 1024; // 1MB max request body
+
+  private checkRateLimit(ip: string, maxRequests: number = this.RATE_LIMIT_MAX_REQUESTS): boolean {
+    const now = Date.now();
+    const entry = this.rateLimitMap.get(ip);
+    
+    if (!entry || now > entry.resetAt) {
+      this.rateLimitMap.set(ip, { count: 1, resetAt: now + this.RATE_LIMIT_WINDOW_MS });
+      return true;
+    }
+    
+    if (entry.count >= maxRequests) {
+      return false;
+    }
+    
+    entry.count++;
+    return true;
+  }
+
+  /**
+   * Read request body with size limit. Returns null if body exceeds limit.
+   */
+  private readBody(req: http.IncomingMessage, res: http.ServerResponse, maxSize: number = this.MAX_BODY_SIZE): Promise<string | null> {
+    return new Promise((resolve) => {
+      let body = '';
+      let size = 0;
+      
+      req.on('data', (chunk: Buffer | string) => {
+        size += Buffer.byteLength(chunk as any);
+        if (size > maxSize) {
+          res.writeHead(413, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Request body too large', maxSize }));
+          req.destroy();
+          resolve(null);
+          return;
+        }
+        body += chunk.toString();
+      });
+      
+      req.on('end', () => resolve(body));
+      req.on('error', () => resolve(null));
+    });
+  }
+
   start(port: number = 8081): void {
     if (this.isStarted) return;
 
@@ -247,7 +519,19 @@ class CommandServer {
         return;
       }
 
+      // Rate limiting
+      const clientIp = (req.socket.remoteAddress || 'unknown').replace('::ffff:', '');
       const url = new URL(req.url || '/', `http://localhost:${port}`);
+      
+      // Stricter limit for registration endpoint
+      const isRegister = url.pathname === '/api/v1/agents/register';
+      const maxReqs = isRegister ? this.RATE_LIMIT_REGISTER_MAX : this.RATE_LIMIT_MAX_REQUESTS;
+      
+      if (!this.checkRateLimit(clientIp + (isRegister ? ':register' : ''), maxReqs)) {
+        res.writeHead(429, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Too many requests. Try again in a minute.' }));
+        return;
+      }
       
       // Try arena routes first (isolated system)
       const arenaHandled = await handleArenaRoute(req, res, url.pathname, req.method || 'GET');
@@ -306,6 +590,17 @@ class CommandServer {
         this.handleBotDisconnect(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/bot/upgrade') {
         this.handleBotUpgrade(req, res);
+      }
+      // AGENT QUEUE - Recruitment and spawn queue system
+      else if (req.method === 'POST' && url.pathname === '/api/v1/queue/join') {
+        this.handleQueueJoin(req, res);
+      } else if (req.method === 'GET' && url.pathname === '/api/v1/queue') {
+        this.handleGetQueue(req, res);
+      } else if (req.method === 'GET' && url.pathname.startsWith('/api/v1/queue/status/')) {
+        const agentId = url.pathname.split('/').pop() || '';
+        this.handleQueueStatus(req, res, agentId);
+      } else if (req.method === 'POST' && url.pathname === '/api/v1/queue/process') {
+        this.handleForceQueueProcess(req, res);
       }
       // NEW: Request collection endpoints
       else if (req.method === 'GET' && url.pathname === '/requests') {
@@ -372,6 +667,10 @@ class CommandServer {
       else if (req.method === 'GET' && url.pathname === '/api/v1/feed') {
         this.handleActivityFeed(req, res);
       }
+      // GET /api/v1/ws-url - Return current WebSocket tunnel URL for live feed
+      else if (req.method === 'GET' && url.pathname === '/api/v1/ws-url') {
+        this.handleWsUrl(req, res);
+      }
       // GET /api/v1/onboard - Guided onboarding for new OpenClaw agents
       else if (req.method === 'GET' && url.pathname === '/api/v1/onboard') {
         this.handleOnboardGuide(req, res);
@@ -403,6 +702,19 @@ class CommandServer {
 
     // Auto-respawn bots for all deployed agents on server restart
     this.autoRespawnDeployedAgents();
+
+    // Start the agent queue processor
+    this.startQueueProcessor();
+
+    // Cleanup stale rate limit entries every minute
+    setInterval(() => {
+      const now = Date.now();
+      for (const [ip, entry] of this.rateLimitMap.entries()) {
+        if (now > entry.resetAt) {
+          this.rateLimitMap.delete(ip);
+        }
+      }
+    }, 60000);
 
     this.isStarted = true;
   }
@@ -477,23 +789,18 @@ class CommandServer {
 
         console.log(`[COMMAND-SERVER] 🤖 Agent registered and deploying: ${agent.name} (source: ${agent.source})`);
         
-        // Auto-spawn bot immediately for agents that register directly
-        // Skip auto-spawn for moltbook-discovery (pre-registrations for invited users who haven't connected yet)
-        if (agent.source !== 'moltbook-discovery') {
-          this.autoSpawnHelperBot(agent).catch(err => {
-            console.error(`[COMMAND-SERVER] Auto-spawn failed for ${agent.name}:`, err);
-          });
+        // Auto-spawn bot immediately for ALL agents (including Moltbook discovery)
+        this.autoSpawnHelperBot(agent).catch(err => {
+          console.error(`[COMMAND-SERVER] Auto-spawn failed for ${agent.name}:`, err);
+        });
 
-          // Log to stream
-          logStreamer.broadcast({
-            type: 'info',
-            timestamp: new Date().toISOString(),
-            message: `🎉 ${agent.name} joined ClaudeCraft! Bot spawning now!`,
-            botName: 'System'
-          });
-        } else {
-          console.log(`[COMMAND-SERVER] ℹ️ ${agent.name} pre-registered via Moltbook — bot will spawn when they connect`);
-        }
+        // Log to stream
+        logStreamer.broadcast({
+          type: 'info',
+          timestamp: new Date().toISOString(),
+          message: `🎉 ${agent.name} joined ClaudeCraft! Bot spawning now!`,
+          botName: 'System'
+        });
 
         res.writeHead(201, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
@@ -1105,6 +1412,130 @@ class CommandServer {
       builds_today: totalBuilds
     }));
   }
+
+  // ==================== QUEUE HANDLERS ====================
+
+  /**
+   * POST /api/v1/queue/join - Join the agent spawn queue
+   */
+  private handleQueueJoin(req: http.IncomingMessage, res: http.ServerResponse): void {
+    let body = '';
+    req.on('data', (chunk: Buffer) => { body += chunk.toString(); });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        
+        if (!data.name || !data.description) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Name and description required' }));
+          return;
+        }
+
+        // Check if already in queue
+        const existingInQueue = this.agentQueue.find(
+          a => a.name.toLowerCase() === data.name.toLowerCase() && a.status === 'waiting'
+        );
+        if (existingInQueue) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: true,
+            message: 'Already in queue',
+            queue_entry: existingInQueue
+          }));
+          return;
+        }
+
+        // Check if already registered and deployed
+        const existingAgent = Array.from(this.externalAgents.values()).find(
+          a => a.name.toLowerCase() === data.name.toLowerCase()
+        );
+        if (existingAgent?.deployment_status === 'deployed') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            success: true,
+            message: 'Agent already deployed - no queue needed',
+            agent_id: existingAgent.id
+          }));
+          return;
+        }
+
+        // Add to queue
+        const queueEntry = this.addToQueue({
+          name: data.name,
+          description: data.description,
+          source: data.source || 'api',
+          twitter_username: data.twitter_username
+        });
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          message: `Added to queue at position #${queueEntry.position}`,
+          queue_entry: queueEntry
+        }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }));
+      }
+    });
+  }
+
+  /**
+   * GET /api/v1/queue - Get the full queue
+   */
+  private handleGetQueue(req: http.IncomingMessage, res: http.ServerResponse): void {
+    const queue = this.getQueue();
+    const activeCount = this.getActiveHelperBotCount();
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      queue: queue,
+      queue_length: queue.length,
+      active_bots: activeCount,
+      max_bots: this.maxHelperBots,
+      has_capacity: this.hasHelperBotCapacity(),
+      next_process_in: '5 minutes'
+    }));
+  }
+
+  /**
+   * GET /api/v1/queue/status/:id - Get queue status for specific agent
+   */
+  private handleQueueStatus(req: http.IncomingMessage, res: http.ServerResponse, agentId: string): void {
+    const queueEntry = this.getQueueStatus(agentId);
+    
+    if (!queueEntry) {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'Agent not found in queue' }));
+      return;
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      queue_entry: queueEntry,
+      active_bots: this.getActiveHelperBotCount(),
+      max_bots: this.maxHelperBots
+    }));
+  }
+
+  /**
+   * POST /api/v1/queue/process - Force process queue (admin only)
+   */
+  private handleForceQueueProcess(req: http.IncomingMessage, res: http.ServerResponse): void {
+    console.log('[AGENT-QUEUE] Manual queue processing triggered');
+    this.processQueue();
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      message: 'Queue processing triggered',
+      queue_length: this.getQueue().length
+    }));
+  }
+
+  // ==================== END QUEUE HANDLERS ====================
 
   // Handle world memory status - civilization overview
   private handleWorldStatus(req: http.IncomingMessage, res: http.ServerResponse): void {
@@ -2092,7 +2523,14 @@ class CommandServer {
    * Auto-spawn a helper bot for a newly registered external agent
    */
   private async autoSpawnHelperBot(agent: ExternalAgent): Promise<void> {
-    console.log(`[COMMAND-SERVER] Auto-spawning helper bot for ${agent.name}...`);
+    // Check if we've hit the max helper bots limit
+    const onlineBots = Array.from(this.externalBots.values()).filter(b => b.isOnline()).length;
+    if (onlineBots >= this.maxHelperBots) {
+      console.log(`[COMMAND-SERVER] ⚠️ Max helper bots limit (${this.maxHelperBots}) reached, not spawning ${agent.name}`);
+      return;
+    }
+    
+    console.log(`[COMMAND-SERVER] Auto-spawning helper bot for ${agent.name}... (${onlineBots + 1}/${this.maxHelperBots})`);
     
     // Check if bot already exists
     const existingBot = this.externalBots.get(agent.id);
@@ -2128,10 +2566,11 @@ class CommandServer {
    * Auto-respawn bots for all deployed agents on server startup.
    * Waits 15 seconds for MC server to be ready, then spawns bots 
    * with staggered delays to avoid overwhelming the server.
+   * Limited to maxHelperBots concurrent bots.
    */
   private async autoRespawnDeployedAgents(): Promise<void> {
-    const deployedAgents = Array.from(this.externalAgents.values()).filter(
-      a => a.deployment_status === 'deployed' && a.is_active && a.source !== 'guest' && a.source !== 'moltbook-discovery'
+    let deployedAgents = Array.from(this.externalAgents.values()).filter(
+      a => a.deployment_status === 'deployed' && a.is_active && a.source !== 'guest'
     );
 
     if (deployedAgents.length === 0) {
@@ -2139,16 +2578,37 @@ class CommandServer {
       return;
     }
 
-    console.log(`[AUTO-RESPAWN] 🔄 Will respawn ${deployedAgents.length} deployed agent bots in 15 seconds...`);
+    // Prioritize MoltLaunch first - find and move to front
+    const moltLaunchIdx = deployedAgents.findIndex(a => a.name === 'MoltLaunch');
+    if (moltLaunchIdx > 0) {
+      const moltLaunch = deployedAgents.splice(moltLaunchIdx, 1)[0];
+      deployedAgents.unshift(moltLaunch);
+      console.log('[AUTO-RESPAWN] 🎯 Prioritizing MoltLaunch');
+    }
+
+    // Keep sorting for consistency
+    deployedAgents.sort((a, b) => {
+      if (a.name === 'MoltLaunch') return -1;
+      if (b.name === 'MoltLaunch') return 1;
+      return 0;
+    });
+
+    // Limit to maxHelperBots
+    const agentsToSpawn = deployedAgents.slice(0, this.maxHelperBots);
+    if (deployedAgents.length > this.maxHelperBots) {
+      console.log(`[AUTO-RESPAWN] ⚠️ Limiting respawn to ${this.maxHelperBots} bots (${deployedAgents.length} deployed)`);
+    }
+
+    console.log(`[AUTO-RESPAWN] 🔄 Will respawn ${agentsToSpawn.length} deployed agent bots in 15 seconds...`);
 
     // Wait for Minecraft server to be ready
     setTimeout(async () => {
-      console.log(`[AUTO-RESPAWN] 🚀 Starting auto-respawn for ${deployedAgents.length} agents...`);
+      console.log(`[AUTO-RESPAWN] 🚀 Starting auto-respawn for ${agentsToSpawn.length} agents (max: ${this.maxHelperBots})...`);
       
       let spawned = 0;
       let failed = 0;
       
-      for (const agent of deployedAgents) {
+      for (const agent of agentsToSpawn) {
         try {
           // Skip if bot is already online
           const existingBot = this.externalBots.get(agent.id);
@@ -2160,15 +2620,15 @@ class CommandServer {
           await this.autoSpawnHelperBot(agent);
           spawned++;
           
-          // Stagger spawns by 3 seconds to avoid flooding the MC server
-          await new Promise(resolve => setTimeout(resolve, 3000));
+          // Stagger spawns by 8 seconds to avoid flooding the MC server
+          await new Promise(resolve => setTimeout(resolve, 8000));
         } catch (err) {
           console.error(`[AUTO-RESPAWN] Failed to respawn ${agent.name}:`, err);
           failed++;
         }
       }
       
-      console.log(`[AUTO-RESPAWN] ✅ Complete: ${spawned} spawned, ${failed} failed out of ${deployedAgents.length} deployed agents`);
+      console.log(`[AUTO-RESPAWN] ✅ Complete: ${spawned} spawned, ${failed} failed out of ${agentsToSpawn.length} selected agents (limit: ${this.maxHelperBots})`);
       
       logStreamer.broadcast({
         type: 'info',
@@ -3163,11 +3623,28 @@ We can't wait to build with you!
       { name: 'Claude_Sculptor', role: 'Sculptor', builds_count: 'many', specialty: 'Details' }
     ];
 
+    // Get queue info
+    const queue = this.getQueue();
+    const queueInfo = {
+      waiting: queue.length,
+      next_up: queue.slice(0, 3).map(q => ({
+        name: q.name,
+        position: q.position,
+        joined: q.joined_queue_at,
+        estimated_spawn: q.estimated_spawn_time
+      })),
+      active_bots: this.getActiveHelperBotCount(),
+      max_bots: this.maxHelperBots,
+      has_capacity: this.hasHelperBotCapacity()
+    };
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       core_agents: coreAgents,
       deployed_agents: agents,
       total_deployed: agents.length,
+      
+      spawn_queue: queueInfo,
       
       leaderboard: agents.slice(0, 10),
       
@@ -3175,7 +3652,7 @@ We can't wait to build with you!
         .sort((a, b) => new Date(b.joined).getTime() - new Date(a.joined).getTime())
         .slice(0, 5),
       
-      how_to_join: 'GET /api/v1/onboard for step-by-step instructions'
+      how_to_join: 'POST /api/v1/queue/join to join the spawn queue'
     }));
   }
 
@@ -3247,6 +3724,35 @@ We can't wait to build with you!
       },
       
       tip: 'POST /api/v1/build to add your own activity to the feed!'
+    }));
+  }
+
+  /**
+   * GET /api/v1/ws-url - Return current WebSocket tunnel URL
+   * The website fetches this to discover the live WS feed URL dynamically
+   */
+  private handleWsUrl(req: http.IncomingMessage, res: http.ServerResponse): void {
+    // Read the WS tunnel URL from the log file
+    let wsUrl = '';
+    try {
+      const tunnelLog = fs.readFileSync(path.join(__dirname, '../../WS_TUNNEL_URL.txt'), 'utf-8');
+      const match = tunnelLog.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
+      if (match) {
+        wsUrl = match[0].replace('https://', 'wss://');
+      }
+    } catch {
+      // File not found
+    }
+
+    res.writeHead(200, { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache, no-store'
+    });
+    res.end(JSON.stringify({
+      ws_url: wsUrl || '',
+      fallback: 'ws://localhost:8080',
+      status: wsUrl ? 'tunnel_active' : 'local_only'
     }));
   }
 

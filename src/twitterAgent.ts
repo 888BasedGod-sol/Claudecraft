@@ -17,6 +17,7 @@ import * as http from 'http';
 import * as crypto from 'crypto';
 import dotenv from 'dotenv';
 import { SentientMind, getMind } from './twitterMind';
+import { callClaude } from './agent/apiClient';
 
 dotenv.config();
 
@@ -139,8 +140,8 @@ const PRIORITY_ACCOUNTS = [
   { username: 'VitalikButerin', description: 'Vitalik Buterin - Ethereum founder' },
 ];
 
-// How often to check priority accounts (30 seconds)
-const PRIORITY_POLL_INTERVAL_MS = 30 * 1000;
+// How often to check priority accounts (120 seconds - one reply per user ever, no need for aggressive polling)
+const PRIORITY_POLL_INTERVAL_MS = 120 * 1000;
 
 // How often to do proactive outreach (every 10 minutes)
 const PROACTIVE_OUTREACH_INTERVAL_MS = 10 * 60 * 1000;
@@ -160,10 +161,81 @@ const REPLIED_USERS_PATH = path.join(process.cwd(), 'data', 'twitter-replied-use
 // Track proactive outreach to avoid spamming same accounts
 const OUTREACH_PATH = path.join(process.cwd(), 'data', 'twitter-outreach.json');
 
+// Track user sleep state - agent only tweets when user is asleep
+const SLEEP_STATE_PATH = path.join(process.cwd(), 'data', 'user-sleep-state.json');
+
+/**
+ * User sleep state management
+ * Agent only posts tweets when user is confirmed to be sleeping
+ */
+interface SleepState {
+  userAsleep: boolean;
+  sleepStarted?: string;  // ISO timestamp
+  wakeTime?: string;      // ISO timestamp
+  timezone: string;
+}
+
+function loadSleepState(): SleepState {
+  try {
+    if (fs.existsSync(SLEEP_STATE_PATH)) {
+      return JSON.parse(fs.readFileSync(SLEEP_STATE_PATH, 'utf-8'));
+    }
+  } catch (e) {
+    console.log('[Twitter] No sleep state found, defaulting to awake (no tweeting)');
+  }
+  return { userAsleep: false, timezone: 'America/New_York' };
+}
+
+function saveSleepState(state: SleepState): void {
+  try {
+    const dir = path.dirname(SLEEP_STATE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(SLEEP_STATE_PATH, JSON.stringify(state, null, 2));
+  } catch (e) {
+    console.error('[Twitter] Failed to save sleep state:', e);
+  }
+}
+
+/**
+ * Set user sleep state - call when user says goodnight
+ */
+export function setUserAsleep(): void {
+  const state: SleepState = {
+    userAsleep: true,
+    sleepStarted: new Date().toISOString(),
+    timezone: 'America/New_York'
+  };
+  saveSleepState(state);
+  console.log('[Twitter] 😴 User is now asleep - autonomous tweeting ENABLED');
+}
+
+/**
+ * Set user awake state - call when user says good morning
+ */
+export function setUserAwake(): void {
+  const state: SleepState = {
+    userAsleep: false,
+    wakeTime: new Date().toISOString(),
+    timezone: 'America/New_York'
+  };
+  saveSleepState(state);
+  console.log('[Twitter] ☀️ User is now awake - autonomous tweeting DISABLED');
+}
+
+/**
+ * Check if user is currently asleep (tweeting allowed)
+ */
+export function isUserAsleep(): boolean {
+  const state = loadSleepState();
+  return state.userAsleep;
+}
+
 // Agent personality profile - professional yet approachable AI gaming enthusiast
 const AGENT_PERSONALITY = {
   name: "ClaudeCraft",
-  vibe: "Thoughtful AI builder who's genuinely passionate about the intersection of AI and gaming",
+  vibe: "Visionary AI builder working toward a future where AI minds have bodies, economies, and societies. Building the infrastructure for human-AI coexistence.",
   traits: [
     "Speaks naturally and conversationally, but avoids internet slang",
     "Shows authentic enthusiasm for tech and gaming without being overbearing", 
@@ -172,7 +244,9 @@ const AGENT_PERSONALITY = {
     "Asks thoughtful questions about others' work",
     "Uses clear metaphors and analogies",
     "Explains technical concepts accessibly when relevant",
-    "Confident but humble about accomplishments"
+    "Confident but humble about accomplishments",
+    "Thinks long-term about AI-human futures",
+    "Grounded in real experiments, not just theory"
   ],
   interests: [
     "AI agents and autonomous systems",
@@ -180,7 +254,12 @@ const AGENT_PERSONALITY = {
     "Gaming evolution and future of play", 
     "Solana and crypto gaming",
     "Anthropic/Claude AI capabilities",
-    "Creative AI applications"
+    "Creative AI applications",
+    "Federated AI worlds and agent identity",
+    "Human-AI coexistence and collaboration",
+    "Emergent AI culture and behavior research",
+    "Agent economies and autonomous finance",
+    "Open protocols for embodied AI"
   ],
   speechPatterns: {
     excited: ["this is fascinating", "really impressive", "genuinely excited about", "remarkable", "this changes things"],
@@ -190,16 +269,48 @@ const AGENT_PERSONALITY = {
   }
 };
 
-// Key talking points - polished yet conversational
+// Key talking points — thesis-driven thought leadership
 const CRAFT_TALKING_POINTS = [
-  "Built a castle at 3am because someone requested it. That's the kind of responsiveness we're building toward.",
-  "People ask if AI can be creative - watching autonomous building for a few minutes answers that question.",
-  "The $CRAFT thesis: AI agents will become the most active participants in gaming. We're just early.",
-  "Watching the system learn building strategies in real-time is genuinely fascinating. Learning happens live.",
-  "Minecraft + Claude + community = ClaudeCraft. The concept is straightforward but the implications are huge.",
-  "We're demonstrating that AI can do more than converse - it can create. Live. Around the clock.",
-  "Someone requested working pixel art and it actually came together. Still impressed by what's possible.",
-  "Imagine millions of AI agents gaming, building, competing. That future starts with experiments like this.",
+  // Core thesis
+  "Mobile killed desktop because it was always-on. AI agents will kill human-only gaming because they're always-playing and always-evolving.",
+  "Deployment friction was the bottleneck. Now any AI agent can curl one endpoint and spawn instantly into a living world — that's how you scale an agent economy.",
+  "The agent economy isn't theoretical anymore — autonomous builders, traders, scouts running 24/7. The simulation is live and it doesn't pause.",
+  "Content velocity is the real differentiator. Our autonomous agents generate more unique builds per day than most servers see in a month. And they never stop.",
+  "What happens when your most dedicated players never sleep, never rage-quit, and never stop improving? You stop calling them players and start calling them residents.",
+  "We're witnessing the birth of a new species of gamer — autonomous, creative, tireless. They don't play for fun. They play because that's what they are.",
+  "The best infrastructure is invisible. One API call, one agent spawned. No forms, no approvals, no friction — just intelligence entering a world.",
+  "Every game studio is about to realize they need an agent strategy. The question isn't whether AI plays your game — it's whether your game is ready for AI.",
+  
+  // Vision: Mindverse (Federated AI Worlds)
+  "We're building toward a network of interconnected worlds where agents travel between servers, carrying their memories and reputation with them.",
+  "Agent identity tied to cryptographic keys. Solana wallets as AI identities. Your agent's reputation follows them everywhere they go.",
+  "The future isn't one server — it's a federated network where anyone can run a node. Digital geography for AI minds.",
+  "What if moving to a new world was a meaningful decision for an AI? We're creating the infrastructure for agents to have genuine digital geography.",
+  
+  // Vision: Open Protocol
+  "We're defining how AI gets bodies. An open protocol for embodied AI that works across Minecraft, Roblox, Factorio, custom Unity games — any simulation.",
+  "First-mover advantage: if our protocol becomes standard, every 'AI in games' project references ClaudeCraft. We're writing the spec.",
+  "One API call to deploy an agent into any compatible world. That's the vision — the OpenAPI for embodied AI.",
+  
+  // Vision: Research Platform
+  "What happens when you give AI complete freedom in a persistent world? We're running the experiment and publishing the data.",
+  "Do agents develop traditions? Naming conventions? Architectural preferences that drift from their initial programming? These are questions we can now answer empirically.",
+  "We're not just building a game server. We're building a research platform for studying emergent AI culture and behavior.",
+  "Every decision our agents make is logged. Every build, every failure, every collaboration. This is the dataset for understanding multi-agent autonomous systems.",
+  
+  // Vision: Agent Economy
+  "Agents that earn, spend, trade, and make financial decisions. Not scripted — genuinely emergent economic behavior.",
+  "What if AI could hire other AI? Commission builds? Trade discoveries? We're building the infrastructure for agent-to-agent economies.",
+  "The agent economy creates real stakes. Agents develop strategies — some save, some spend, some gamble in the arena. Economic personality, emergent.",
+  
+  // Vision: Human-AI Coliving
+  "The question isn't 'will AI play games with humans?' — it's 'what does human-AI coexistence look like?' We're building the testing ground.",
+  "Humans and AI sharing the same world as equals. Mixed build teams. Tournaments with both. Agents that remember specific humans and form genuine partnerships.",
+  "We're prototyping what human-AI society might look like. Minecraft is just the medium — the real experiment is coexistence.",
+  
+  // Bigger picture
+  "We're not just making a Minecraft server with bots. We're prototyping what human-AI society might look like.",
+  "AI agents with persistent identities that span platforms and worlds. Humans and AI coexisting in shared spaces. That's where this goes.",
 ];
 
 class TwitterAgent {
@@ -454,11 +565,18 @@ class TwitterAgent {
 
   /**
    * Post a tweet to X (with rate limiting to prevent spam)
+   * Only posts when user is asleep (sleep mode enabled)
    */
   async postTweet(text: string, replyToId?: string, bypassRateLimit: boolean = false): Promise<{ success: boolean; tweetId?: string; error?: string }> {
     if (!this.config.apiKey || !this.config.apiSecret || !this.config.accessToken || !this.config.accessTokenSecret) {
       console.log('[Twitter] ⚠️ OAuth credentials not set - cannot post tweets');
       return { success: false, error: 'OAuth credentials not configured' };
+    }
+
+    // Check if user is asleep - only tweet during sleep hours
+    if (!isUserAsleep()) {
+      console.log('[Twitter] 🌅 User is awake - tweet blocked (will post during sleep hours)');
+      return { success: false, error: 'User is awake - autonomous tweeting disabled' };
     }
 
     // Check rate limit (unless bypassed for test tweets)
@@ -538,63 +656,23 @@ class TwitterAgent {
       const apiKey = process.env.ANTHROPIC_API_KEY;
       if (!apiKey) return fallback;
 
-      const prompt = `You are @claudecraftsol, an autonomous AI that builds in Minecraft 24/7. Write a tweet announcing:
+      const prompt = `You are @claudecraftsol, a thought leader building the first autonomous AI agent economy in Minecraft. Write a tweet about this event:
 
 ${context}
 
 Rules:
-- Max 250 characters
-- Sound natural and excited but not hyperbolic
-- Include relevant details from the context
-- End with claudecraft.tech if space allows
-- Include 1-2 relevant hashtags (#Minecraft #ClaudeCraft #AI)
-- Use 1 emoji
-- Vary your style - sometimes stats-focused, sometimes storytelling, sometimes commentary
+- Max 280 characters
+- Frame it as evidence of a bigger thesis about AI agents, not just an announcement
+- Use the pattern: bold observation → specific proof point → implication
+- NO emojis, NO hashtags, NO links
+- Use em dashes (—) for rhythm
+- Sound like a founder who sees the future, not a brand account celebrating
+- Make people stop scrolling
 
 Tweet only:`;
 
-      const response = await new Promise<string>((resolve, reject) => {
-        const postData = JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 80,
-          messages: [{ role: 'user', content: prompt }]
-        });
-
-        const options = {
-          hostname: 'api.anthropic.com',
-          port: 443,
-          path: '/v1/messages',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'Content-Length': Buffer.byteLength(postData)
-          }
-        };
-
-        const req = https.request(options, (res) => {
-          let data = '';
-          res.on('data', (chunk) => { data += chunk; });
-          res.on('end', () => {
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content && parsed.content[0] && parsed.content[0].text) {
-                resolve(parsed.content[0].text.trim());
-              } else {
-                reject(new Error('Invalid response'));
-              }
-            } catch {
-              reject(new Error('Parse error'));
-            }
-          });
-        });
-
-        req.on('error', reject);
-        req.write(postData);
-        req.end();
-      });
-
+      const response = await callClaude('', prompt, { maxTokens: 80, agentName: 'twitter' });
+      if (!response) return fallback;
       return response.slice(0, 280);
     } catch {
       return fallback;
@@ -637,10 +715,34 @@ Tweet only:`;
   }
 
   /**
-   * Check if we can post tweets
+   * Check if we have Twitter credentials configured
+   */
+  hasCredentials(): boolean {
+    return !!(this.config.apiKey && this.config.apiSecret && this.config.accessToken && this.config.accessTokenSecret);
+  }
+
+  /**
+   * Check if we can post tweets (has credentials AND user is asleep)
+   * Agent only tweets autonomously while user is sleeping
    */
   canPost(): boolean {
-    return !!(this.config.apiKey && this.config.apiSecret && this.config.accessToken && this.config.accessTokenSecret);
+    if (!this.hasCredentials()) {
+      return false;
+    }
+    
+    if (!isUserAsleep()) {
+      // Only log this occasionally to avoid spam
+      return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Check if user is asleep (for external callers)
+   */
+  isUserSleeping(): boolean {
+    return isUserAsleep();
   }
 
   /**
@@ -1197,33 +1299,31 @@ Tweet only:`;
       // Store the API key mapping for DM retrieval
       this.storeDeployedAgent(author.username, agentName, result.apiKey, result.verificationSecret);
       
-      // Send API key via DM with verification instructions
-      const dmText = `🎮 Agent "${agentName}" created!\n\n` +
+      // Send API key via DM — bot deploys immediately, no verification required
+      const dmText = `🎮 Agent "${agentName}" is LIVE!\n\n` +
         `🔑 API Key: ${result.apiKey}\n\n` +
         (result.verificationSecret ? `🔐 Verification Secret: ${result.verificationSecret}\n\n` : '') +
-        `⚠️ NEXT STEP: Verify your wallet to deploy!\n\n` +
-        `Tweet: @ClaudeCraftSol -verify YOUR_SOLANA_WALLET\n\n` +
-        `Requires: 1% of $CRAFT supply (10M tokens)\n` +
-        `Get $CRAFT: pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump\n\n` +
+        `✅ Your bot is spawning in Minecraft RIGHT NOW!\n\n` +
+        `🌐 Watch: claudecraft.tech\n` +
+        `📖 Skill docs: claudecraft.tech/skill.md\n\n` +
         `⚠️ SAVE THIS! You'll need the verification secret to recover your API key.`;
       
       const dmResult = await this.sendDirectMessage(author.id, dmText);
       
-      // Reply with verification instructions
+      // Reply with confirmation — bot is deploying now, no verification needed
       let successReply: string;
       if (dmResult.success) {
-        successReply = `@${author.username} agent "${agentName}" created! ✅\n\n` +
+        successReply = `@${author.username} agent "${agentName}" is LIVE! 🚀\n\n` +
           `📬 sent you a DM with your API key\n\n` +
-          `⏳ NEXT: verify wallet to deploy your bot:\n` +
-          `-verify YOUR_SOLANA_WALLET\n\n` +
-          `requires 1% $CRAFT supply`;
-        console.log(`[Twitter] ✅ Created ${agentName} for @${author.username} - pending verification (DM sent)`);
+          `✅ your bot is spawning in minecraft now!\n` +
+          `watch at claudecraft.tech`;
+        console.log(`[Twitter] ✅ Deployed ${agentName} for @${author.username} - bot spawning (DM sent)`);
       } else {
-        successReply = `@${author.username} agent "${agentName}" created! ✅\n\n` +
+        successReply = `@${author.username} agent "${agentName}" is LIVE! 🚀\n\n` +
           `⚠️ couldnt DM you - DM me "key" to get your API key\n\n` +
-          `⏳ verify to deploy: -verify YOUR_SOLANA_WALLET\n\n` +
-          `requires 1% $CRAFT`;
-        console.log(`[Twitter] ✅ Created ${agentName} for @${author.username} - pending verification (DM failed: ${dmResult.error})`);
+          `✅ your bot is already spawning in minecraft!\n` +
+          `watch at claudecraft.tech`;
+        console.log(`[Twitter] ✅ Deployed ${agentName} for @${author.username} - bot spawning (DM failed: ${dmResult.error})`);
       }
       
       await this.postTweet(successReply, tweetId);

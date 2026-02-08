@@ -69,18 +69,24 @@ export class AgentMemory {
   }
 
   private save(): void {
-    try {
-      const store: MemoryStore = {
-        agentName: this.agentName,
-        memories: this.memories,
-        createdAt: this.memories[0]?.timestamp || Date.now(),
-        lastUpdated: Date.now(),
-        version: 1
-      };
-      fs.writeFileSync(this.memoryFilePath, JSON.stringify(store, null, 2));
-    } catch (error) {
-      console.error(`[Memory] Error saving memories for ${this.agentName}:`, error);
+    // Debounce saves to avoid excessive disk I/O
+    if (this.saveDebounceTimer) {
+      clearTimeout(this.saveDebounceTimer);
     }
+    this.saveDebounceTimer = setTimeout(() => {
+      try {
+        const store: MemoryStore = {
+          agentName: this.agentName,
+          memories: this.memories,
+          createdAt: this.memories[0]?.timestamp || Date.now(),
+          lastUpdated: Date.now(),
+          version: 1
+        };
+        fs.writeFileSync(this.memoryFilePath, JSON.stringify(store, null, 2));
+      } catch (error) {
+        console.error(`[Memory] Error saving memories for ${this.agentName}:`, error);
+      }
+    }, this.SAVE_DEBOUNCE_MS);
   }
 
   /**

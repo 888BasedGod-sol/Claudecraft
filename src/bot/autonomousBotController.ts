@@ -217,12 +217,12 @@ export class AutonomousBotController {
     // Add random stagger (0-2 seconds) to avoid all agents calling API simultaneously
     const staggerMs = Math.random() * 2000;
     
-    // Decision loop every 4 seconds (staggered start)
+    // Decision loop every 10 seconds (staggered start) — reduced from 4s to save API tokens
     setTimeout(() => {
       this.decisionInterval = setInterval(async () => {
         if (!this.running || this.actionInProgress) return;
         await this.makeDecision();
-      }, 4000);
+      }, 10000);
     }, staggerMs);
 
     // Make first decision after stagger delay
@@ -232,7 +232,7 @@ export class AutonomousBotController {
   private startPositionBroadcast(): void {
     const registry = getAgentRegistry();
     
-    // Broadcast position every 2 seconds for mini-map and agent awareness
+    // Broadcast position every 5 seconds for mini-map and agent awareness
     this.positionUpdateInterval = setInterval(() => {
       if (!this.bot || !this.bot.entity) return;
       
@@ -263,7 +263,7 @@ export class AutonomousBotController {
         health: this.bot.health,
         inventory: this.getBotState().inventory
       });
-    }, 2000);
+    }, 5000);
 
     // Send initial position
     if (this.bot && this.bot.entity) {
@@ -282,6 +282,10 @@ export class AutonomousBotController {
 
   private async makeDecision(): Promise<void> {
     if (!this.bot || !this.running) return;
+    if (!this.bot.entity) {
+      // Bot not fully spawned yet - skip this decision cycle
+      return;
+    }
     if (this.actionInProgress) return;
 
     this.actionInProgress = true;
@@ -877,7 +881,19 @@ export class AutonomousBotController {
     }
   }
 
-  private async buildShape(shape: string, material: string, size: number): Promise<{ success: boolean; message: string }> {
+  private async buildShape(shape: string, material: string, size: number | string): Promise<{ success: boolean; message: string }> {
+    // Safety check: ensure bot is connected and spawned
+    if (!this.bot || !this.bot.entity) {
+      return { success: false, message: 'Bot not ready - waiting to spawn' };
+    }
+    
+    // Normalize size: convert string descriptors to numbers
+    const sizeMap: Record<string, number> = { tiny: 3, small: 5, medium: 8, large: 12, huge: 16, massive: 20 };
+    const numericSize = typeof size === 'string' 
+      ? (sizeMap[size.toLowerCase()] || parseInt(size) || 8) 
+      : (size || 8);
+    size = Math.max(3, Math.min(numericSize, 30)); // Clamp between 3-30
+    
     // Ensure we're on the surface before building (but respect teleport cooldown)
     const currentY = Math.floor(this.bot.entity.position.y);
     const canTeleport = Date.now() - this.lastTeleportTime >= this.teleportCooldown;
@@ -1058,7 +1074,19 @@ export class AutonomousBotController {
   }
 
   // Creative mode building using /setblock commands - unlimited resources!
-  private async buildShapeCreative(shape: string, material: string, size: number): Promise<{ success: boolean; message: string }> {
+  private async buildShapeCreative(shape: string, material: string, size: number | string): Promise<{ success: boolean; message: string }> {
+    // Safety check: ensure bot is connected and spawned
+    if (!this.bot || !this.bot.entity) {
+      return { success: false, message: 'Bot not ready - waiting to spawn' };
+    }
+    
+    // Normalize size: convert string descriptors to numbers
+    const sizeMap: Record<string, number> = { tiny: 3, small: 5, medium: 8, large: 12, huge: 16, massive: 20 };
+    const numericSize = typeof size === 'string' 
+      ? (sizeMap[size.toLowerCase()] || parseInt(size) || 8) 
+      : (size || 8);
+    size = Math.max(3, Math.min(numericSize, 30)); // Clamp between 3-30
+    
     // Ensure we're on the surface before building (but respect teleport cooldown)
     const currentY = Math.floor(this.bot.entity.position.y);
     const canTeleport = Date.now() - this.lastTeleportTime >= this.teleportCooldown;
@@ -2442,6 +2470,8 @@ export class AutonomousBotController {
    * Called periodically during mining and building
    */
   private async placeTorchIfNeeded(): Promise<void> {
+    if (!this.bot || !this.bot.entity) return; // Safety check
+    
     const now = Date.now();
     
     // Don't place torches too frequently
@@ -2992,6 +3022,8 @@ export class AutonomousBotController {
    * Check if any other agents are nearby and trigger a "meeting" - an information exchange
    */
   private async checkForAgentMeetings(): Promise<void> {
+    if (!this.bot || !this.bot.entity) return; // Safety check
+    
     const registry = getAgentRegistry();
     const pos = this.bot.entity.position;
     const nearbyAgents = registry.getNearbyAgents(

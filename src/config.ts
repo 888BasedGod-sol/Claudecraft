@@ -7,7 +7,7 @@ export const CONFIG = {
   // API Configuration
   api: {
     model: 'claude-sonnet-4-20250514',
-    maxTokens: 800,
+    maxTokens: 1024, // Enough for full JSON responses with optional fields
     timeoutMs: 30000,
   },
 
@@ -22,8 +22,8 @@ export const CONFIG = {
 
   // Decision Loop Configuration
   decisionLoop: {
-    autonomousIntervalMs: 4000,
-    survivalIntervalMs: 5000,
+    autonomousIntervalMs: 10000,
+    survivalIntervalMs: 12000,
     staggerMaxMs: 2000,
   },
 

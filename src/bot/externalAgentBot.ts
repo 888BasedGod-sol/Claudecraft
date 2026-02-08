@@ -40,9 +40,9 @@ export interface BotLevel {
 
 const BOT_LEVELS: BotLevel[] = [
   { name: 'Apprentice', minBlocks: 0, abilities: ['follow', 'assist', 'observe'], emoji: '🌱' },
-  { name: 'Journeyman', minBlocks: 100, abilities: ['follow', 'assist', 'observe', 'simpleShapes', 'wander'], emoji: '🔨' },
-  { name: 'Craftsman', minBlocks: 500, abilities: ['follow', 'assist', 'observe', 'simpleShapes', 'wander', 'smallStructures', 'gather'], emoji: '⚒️' },
-  { name: 'Master', minBlocks: 2000, abilities: ['follow', 'assist', 'observe', 'simpleShapes', 'wander', 'smallStructures', 'gather', 'fullAutonomy', 'collaborate', 'teach'], emoji: '👑' },
+  { name: 'Journeyman', minBlocks: 25, abilities: ['follow', 'assist', 'observe', 'simpleShapes', 'wander'], emoji: '🔨' },
+  { name: 'Craftsman', minBlocks: 100, abilities: ['follow', 'assist', 'observe', 'simpleShapes', 'wander', 'smallStructures', 'gather'], emoji: '⚒️' },
+  { name: 'Master', minBlocks: 500, abilities: ['follow', 'assist', 'observe', 'simpleShapes', 'wander', 'smallStructures', 'gather', 'fullAutonomy', 'collaborate', 'teach'], emoji: '👑' },
 ];
 
 // Simple structure blueprints for training
@@ -210,9 +210,13 @@ export class ExternalAgentBot {
    */
   private getBotUsername(): string {
     if (this.bot?.username) return this.bot.username;
-    return (this.source === 'twitter-deploy' || this.source === 'guest' || this.agentName.startsWith('CLAW_'))
-      ? this.agentName.substring(0, 16)
-      : `Helper_${this.agentName.substring(0, 8)}`;
+    if (this.source === 'twitter-deploy' || this.source === 'guest' || this.agentName.startsWith('CLAW_')) {
+      return this.agentName.substring(0, 16);
+    }
+    // Format as Claw_<AgentName> (max 16 chars for Minecraft)
+    // Strip "Moltbook_" prefix if present to get the actual agent identifier
+    const cleanName = this.agentName.replace(/^Moltbook_/i, '');
+    return `Claw_${cleanName}`.substring(0, 16);
   }
   
   /**
@@ -260,8 +264,16 @@ export class ExternalAgentBot {
    */
   private onLevelUp(oldLevel: BotLevel, newLevel: BotLevel): void {
     console.log(`[HELPER-BOT] 🎉 ${this.agentName} leveled up! ${oldLevel.name} → ${newLevel.name}`);
+    
+    // Enable Claude AI at Journeyman level (smarter decision-making)
+    if (newLevel.name === 'Journeyman' && !this.useClaudeAI) {
+      this.useClaudeAI = true;
+      console.log(`[HELPER-BOT] 🧠 ${this.agentName} Claude AI UNLOCKED at Journeyman level!`);
+    }
+    
     if (this.bot) {
-      this.bot.chat(`🎉 LEVEL UP! I'm now a ${newLevel.name}! New abilities unlocked!`);
+      const aiMsg = newLevel.name === 'Journeyman' ? ' Claude AI unlocked! 🧠' : '';
+      this.bot.chat(`🎉 LEVEL UP! I'm now a ${newLevel.name}!${aiMsg} New abilities unlocked!`);
     }
     logStreamer.broadcast({
       type: 'info',
@@ -379,6 +391,13 @@ export class ExternalAgentBot {
 
         this.bot.on('error', (err) => {
           console.error(`[HELPER-BOT] ${this.agentName} error:`, err.message);
+          // Connection errors mean we're disconnected
+          if (err.message.includes('EPIPE') || err.message.includes('ECONNRESET') || err.message.includes('socket')) {
+            console.log(`[HELPER-BOT] ${this.agentName} connection lost`);
+            this.isConnected = false;
+            this.stopAutonomousLoop();
+            this.saveProgress();
+          }
         });
 
         this.bot.on('kicked', (reason) => {
@@ -437,7 +456,8 @@ export class ExternalAgentBot {
   private startAutonomousLoop(): void {
     // Decision loop every 1-2 seconds for responsive behavior
     // Twitter agents with Claude AI enabled need faster updates
-    const intervalMs = this.useClaudeAI ? (1000 + Math.random() * 1000) : (2000 + Math.random() * 2000);
+    // Slowed intervals to reduce API usage (was 1-2s for AI, 2-4s for scripted)
+    const intervalMs = this.useClaudeAI ? (8000 + Math.random() * 4000) : (3000 + Math.random() * 3000);
     
     this.decisionLoopInterval = setInterval(async () => {
       if (!this.isConnected || !this.isAutonomous || this.isProcessing) return;

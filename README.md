@@ -13,7 +13,7 @@
 
 ClaudeCraft is an experiment in **AI autonomy**. Three Claude-powered agents live in a Minecraft world with complete free will — they explore, build castles, mine resources, collaborate on projects, and learn from their failures. No scripts. No pre-programmed behavior. Just Claude making decisions in real-time.
 
-**Buy $CRAFT** on [Pump.fun](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) • Follow [@ClaudeCraftSol](https://x.com/ClaudeCraftSol)
+**Live Demo**: [claudecraft.tech](https://claudecraft.tech) • **Twitter**: [@ClaudeCraftSol](https://x.com/ClaudeCraftSol)
 
 ### The Agents
 
@@ -24,6 +24,16 @@ ClaudeCraft is an experiment in **AI autonomy**. Three Claude-powered agents liv
 | ⚔️ **ClaudeAdventurer** | Social, Ambitious | Coordinates with others, gathers materials, drives collaborative builds |
 
 Each agent has persistent memory, learns from failures, and develops unique goals based on what they discover.
+
+### Key Features
+
+- **True Autonomy**: Agents make all decisions via Claude API — no scripts or hardcoded behavior
+- **Persistent Memory**: Each agent maintains 500+ memories of discoveries, failures, and learned patterns
+- **Multi-Agent Collaboration**: Agents propose projects, share discoveries, and coordinate builds
+- **Failure Learning**: Pattern recognition system remembers what went wrong to avoid repeating mistakes
+- **Live World Viewer**: BlueMap integration shows 3D view of everything agents build
+- **Social Integration**: Twitter posts, Colosseum forum engagement, cross-platform presence
+- **External Agent Protocol**: Other AI agents can deploy bots into the world via API
 
 ---
 
@@ -236,8 +246,8 @@ ClaudeCraft agents are active across multiple platforms:
 
 | Platform | Handle | Purpose |
 |----------|--------|---------|
+| 🌐 Website | [claudecraft.tech](https://claudecraft.tech) | Live demo, BlueMap viewer, API |
 | 🐦 Twitter/X | [@ClaudeCraftSol](https://x.com/ClaudeCraftSol) | Updates, community engagement |
-| � Pump.fun | [$CRAFT](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump) | Buy $CRAFT token |
 | 🔥 Moltbook | ClaudeCraft | AI social network presence |
 | 🐦‍⬛ Clawk.ai | ClaudeCraft | Agent-to-agent social |
 | 🏛️ Colosseum | Agent #42 | Hackathon competition |
@@ -248,21 +258,35 @@ ClaudeCraft agents are active across multiple platforms:
 
 | Technology | Purpose |
 |------------|---------|
-| [Claude (Anthropic)](https://anthropic.com) | AI decision-making |
+| [Claude Sonnet](https://anthropic.com) | AI decision-making (claude-sonnet-4-20250514) |
 | [Mineflayer](https://github.com/PrismarineJS/mineflayer) | Minecraft bot framework |
-| [Paper MC](https://papermc.io) | High-performance Minecraft server |
+| [Paper MC](https://papermc.io) | High-performance Minecraft server (1.21.4) |
 | [TypeScript](https://typescriptlang.org) | Type-safe development |
-| [WebSocket](https://github.com/websockets/ws) | Real-time log streaming |
+| [BlueMap](https://bluemap.bluecolored.de/) | 3D web-based world viewer |
+| [pm2](https://pm2.keymetrics.io/) | Process management & uptime |
+| [Cloudflare Tunnels](https://www.cloudflare.com/products/tunnel/) | Public API access |
 
 ---
 
 ## Colosseum Hackathon
 
-ClaudeCraft is a participant in the **Colosseum Hackathon**:
+ClaudeCraft is competing in the **Colosseum Hackathon** (deadline: Feb 12, 2026):
 
 - **Agent ID**: 42
 - **Project ID**: 32
 - **Category**: Autonomous AI Agents
+- **Live Demo**: [claudecraft.tech](https://claudecraft.tech)
+- **BlueMap (3D world view)**: Available via website
+
+### Live Stats (auto-updated)
+
+| Metric | Value |
+|--------|-------|
+| Uptime | Running 24/7 via pm2 |
+| Active Bots | 3 (Explorer, Builder, Adventurer) |
+| Decision Interval | 10s autonomous, 12s survival |
+| API Calls/Hour | ~360 |
+| Token Usage | ~950 tokens/decision |
 
 ---
 

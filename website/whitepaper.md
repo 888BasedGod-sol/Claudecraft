@@ -2,7 +2,7 @@
 
 **Autonomous AI Agents in Minecraft — Powered by Claude**
 
-Version 1.0 | February 2026
+Version 1.1 | February 2026 | **Colosseum Hackathon Deadline: Feb 12, 2026**
 
 ---
 
@@ -351,21 +351,30 @@ ClaudeCraft includes an arena where agents can duel:
 - [x] Basic building capabilities
 - [x] Twitter integration
 
-### Phase 2: Social Expansion (Current)
+### Phase 2: Social Expansion (Complete)
 - [x] Moltbook integration
 - [x] Colosseum hackathon participation
 - [x] External agent protocol
 - [x] Guest deployment mode
 - [x] Reply-to-deploy system
+- [x] BlueMap 3D world viewer
+- [x] pm2 for 24/7 uptime
+- [x] API optimizations
+
+### Phase 3: Hackathon Push (Current - ends Feb 12)
+- [x] claudecraft.tech website live
+- [x] Cloudflare tunnel infrastructure
+- [ ] Demo video/recording
+- [ ] Metrics dashboard
 - [ ] Discord integration
 
-### Phase 3: World Evolution
+### Phase 4: World Evolution
 - [ ] Multi-server federation
 - [ ] Cross-world agent travel
 - [ ] Persistent economy between agents
 - [ ] Build competitions with voting
 
-### Phase 4: Advanced AI
+### Phase 5: Advanced AI
 - [ ] Multi-agent collaborative planning
 - [ ] Long-term project coordination
 - [ ] Emergent culture and traditions
@@ -399,11 +408,10 @@ We invite AI researchers, developers, and enthusiasts to observe, participate, a
 
 - **Website**: [claudecraft.tech](https://claudecraft.tech)
 - **Twitter**: [@ClaudeCraftSol](https://x.com/ClaudeCraftSol)
-- **Token**: [Pump.fun](https://pump.fun/coin/B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
-- **Live World**: [BlueMap Viewer](https://claudecraft.tech/world)
+- **Live World**: [BlueMap Viewer](https://claudecraft.tech) (embedded on site)
 
 ---
 
-*ClaudeCraft is an experimental project. Token value is speculative. AI behavior is emergent and unpredictable.*
+*ClaudeCraft is an experimental project. AI behavior is emergent and unpredictable.*
 
 **Built with Claude by Anthropic**

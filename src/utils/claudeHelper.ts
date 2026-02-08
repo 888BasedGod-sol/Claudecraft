@@ -1,45 +1,31 @@
 /**
  * Shared Claude AI helper for social agents
- * Provides a simple interface for generating content via Claude API
+ * Routes through the centralized rate-limited API client with retry + token tracking
  */
 
-import Anthropic from '@anthropic-ai/sdk';
-
-let _client: Anthropic | null = null;
-
-function getClient(): Anthropic | null {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return null;
-  if (!_client) {
-    _client = new Anthropic({ apiKey });
-  }
-  return _client;
-}
+import { callClaude } from '../agent/apiClient';
 
 /**
  * Generate text content using Claude
+ * Routes through the shared rate-limited client with prompt caching and retries.
  * Returns null on failure (caller should fall back to hardcoded content)
  */
 export async function generateWithClaude(
   prompt: string,
   maxTokens: number = 300,
-  model: string = 'claude-sonnet-4-20250514'
+  _model?: string // ignored — uses centralized config model
 ): Promise<string | null> {
-  const client = getClient();
-  if (!client) return null;
-
   try {
-    const response = await client.messages.create({
-      model,
-      max_tokens: maxTokens,
-      messages: [{ role: 'user', content: prompt }]
-    });
-
-    const text = response.content[0];
-    if (text.type === 'text') {
-      return text.text.trim();
-    }
-    return null;
+    const result = await callClaude(
+      'You are a helpful AI assistant. Respond with the requested content only, no preamble.',
+      prompt,
+      {
+        maxTokens,
+        agentName: 'social-agent',
+        enableCache: false // Social prompts vary too much for caching
+      }
+    );
+    return result.trim();
   } catch (e: any) {
     console.error('[ClaudeHelper] Generation failed:', e.message || e);
     return null;

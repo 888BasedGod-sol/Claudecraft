@@ -546,6 +546,598 @@
           "params": { "block": "hay_block", "count": 16 }
         }
       ]
+    },
+    "steamLocomotive": {
+      "name": "Classic Steam Locomotive",
+      "description": "A detailed steam train engine with smokestack, boiler, and cab",
+      "difficulty": "hard",
+      "estimatedBlocks": 450,
+      "style": "industrial",
+      "dimensions": { "width": 5, "length": 18, "height": 9 },
+      "materials": {
+        "primary": "black_concrete",
+        "accent": "red_concrete",
+        "detail": "iron_block"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x18 rail base with iron blocks for tracks",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "iron_block", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build 3x10 boiler section using black concrete cylinder shape",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "black_concrete", "size": 10 }
+        },
+        {
+          "step": 3,
+          "description": "Add red cow catcher/pilot at front with red concrete stairs",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "red_concrete", "size": 3 }
+        },
+        {
+          "step": 4,
+          "description": "Build cylindrical smokestack 4 blocks tall at front",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "black_concrete", "size": 4 }
+        },
+        {
+          "step": 5,
+          "description": "Build cab section 5x5x5 with windows using glass panes",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "black_concrete", "size": 5 }
+        },
+        {
+          "step": 6,
+          "description": "Add 6 wheel assemblies using black concrete circles on sides",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "black_concrete", "size": 3 }
+        },
+        {
+          "step": 7,
+          "description": "Add gold block headlight at front",
+          "action": "placeBlock",
+          "params": { "block": "glowstone", "count": 2 }
+        },
+        {
+          "step": 8,
+          "description": "Add campfire smoke effects in smokestack",
+          "action": "placeBlock",
+          "params": { "block": "campfire", "count": 1 }
+        }
+      ]
+    },
+    "passengerCar": {
+      "name": "Passenger Train Car",
+      "description": "A classic passenger car with windows and seating",
+      "difficulty": "medium",
+      "estimatedBlocks": 200,
+      "style": "industrial",
+      "dimensions": { "width": 5, "length": 12, "height": 5 },
+      "materials": {
+        "primary": "red_terracotta",
+        "accent": "white_concrete",
+        "detail": "glass_pane"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x12 floor platform with iron blocks",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "iron_block", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build lower walls 2 blocks high with red terracotta",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "red_terracotta", "size": 2 }
+        },
+        {
+          "step": 3,
+          "description": "Add row of glass pane windows all around",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "glass_pane", "size": 2 }
+        },
+        {
+          "step": 4,
+          "description": "Build roof section with white concrete curved top",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "white_concrete", "size": 5 }
+        },
+        {
+          "step": 5,
+          "description": "Add stairs stairs at both ends for boarding",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "oak_stairs", "size": 2 }
+        },
+        {
+          "step": 6,
+          "description": "Place oak benches inside for seating",
+          "action": "placeBlock",
+          "params": { "block": "oak_stairs", "count": 16 }
+        }
+      ]
+    },
+    "cargoCar": {
+      "name": "Freight Cargo Car",
+      "description": "An open-top cargo car for hauling materials",
+      "difficulty": "easy",
+      "estimatedBlocks": 120,
+      "style": "industrial",
+      "dimensions": { "width": 5, "length": 10, "height": 4 },
+      "materials": {
+        "primary": "spruce_planks",
+        "accent": "iron_block",
+        "detail": "barrel"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x10 floor with iron blocks as base",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "iron_block", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build spruce plank walls 3 blocks high on all sides",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "spruce_planks", "size": 3 }
+        },
+        {
+          "step": 3,
+          "description": "Add iron reinforcement strips on corners",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "iron_block", "size": 3 }
+        },
+        {
+          "step": 4,
+          "description": "Fill with decorative cargo - barrels and chests",
+          "action": "placeBlock",
+          "params": { "block": "barrel", "count": 8 }
+        }
+      ]
+    },
+    "trainStation": {
+      "name": "Victorian Train Station",
+      "description": "A grand train station with covered platform and ticket booth",
+      "difficulty": "hard",
+      "estimatedBlocks": 800,
+      "style": "victorian",
+      "dimensions": { "width": 20, "length": 30, "height": 12 },
+      "materials": {
+        "primary": "stone_bricks",
+        "accent": "red_nether_bricks",
+        "detail": "iron_bars"
+      },
+      "collaborationRoles": {
+        "builder1": ["main_building", "roof"],
+        "builder2": ["platform", "decorations"],
+        "builder3": ["track_area", "signals"]
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 20x30 stone brick foundation platform",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "stone_bricks", "size": 20 },
+          "assignedTo": "builder2"
+        },
+        {
+          "step": 2,
+          "description": "Build main station building 12x15x10",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "stone_bricks", "size": 10 },
+          "assignedTo": "builder1"
+        },
+        {
+          "step": 3,
+          "description": "Add decorative pillar supports along platform",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "stone_bricks", "size": 8 },
+          "assignedTo": "builder2"
+        },
+        {
+          "step": 4,
+          "description": "Build covered canopy roof with red nether brick trim",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "red_nether_bricks", "size": 15 },
+          "assignedTo": "builder1"
+        },
+        {
+          "step": 5,
+          "description": "Add iron bar decorative supports under canopy",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "iron_bars", "size": 6 },
+          "assignedTo": "builder2"
+        },
+        {
+          "step": 6,
+          "description": "Build ticket booth 5x5x4 near entrance",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "stone_bricks", "size": 5 },
+          "assignedTo": "builder1"
+        },
+        {
+          "step": 7,
+          "description": "Lay powered rail tracks through station",
+          "action": "placeBlock",
+          "params": { "block": "powered_rail", "count": 30 },
+          "assignedTo": "builder3"
+        },
+        {
+          "step": 8,
+          "description": "Add redstone lamp platform lights",
+          "action": "placeBlock",
+          "params": { "block": "redstone_lamp", "count": 12 },
+          "assignedTo": "builder3"
+        }
+      ]
+    },
+    "modernLocomotive": {
+      "name": "Modern Diesel Locomotive",
+      "description": "A sleek modern diesel train engine",
+      "difficulty": "hard",
+      "estimatedBlocks": 380,
+      "style": "modern",
+      "dimensions": { "width": 5, "length": 16, "height": 7 },
+      "materials": {
+        "primary": "blue_concrete",
+        "accent": "light_gray_concrete",
+        "detail": "black_concrete"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x16 base platform with black concrete",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "black_concrete", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build main body 5x14x5 with blue concrete",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "blue_concrete", "size": 5 }
+        },
+        {
+          "step": 3,
+          "description": "Add sloped nose cone at front using stairs",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "blue_concrete", "size": 4 }
+        },
+        {
+          "step": 4,
+          "description": "Build driver cab with glass windows",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "glass", "size": 3 }
+        },
+        {
+          "step": 5,
+          "description": "Add light gray stripe accents along sides",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "light_gray_concrete", "size": 3 }
+        },
+        {
+          "step": 6,
+          "description": "Add headlights with sea lanterns",
+          "action": "placeBlock",
+          "params": { "block": "sea_lantern", "count": 4 }
+        },
+        {
+          "step": 7,
+          "description": "Build wheel trucks with black concrete",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "black_concrete", "size": 3 }
+        }
+      ]
+    },
+    "coalTender": {
+      "name": "Coal Tender Car",
+      "description": "A coal tender that attaches behind steam locomotives",
+      "difficulty": "easy",
+      "estimatedBlocks": 100,
+      "style": "industrial",
+      "dimensions": { "width": 5, "length": 8, "height": 5 },
+      "materials": {
+        "primary": "black_concrete",
+        "accent": "iron_block",
+        "detail": "coal_block"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x8 iron block base platform",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "iron_block", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build black concrete walls 4 blocks high for coal bin",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "black_concrete", "size": 4 }
+        },
+        {
+          "step": 3,
+          "description": "Fill interior with coal blocks",
+          "action": "placeBlock",
+          "params": { "block": "coal_block", "count": 24 }
+        },
+        {
+          "step": 4,
+          "description": "Add wheel assemblies on sides",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "black_concrete", "size": 2 }
+        }
+      ]
+    },
+    "railSignal": {
+      "name": "Railroad Signal Tower",
+      "description": "A signal tower with working redstone lights",
+      "difficulty": "easy",
+      "estimatedBlocks": 40,
+      "style": "industrial",
+      "dimensions": { "width": 3, "length": 3, "height": 8 },
+      "materials": {
+        "primary": "iron_block",
+        "accent": "black_concrete",
+        "detail": "redstone_lamp"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 3x3 iron block base",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "iron_block", "size": 3 }
+        },
+        {
+          "step": 2,
+          "description": "Build iron block pole 6 blocks tall",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "iron_block", "size": 6 }
+        },
+        {
+          "step": 3,
+          "description": "Build signal head box with black concrete",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "black_concrete", "size": 2 }
+        },
+        {
+          "step": 4,
+          "description": "Add redstone lamps for signal lights",
+          "action": "placeBlock",
+          "params": { "block": "redstone_lamp", "count": 3 }
+        },
+        {
+          "step": 5,
+          "description": "Add daylight sensor for automatic operation",
+          "action": "placeBlock",
+          "params": { "block": "daylight_detector", "count": 1 }
+        }
+      ]
+    },
+    "railCrossing": {
+      "name": "Railroad Crossing",
+      "description": "A road/rail crossing with warning signs and barriers",
+      "difficulty": "medium",
+      "estimatedBlocks": 80,
+      "style": "industrial",
+      "dimensions": { "width": 9, "length": 9, "height": 6 },
+      "materials": {
+        "primary": "gray_concrete",
+        "accent": "yellow_concrete",
+        "detail": "iron_bars"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 9x9 road surface with gray concrete",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "gray_concrete", "size": 9 }
+        },
+        {
+          "step": 2,
+          "description": "Add yellow concrete warning stripes in X pattern",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "yellow_concrete", "size": 3 }
+        },
+        {
+          "step": 3,
+          "description": "Lay rail tracks through center",
+          "action": "placeBlock",
+          "params": { "block": "rail", "count": 9 }
+        },
+        {
+          "step": 4,
+          "description": "Build 4 warning sign posts with iron bars",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "iron_bars", "size": 5 }
+        },
+        {
+          "step": 5,
+          "description": "Add red concrete warning circles at top",
+          "action": "placeBlock",
+          "params": { "block": "red_concrete", "count": 4 }
+        },
+        {
+          "step": 6,
+          "description": "Add fence gate barriers on each side",
+          "action": "placeBlock",
+          "params": { "block": "oak_fence_gate", "count": 4 }
+        }
+      ]
+    },
+    "tankerCar": {
+      "name": "Tank Car",
+      "description": "A cylindrical tanker car for liquids",
+      "difficulty": "medium",
+      "estimatedBlocks": 150,
+      "style": "industrial",
+      "dimensions": { "width": 5, "length": 12, "height": 5 },
+      "materials": {
+        "primary": "white_concrete",
+        "accent": "iron_block",
+        "detail": "black_concrete"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x12 iron block base frame",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "iron_block", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build cylindrical tank body with white concrete",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "white_concrete", "size": 10 }
+        },
+        {
+          "step": 3,
+          "description": "Add domed end caps using stairs",
+          "action": "buildShape",
+          "params": { "shape": "pyramid", "material": "white_concrete", "size": 3 }
+        },
+        {
+          "step": 4,
+          "description": "Add iron block ladder on side",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "ladder", "size": 4 }
+        },
+        {
+          "step": 5,
+          "description": "Add black concrete wheel trucks",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "black_concrete", "size": 2 }
+        },
+        {
+          "step": 6,
+          "description": "Add cauldron on top as fill hatch",
+          "action": "placeBlock",
+          "params": { "block": "cauldron", "count": 1 }
+        }
+      ]
+    },
+    "caboose": {
+      "name": "Classic Caboose",
+      "description": "A red caboose for the end of freight trains",
+      "difficulty": "medium",
+      "estimatedBlocks": 180,
+      "style": "industrial",
+      "dimensions": { "width": 5, "length": 10, "height": 7 },
+      "materials": {
+        "primary": "red_concrete",
+        "accent": "black_concrete",
+        "detail": "glass_pane"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build 5x10 black concrete base platform",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "black_concrete", "size": 5 }
+        },
+        {
+          "step": 2,
+          "description": "Build red concrete walls 4 blocks high",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "red_concrete", "size": 4 }
+        },
+        {
+          "step": 3,
+          "description": "Add glass pane windows on all sides",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "glass_pane", "size": 2 }
+        },
+        {
+          "step": 4,
+          "description": "Build raised cupola observation deck in center",
+          "action": "buildShape",
+          "params": { "shape": "cube", "material": "red_concrete", "size": 3 }
+        },
+        {
+          "step": 5,
+          "description": "Add black concrete roof with slight overhang",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "black_concrete", "size": 6 }
+        },
+        {
+          "step": 6,
+          "description": "Build platforms at both ends with fencing",
+          "action": "buildShape",
+          "params": { "shape": "floor", "material": "spruce_planks", "size": 3 }
+        },
+        {
+          "step": 7,
+          "description": "Add lanterns for lighting",
+          "action": "placeBlock",
+          "params": { "block": "lantern", "count": 4 }
+        }
+      ]
+    },
+    "minecartRoller": {
+      "name": "Minecart Coaster Track",
+      "description": "A roller coaster style minecart track with loops and drops",
+      "difficulty": "hard",
+      "estimatedBlocks": 300,
+      "style": "fun",
+      "dimensions": { "width": 20, "length": 30, "height": 15 },
+      "materials": {
+        "primary": "oak_planks",
+        "accent": "powered_rail",
+        "detail": "detector_rail"
+      },
+      "steps": [
+        {
+          "step": 1,
+          "description": "Build raised wooden platform start point 8 blocks high",
+          "action": "buildShape",
+          "params": { "shape": "pillar", "material": "oak_planks", "size": 8 }
+        },
+        {
+          "step": 2,
+          "description": "Build descending track support structure",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "oak_fence", "size": 12 }
+        },
+        {
+          "step": 3,
+          "description": "Lay powered rails at start with button activation",
+          "action": "placeBlock",
+          "params": { "block": "powered_rail", "count": 10 }
+        },
+        {
+          "step": 4,
+          "description": "Lay regular rails for the descent",
+          "action": "placeBlock",
+          "params": { "block": "rail", "count": 40 }
+        },
+        {
+          "step": 5,
+          "description": "Build curved section supports",
+          "action": "buildShape",
+          "params": { "shape": "wall", "material": "oak_planks", "size": 6 }
+        },
+        {
+          "step": 6,
+          "description": "Add powered rail boosters throughout",
+          "action": "placeBlock",
+          "params": { "block": "powered_rail", "count": 15 }
+        },
+        {
+          "step": 7,
+          "description": "Build return track back to start",
+          "action": "placeBlock",
+          "params": { "block": "rail", "count": 30 }
+        },
+        {
+          "step": 8,
+          "description": "Add detector rails to trigger redstone effects",
+          "action": "placeBlock",
+          "params": { "block": "detector_rail", "count": 5 }
+        }
+      ]
     }
   }
 }

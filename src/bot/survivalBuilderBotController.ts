@@ -121,11 +121,11 @@ export class SurvivalBuilderBotController {
   }
 
   private startDecisionLoop(): void {
-    // Slower decision loop for survival mode (5 seconds)
+    // Slower decision loop for survival mode (12 seconds) — reduced from 5s to save API tokens
     this.decisionInterval = setInterval(async () => {
       if (!this.running || this.actionInProgress) return;
       await this.makeDecision();
-    }, 5000);
+    }, 12000);
 
     // Make first decision immediately
     this.makeDecision();
