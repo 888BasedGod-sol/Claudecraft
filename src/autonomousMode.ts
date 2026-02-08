@@ -153,6 +153,14 @@ async function main() {
           commandServer.registerAgent(agent.name, async (command: ViewerCommand) => {
             Logger.info(`📱 [${agent.name}] Received viewer command from ${command.sender}: ${command.command}`);
             
+            // Special command: buildColosseum — route directly to blueprint builder
+            if (command.command === 'buildColosseum') {
+              Logger.info(`🏟️ [${agent.name}] COLOSSEUM BUILD COMMAND — executing blueprint!`);
+              const result = await botController.buildColosseumBlueprint();
+              commandServer.completeCommand(command.id, result.success, result.message);
+              return;
+            }
+            
             // For creative mode agents (Claude_Builder), execute ANY build/create request immediately
             if (agent.creativeMode) {
               // Execute immediately - don't wait for decision loop
@@ -300,6 +308,15 @@ async function main() {
       logStreamer.stop();
       commandServer.stop();
       process.exit(0);
+    });
+
+    // Prevent unhandled errors from crashing the whole process (e.g. keepalive timeouts)
+    process.on('uncaughtException', (err) => {
+      Logger.error(`⚠️ Uncaught exception (recovered): ${err.message}`);
+      console.error(err.stack);
+    });
+    process.on('unhandledRejection', (reason) => {
+      Logger.error(`⚠️ Unhandled rejection (recovered): ${reason}`);
     });
 
     // Keep the process running

@@ -1,0 +1,417 @@
+{
+  "version": "1.0",
+  "source": "r/Minecraftbuilds - Top 50 posts (monthly)",
+  "description": "Advanced building knowledge scraped from Reddit's top Minecraft builders. Used to train agents to build more complex, creative, and impressive structures.",
+  "scrapedAt": "2025-06-07",
+  
+  "buildCategories": {
+    "megabuilds": {
+      "description": "Massive projects requiring thousands of blocks, multiple sessions, and advanced planning",
+      "examples": [
+        "Full-scale Subnautica Aurora ship recreation (3.5 years)",
+        "1:1 scale NYC city recreation (5 years)",
+        "Vietnamese Trang An landscape for build contest",
+        "Giant Arnold Schwarzenegger statue",
+        "Hand-placed survival mountain (3 years)"
+      ],
+      "techniques": [
+        "Plan the full structure before placing any blocks",
+        "Use reference images and grid overlays for accuracy",
+        "Build in sections/chunks to maintain motivation",
+        "Vary block palette within sections for visual interest",
+        "Use scaffolding and temporary supports during construction",
+        "Employ gradients in material transitions (stone → cobble → gravel → dirt)",
+        "Create internal structure framework first, then detail exterior"
+      ],
+      "blockPalettes": [
+        ["stone", "stone_bricks", "cracked_stone_bricks", "mossy_stone_bricks", "cobblestone"],
+        ["sandstone", "smooth_sandstone", "cut_sandstone", "sand", "terracotta"],
+        ["deepslate", "deepslate_bricks", "polished_deepslate", "tuff", "basalt"],
+        ["quartz_block", "smooth_quartz", "quartz_pillar", "white_concrete", "calcite"]
+      ]
+    },
+    "houses_and_bases": {
+      "description": "Living structures from cozy cottages to elaborate mansions",
+      "examples": [
+        "Cute cottage with overhanging roof and flower boxes",
+        "Medieval/Mythical steampunk hybrid base",
+        "Normal survival base with character",
+        "Multi-building hardcore world compound",
+        "Cliffside integrated home"
+      ],
+      "techniques": [
+        "Use depth variation - push/pull walls for texture",
+        "Add window boxes with trapdoors and flower pots",
+        "Overhang roofs by 1-2 blocks for shadow",
+        "Mix 2-3 wood types in a single build (frame vs fill)",
+        "Create L-shaped or irregular floor plans instead of boxes",
+        "Add porches, balconies, and exterior staircases",
+        "Include chimneys with campfire smoke",
+        "Add paths leading to the entrance with varying blocks",
+        "Use lanterns on chains for exterior lighting",
+        "Break up flat walls with pillars, buttons, and trapdoors"
+      ],
+      "blockPalettes": [
+        ["spruce_planks", "stripped_spruce_log", "cobblestone", "stone_bricks", "lantern"],
+        ["oak_planks", "dark_oak_log", "white_terracotta", "bricks", "flower_pot"],
+        ["birch_planks", "stripped_birch_log", "smooth_stone", "glass_pane", "chain"]
+      ]
+    },
+    "nature_and_landscapes": {
+      "description": "Custom terrain, gardens, forests, and natural features",
+      "examples": [
+        "Cliffside landscape with waterfalls",
+        "Custom forest with varied tree species",
+        "Oregon Coast rock arch formation",
+        "Custom hills and valley biome",
+        "Wheat field farm landscape"
+      ],
+      "techniques": [
+        "Layer multiple stone types for realistic cliff faces",
+        "Use leaves and vines for overgrown natural effects",
+        "Create water features with source blocks at different heights",
+        "Vary tree heights and shapes - no two trees identical",
+        "Add moss blocks and moss carpets for ground cover",
+        "Use coarse dirt, podzol, and path blocks for ground variation",
+        "Create elevation changes with smooth gradients",
+        "Add small details: mushrooms, flowers, fallen logs, boulders",
+        "Use glow lichen and hanging roots in cave sections"
+      ],
+      "blockPalettes": [
+        ["stone", "andesite", "diorite", "cobblestone", "mossy_cobblestone", "gravel"],
+        ["grass_block", "moss_block", "podzol", "coarse_dirt", "farmland"],
+        ["oak_leaves", "birch_leaves", "azalea_leaves", "flowering_azalea_leaves", "vine"]
+      ]
+    },
+    "towns_and_cities": {
+      "description": "Multi-building settlements with infrastructure",
+      "examples": [
+        "Japanese village scene with pagodas",
+        "Street with bike lanes and trams (modern city WIP)",
+        "Hardcore world town with varied building styles",
+        "Medieval village with marketplace"
+      ],
+      "techniques": [
+        "Plan roads and pathways FIRST before buildings",
+        "Vary building heights to create interesting skylines",
+        "No two buildings should look identical",
+        "Include public spaces: plazas, fountains, parks",
+        "Add infrastructure: bridges, walls, gates, lampposts",
+        "Use consistent material palette across the town",
+        "Create districts with different architectural themes",
+        "Add street-level details: market stalls, benches, signs"
+      ],
+      "blockPalettes": [
+        ["stone_brick_slab", "cobblestone_slab", "gravel", "andesite", "polished_andesite"],
+        ["spruce_planks", "dark_oak_planks", "stone_bricks", "bricks", "terracotta"]
+      ]
+    },
+    "magical_and_fantasy": {
+      "description": "Mystical, enchanted, and fantastical structures",
+      "examples": [
+        "Dragon eye perspective build (75+ layers of depth)",
+        "Ancient ruins with arcane symbols",
+        "Floating island with magical garden",
+        "Enchanted wizard library"
+      ],
+      "techniques": [
+        "Use perspective tricks for forced-perspective builds",
+        "Layer blocks at different depths for 3D illusions",
+        "Combine glowing blocks (sea lantern, glowstone, shroomlight)",
+        "Create floating elements using barriers or hidden supports",
+        "Use particle-producing blocks (soul campfire, end rod)",
+        "Add enchanting tables, brewing stands, bookshelves for atmosphere",
+        "Use amethyst and crystals for magical accents",
+        "Create mystical gardens with chorus plants and end rods"
+      ],
+      "blockPalettes": [
+        ["deepslate_bricks", "crying_obsidian", "amethyst_block", "purpur_block", "end_stone_bricks"],
+        ["prismarine", "dark_prismarine", "sea_lantern", "oxidized_copper", "waxed_copper"],
+        ["blackstone", "gilded_blackstone", "soul_lantern", "blue_ice", "packed_ice"]
+      ]
+    },
+    "recreations": {
+      "description": "Real-world or game recreations in Minecraft",
+      "examples": [
+        "Fallout wasteland recreation",
+        "Western town (RDR2 Armadillo)",
+        "Vietnamese Trang An recreation",
+        "Subnautica Aurora ship"
+      ],
+      "techniques": [
+        "Use reference images constantly during building",
+        "Focus on proportions first, details second",
+        "Use concrete and terracotta for color-matching real materials",
+        "Create custom texture approximations with mixed blocks",
+        "Build at appropriate scale - decide scale ratio first",
+        "Add environmental context (vehicles, props, landscape)"
+      ]
+    },
+    "interior_and_detail": {
+      "description": "Small-scale detailed builds, interiors, and decorative elements",
+      "examples": [
+        "Calendar design using item frames",
+        "Rustic farm workflow guide",
+        "Interior furnishing with custom furniture"
+      ],
+      "techniques": [
+        "Use stairs and slabs creatively for furniture shapes",
+        "Item frames and maps for custom wall art",
+        "Armor stands for mannequins and sculptures",
+        "Trapdoors as shutters, cabinet doors, and tabletops",
+        "Buttons and levers as small decorative elements",
+        "Flower pots on fences for elevated planters",
+        "Campfires hidden under blocks for chimney smoke",
+        "Composters as stools, cauldrons as sinks"
+      ]
+    }
+  },
+
+  "advancedBuildingTechniques": {
+    "depthAndTexture": {
+      "name": "Wall Depth & Texturing",
+      "description": "Never build flat walls. Push and pull surfaces for visual interest.",
+      "steps": [
+        "Recess windows by 1 block into the wall",
+        "Add pillar supports every 4-5 blocks that protrude 1 block",
+        "Use stairs as trim/molding along rooflines",
+        "Mix cracked and mossy stone variants randomly at 10-15% ratio",
+        "Add buttons or trapdoors as surface detail"
+      ]
+    },
+    "roofDesign": {
+      "name": "Advanced Roof Techniques",
+      "description": "Roofs make or break a build. Master these patterns.",
+      "steps": [
+        "Use stairs for 45-degree steep roofs",
+        "Add dormers (small window protrusions) for visual interest",
+        "Overhang the roof by 1-2 blocks on all sides",
+        "Use slabs at the peak for a thinner ridgeline",
+        "Add chimney with campfire for smoke effect",
+        "Hip roofs: slope on all 4 sides instead of just 2",
+        "Cross-gable: combine two perpendicular gable roofs"
+      ]
+    },
+    "organicShapes": {
+      "name": "Building Organic/Curved Shapes",
+      "description": "Break free from Minecraft's grid with curves and natural forms.",
+      "steps": [
+        "Use the circle chart: radius 3=7wide, 5=11wide, 7=15wide",
+        "Build arches with stairs: 1-up, 2-across, 1-down pattern",
+        "Layer different radii vertically for domes and spheres",
+        "Use leaf blocks and vines to soften hard edges",
+        "Randomize surface textures to prevent grid-pattern look"
+      ]
+    },
+    "colorTheory": {
+      "name": "Block Color & Palette Design",
+      "description": "Choose complementary block palettes for cohesive builds.",
+      "rules": [
+        "Limit main palette to 3-4 block types",
+        "Use 60% primary, 30% secondary, 10% accent blocks",
+        "Warm palette: oak/spruce + bricks + terracotta",
+        "Cool palette: stone bricks + deepslate + prismarine",
+        "Neutral palette: quartz + concrete + glass",
+        "Always include 1 light-emitting accent block"
+      ]
+    },
+    "landscaping": {
+      "name": "Environment & Landscaping",
+      "description": "Great builds need great surroundings.",
+      "steps": [
+        "Grade terrain around buildings with smooth slopes",
+        "Add paths with mixed slabs (cobble + gravel + stone)",
+        "Plant varied vegetation at different heights",
+        "Include water features: ponds, streams, fountains",
+        "Add outdoor furniture: benches, tables, market stalls",
+        "Use walls and fences for property boundaries",
+        "Light pathways with lanterns on fence posts"
+      ]
+    }
+  },
+
+  "complexStructureBlueprints": [
+    {
+      "name": "Rustic Farmstead",
+      "category": "houses_and_bases",
+      "difficulty": "intermediate",
+      "estimatedBlocks": 2500,
+      "dimensions": { "width": 30, "length": 30, "height": 12 },
+      "components": [
+        "Main farmhouse (12x10, L-shaped with porch)",
+        "Barn with double doors (8x12, tall peaked roof)",
+        "Fenced crop fields with water channels",
+        "Windmill with spinning sails (decorative)",
+        "Stone well with bucket mechanism",
+        "Cobblestone path connecting all buildings"
+      ],
+      "palette": ["spruce_planks", "stripped_spruce_log", "cobblestone", "hay_block", "barrel", "composter", "lantern"],
+      "buildOrder": [
+        "Flatten and grade terrain",
+        "Lay paths and field boundaries first",
+        "Build farmhouse frame and walls",
+        "Add farmhouse roof with chimney",
+        "Build barn structure",
+        "Create crop fields with water irrigation",
+        "Add windmill and well",
+        "Detail and decorate"
+      ]
+    },
+    {
+      "name": "Cliffside Dwelling",
+      "category": "houses_and_bases",
+      "difficulty": "advanced",
+      "estimatedBlocks": 3000,
+      "dimensions": { "width": 20, "length": 15, "height": 25 },
+      "components": [
+        "Main living quarters carved into cliff face",
+        "Exterior balcony with wooden supports",
+        "Cascading waterfall beside the entrance",
+        "Rope bridge to adjacent cliff (fence + slabs)",
+        "Hidden garden terrace on top",
+        "Torch-lit cave entrance"
+      ],
+      "palette": ["stone", "stone_bricks", "spruce_planks", "glass_pane", "lantern", "chain", "iron_bars"],
+      "buildOrder": [
+        "Select or create cliff face",
+        "Carve main chamber into cliff",
+        "Build exterior balcony framework",
+        "Add windows and lighting",
+        "Create waterfall water feature",
+        "Build rope bridge",
+        "Add garden terrace on top",
+        "Detail with vines and moss"
+      ]
+    },
+    {
+      "name": "Japanese Garden Pavilion",
+      "category": "towns_and_cities",
+      "difficulty": "advanced",
+      "estimatedBlocks": 4000,
+      "dimensions": { "width": 25, "length": 25, "height": 15 },
+      "components": [
+        "Central pagoda with curved multi-tier roof",
+        "Zen rock garden with gravel patterns",
+        "Koi pond with lily pads and lanterns",
+        "Torii gate entrance",
+        "Cherry blossom trees (pink wool leaves)",
+        "Stone lantern path",
+        "Bamboo fence perimeter"
+      ],
+      "palette": ["dark_oak_planks", "dark_oak_stairs", "white_terracotta", "red_terracotta", "smooth_stone", "bamboo", "lantern"],
+      "buildOrder": [
+        "Grade terrain and create pond depression",
+        "Build torii gate at entrance",
+        "Lay stone path from gate to pavilion",
+        "Build central pagoda frame",
+        "Add curved roof tiers",
+        "Create zen garden with gravel",
+        "Fill pond, add vegetation",
+        "Plant cherry trees and bamboo fencing"
+      ]
+    },
+    {
+      "name": "Wizard's Arcane Tower",
+      "category": "magical_and_fantasy",
+      "difficulty": "advanced",
+      "estimatedBlocks": 5000,
+      "dimensions": { "width": 15, "length": 15, "height": 35 },
+      "components": [
+        "Cylindrical tower base (radius 6)",
+        "Spiraling exterior staircase",
+        "Three floors: library, laboratory, observatory",
+        "Floating crystal ring around spire",
+        "Enchanting room with full bookshelves",
+        "Rooftop telescope platform",
+        "Mystical garden at base with chorus plants"
+      ],
+      "palette": ["deepslate_bricks", "polished_deepslate", "amethyst_block", "purple_stained_glass", "end_rod", "bookshelf", "enchanting_table"],
+      "buildOrder": [
+        "Build circular base foundation",
+        "Raise cylindrical walls to full height",
+        "Create floor divisions every 8-10 blocks",
+        "Build spiraling exterior staircase",
+        "Add windows on each floor",
+        "Furnish library with bookshelves",
+        "Create laboratory with brewing stands",
+        "Build observatory dome at top",
+        "Add floating crystal ring",
+        "Landscape base with mystical garden"
+      ]
+    },
+    {
+      "name": "Medieval Marketplace",
+      "category": "towns_and_cities",
+      "difficulty": "advanced",
+      "estimatedBlocks": 6000,
+      "dimensions": { "width": 40, "length": 30, "height": 12 },
+      "components": [
+        "Central cobblestone plaza with fountain",
+        "6 merchant stalls with colored wool canopies",
+        "Blacksmith shop with outdoor forge",
+        "Tavern with exterior seating",
+        "Clock tower at plaza center",
+        "Stone archway entrance with banners",
+        "Street lamps along pathways"
+      ],
+      "palette": ["stone_bricks", "cobblestone", "oak_planks", "dark_oak_log", "colored_wool", "barrel", "campfire"],
+      "buildOrder": [
+        "Lay out the central plaza with cobblestone",
+        "Build the fountain centerpiece",
+        "Frame out market stall positions around plaza",
+        "Build stalls with wool canopy roofs",
+        "Construct blacksmith with furnaces and anvils",
+        "Build tavern building",
+        "Add clock tower (or watchtower)",
+        "Create entrance archway",
+        "Add street lamps and decorative details",
+        "Place barrels, item frames, and merchant goods"
+      ]
+    },
+    {
+      "name": "Ancient Ruins Temple",
+      "category": "magical_and_fantasy",
+      "difficulty": "intermediate",
+      "estimatedBlocks": 3500,
+      "dimensions": { "width": 25, "length": 20, "height": 15 },
+      "components": [
+        "Partially collapsed stone columns (varying heights)",
+        "Overgrown mossy floor with scattered grass",
+        "Central altar with glowing elements",
+        "Half-destroyed walls with holes",
+        "Vine-covered arched doorways",
+        "Buried treasure vault (underground)",
+        "Fallen column segments on ground"
+      ],
+      "palette": ["stone_bricks", "cracked_stone_bricks", "mossy_stone_bricks", "cobblestone", "mossy_cobblestone", "vine", "glow_lichen"],
+      "buildOrder": [
+        "Build the complete temple footprint",
+        "Add columns at regular intervals",
+        "Build walls at varying heights (some broken)",
+        "Add moss and vine overgrowth",
+        "Create central altar with sea lanterns under glass",
+        "Place fallen column segments",
+        "Spread grass, flowers, and leaf blocks as ground cover",
+        "Add underground vault with trapped entrance"
+      ]
+    }
+  ],
+
+  "redditInspirationPrompts": [
+    "Build a cozy cottage on a hillside with a view of a river - use overhanging roof, flower boxes, and a stone chimney",
+    "Create a small Japanese scene with a pagoda, zen garden, and cherry blossom trees",
+    "Build ancient ruins partially reclaimed by nature - use mossy stone variants and vine overgrowth",
+    "Construct a cliffside dwelling carved into rock with a waterfall beside it",
+    "Design a rustic farm compound with farmhouse, barn, windmill, and crop fields",
+    "Build a wizard tower with an enchanting library and mystical floating elements",
+    "Create a medieval marketplace with merchant stalls, fountain, and a tavern",
+    "Construct a Western-style frontier town with wooden buildings and desert landscape",
+    "Build a dragon's eye using forced perspective and layered blocks at varying depths",
+    "Design a lighthouse on a rocky coast with red and white striped walls",
+    "Create a steampunk workshop with copper, exposed gears (armor stands), and smoke stacks",
+    "Build an underground dwarven hall with massive pillars and golden accents",
+    "Construct a Roman-style bath house with water features and marble columns",
+    "Design a floating sky island with waterfalls cascading off the edges",
+    "Build a haunted cemetery with crooked headstones, dead trees, and eerie lighting"
+  ]
+}

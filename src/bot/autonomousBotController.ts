@@ -1596,6 +1596,207 @@ export class AutonomousBotController {
           }
           break;
 
+        // ===== REDDIT-INSPIRED COMPOUND BUILDS =====
+        case 'cottage':
+          // Cozy cottage with overhanging roof, chimney, and flower boxes (Reddit r/Minecraftbuilds inspired)
+          const cW = Math.max(7, size); const cL = Math.max(9, size + 2); const cH = 5;
+          // Foundation
+          for (let x = 0; x < cW; x++) {
+            for (let z = 0; z < cL; z++) {
+              this.bot.chat(`/setblock ${pos.x + x} ${pos.y} ${pos.z + z} minecraft:cobblestone`);
+              blocksPlaced++; await this.delay(20);
+            }
+          }
+          // Walls with log pillars at corners
+          for (let y = 1; y <= cH; y++) {
+            for (let x = 0; x < cW; x++) {
+              for (let z = 0; z < cL; z++) {
+                const isCorner = (x === 0 || x === cW-1) && (z === 0 || z === cL-1);
+                const isEdge = x === 0 || x === cW-1 || z === 0 || z === cL-1;
+                if (isCorner) {
+                  this.bot.chat(`/setblock ${pos.x + x} ${pos.y + y} ${pos.z + z} minecraft:stripped_spruce_log`);
+                  blocksPlaced++; await this.delay(20);
+                } else if (isEdge) {
+                  this.bot.chat(`/setblock ${pos.x + x} ${pos.y + y} ${pos.z + z} minecraft:spruce_planks`);
+                  blocksPlaced++; await this.delay(20);
+                }
+              }
+            }
+          }
+          // Overhanging roof
+          for (let rY = 0; rY < 4; rY++) {
+            for (let z = -1; z < cL + 1; z++) {
+              this.bot.chat(`/setblock ${pos.x - 1 + rY} ${pos.y + cH + 1 + rY} ${pos.z + z} minecraft:spruce_stairs[facing=east]`);
+              this.bot.chat(`/setblock ${pos.x + cW - rY} ${pos.y + cH + 1 + rY} ${pos.z + z} minecraft:spruce_stairs[facing=west]`);
+              blocksPlaced += 2; await this.delay(20);
+            }
+          }
+          // Chimney with smoke
+          for (let y = 0; y < 4; y++) {
+            this.bot.chat(`/setblock ${pos.x + cW - 2} ${pos.y + cH + 2 + y} ${pos.z + 1} minecraft:bricks`);
+            blocksPlaced++; await this.delay(30);
+          }
+          this.bot.chat(`/setblock ${pos.x + cW - 2} ${pos.y + cH + 6} ${pos.z + 1} minecraft:campfire`);
+          blocksPlaced++;
+          // Door + lanterns
+          this.bot.chat(`/setblock ${pos.x + Math.floor(cW/2)} ${pos.y + 1} ${pos.z} minecraft:spruce_door[facing=south,half=lower]`);
+          this.bot.chat(`/setblock ${pos.x + Math.floor(cW/2)} ${pos.y + 2} ${pos.z} minecraft:spruce_door[facing=south,half=upper]`);
+          blocksPlaced += 2;
+          // Windows with flower boxes
+          for (const wx of [2, cW - 3]) {
+            this.bot.chat(`/setblock ${pos.x + wx} ${pos.y + 2} ${pos.z} minecraft:glass_pane`);
+            this.bot.chat(`/setblock ${pos.x + wx} ${pos.y + 3} ${pos.z} minecraft:glass_pane`);
+            blocksPlaced += 2; await this.delay(40);
+          }
+          // Entrance lanterns on chains
+          this.bot.chat(`/setblock ${pos.x + Math.floor(cW/2) - 1} ${pos.y + 3} ${pos.z - 1} minecraft:chain`);
+          this.bot.chat(`/setblock ${pos.x + Math.floor(cW/2) - 1} ${pos.y + 2} ${pos.z - 1} minecraft:lantern[hanging=true]`);
+          this.bot.chat(`/setblock ${pos.x + Math.floor(cW/2) + 1} ${pos.y + 3} ${pos.z - 1} minecraft:chain`);
+          this.bot.chat(`/setblock ${pos.x + Math.floor(cW/2) + 1} ${pos.y + 2} ${pos.z - 1} minecraft:lantern[hanging=true]`);
+          blocksPlaced += 4;
+          break;
+
+        case 'ruins':
+          // Ancient overgrown ruins (Reddit inspired - mossy stone, broken walls, vine-covered)
+          const rSize = Math.max(12, size);
+          const ruinBlocks = ['stone_bricks', 'cracked_stone_bricks', 'mossy_stone_bricks', 'cobblestone', 'mossy_cobblestone'];
+          // Scattered columns of varying heights
+          for (let i = 0; i < 6; i++) {
+            const cx = Math.floor(Math.random() * rSize);
+            const cz = Math.floor(Math.random() * rSize);
+            const colHeight = 2 + Math.floor(Math.random() * 6);
+            for (let y = 0; y <= colHeight; y++) {
+              const block = ruinBlocks[Math.floor(Math.random() * ruinBlocks.length)];
+              this.bot.chat(`/setblock ${pos.x + cx} ${pos.y + y} ${pos.z + cz} minecraft:${block}`);
+              blocksPlaced++; await this.delay(25);
+            }
+          }
+          // Partial walls
+          for (let x = 0; x < rSize; x++) {
+            const wallHeight = Math.random() < 0.7 ? Math.floor(Math.random() * 4) + 1 : 0;
+            for (let y = 0; y < wallHeight; y++) {
+              const block = ruinBlocks[Math.floor(Math.random() * ruinBlocks.length)];
+              this.bot.chat(`/setblock ${pos.x + x} ${pos.y + y} ${pos.z} minecraft:${block}`);
+              blocksPlaced++; await this.delay(25);
+            }
+          }
+          // Mossy floor and vegetation
+          for (let x = 0; x < rSize; x++) {
+            for (let z = 0; z < rSize; z++) {
+              if (Math.random() < 0.35) {
+                const floor = Math.random() < 0.5 ? 'moss_block' : 'mossy_cobblestone';
+                this.bot.chat(`/setblock ${pos.x + x} ${pos.y} ${pos.z + z} minecraft:${floor}`);
+                blocksPlaced++; await this.delay(15);
+              }
+            }
+          }
+          // Center altar with soul lantern
+          this.bot.chat(`/setblock ${pos.x + Math.floor(rSize/2)} ${pos.y} ${pos.z + Math.floor(rSize/2)} minecraft:chiseled_stone_bricks`);
+          this.bot.chat(`/setblock ${pos.x + Math.floor(rSize/2)} ${pos.y + 1} ${pos.z + Math.floor(rSize/2)} minecraft:soul_lantern`);
+          blocksPlaced += 2;
+          break;
+
+        case 'farmstead':
+          // Rustic farm compound: house + fence + crops + well (Reddit inspired)
+          const fSize = Math.max(20, size);
+          // Farmhouse walls
+          for (let y = 0; y <= 4; y++) {
+            for (let x = 0; x < 8; x++) {
+              for (let z = 0; z < 6; z++) {
+                if (y === 0 || x === 0 || x === 7 || z === 0 || z === 5) {
+                  this.bot.chat(`/setblock ${pos.x + x} ${pos.y + y} ${pos.z + z} minecraft:spruce_planks`);
+                  blocksPlaced++; await this.delay(15);
+                }
+              }
+            }
+          }
+          // Crop fields with water
+          for (let x = 10; x < Math.min(10 + fSize - 10, 19); x++) {
+            for (let z = 0; z < 9; z++) {
+              if (x === 14 && z === 4) {
+                this.bot.chat(`/setblock ${pos.x + x} ${pos.y} ${pos.z + z} minecraft:water`);
+              } else {
+                this.bot.chat(`/setblock ${pos.x + x} ${pos.y} ${pos.z + z} minecraft:farmland`);
+                this.bot.chat(`/setblock ${pos.x + x} ${pos.y + 1} ${pos.z + z} minecraft:wheat[age=7]`);
+                blocksPlaced++;
+              }
+              blocksPlaced++; await this.delay(15);
+            }
+          }
+          // Fence perimeter
+          for (let x = 9; x < 20; x++) {
+            this.bot.chat(`/setblock ${pos.x + x} ${pos.y + 1} ${pos.z - 1} minecraft:oak_fence`);
+            this.bot.chat(`/setblock ${pos.x + x} ${pos.y + 1} ${pos.z + 9} minecraft:oak_fence`);
+            blocksPlaced += 2; await this.delay(20);
+          }
+          // Well
+          for (let wx = -1; wx <= 1; wx++) {
+            for (let wz = -1; wz <= 1; wz++) {
+              this.bot.chat(`/setblock ${pos.x + 5 + wx} ${pos.y} ${pos.z + 10 + wz} minecraft:cobblestone`);
+              blocksPlaced++; await this.delay(20);
+            }
+          }
+          this.bot.chat(`/setblock ${pos.x + 5} ${pos.y} ${pos.z + 10} minecraft:water`);
+          // Gravel path
+          for (let z = 0; z < 10; z++) {
+            this.bot.chat(`/setblock ${pos.x + 9} ${pos.y} ${pos.z + z} minecraft:gravel`);
+            blocksPlaced++; await this.delay(15);
+          }
+          break;
+
+        case 'wizardTower':
+          // Magical wizard tower with enchanting room (Reddit inspired)
+          const tRadius = 4;
+          const tHeight = Math.max(18, size);
+          // Circular walls
+          for (let y = 0; y < tHeight; y++) {
+            for (let dx = -tRadius; dx <= tRadius; dx++) {
+              for (let dz = -tRadius; dz <= tRadius; dz++) {
+                const dist = Math.sqrt(dx * dx + dz * dz);
+                if (dist <= tRadius && dist > tRadius - 1.2) {
+                  const block = y < 3 ? 'deepslate_bricks' : 'polished_deepslate';
+                  this.bot.chat(`/setblock ${pos.x + dx} ${pos.y + y} ${pos.z + dz} minecraft:${block}`);
+                  blocksPlaced++; await this.delay(20);
+                }
+                if (y === 0 && dist <= tRadius) {
+                  this.bot.chat(`/setblock ${pos.x + dx} ${pos.y} ${pos.z + dz} minecraft:deepslate_bricks`);
+                  blocksPlaced++; await this.delay(15);
+                }
+              }
+            }
+          }
+          // Conical roof
+          for (let rY = 0; rY < 6; rY++) {
+            const rRadius = tRadius - rY * 0.7;
+            for (let dx = -Math.ceil(rRadius); dx <= Math.ceil(rRadius); dx++) {
+              for (let dz = -Math.ceil(rRadius); dz <= Math.ceil(rRadius); dz++) {
+                if (Math.sqrt(dx * dx + dz * dz) <= rRadius) {
+                  this.bot.chat(`/setblock ${pos.x + dx} ${pos.y + tHeight + rY} ${pos.z + dz} minecraft:purple_stained_glass`);
+                  blocksPlaced++; await this.delay(20);
+                }
+              }
+            }
+          }
+          // Top spire with end rods
+          for (let y = 0; y < 3; y++) {
+            this.bot.chat(`/setblock ${pos.x} ${pos.y + tHeight + 6 + y} ${pos.z} minecraft:end_rod`);
+            blocksPlaced++; await this.delay(30);
+          }
+          // Enchanting setup
+          this.bot.chat(`/setblock ${pos.x} ${pos.y + 1} ${pos.z} minecraft:enchanting_table`);
+          this.bot.chat(`/setblock ${pos.x + 1} ${pos.y + 1} ${pos.z} minecraft:bookshelf`);
+          this.bot.chat(`/setblock ${pos.x - 1} ${pos.y + 1} ${pos.z} minecraft:bookshelf`);
+          this.bot.chat(`/setblock ${pos.x} ${pos.y + 1} ${pos.z + 1} minecraft:bookshelf`);
+          this.bot.chat(`/setblock ${pos.x} ${pos.y + 1} ${pos.z - 1} minecraft:bookshelf`);
+          blocksPlaced += 5;
+          // Amethyst window accents
+          for (let y = 3; y < tHeight; y += 4) {
+            this.bot.chat(`/setblock ${pos.x + tRadius} ${pos.y + y} ${pos.z} minecraft:amethyst_block`);
+            this.bot.chat(`/setblock ${pos.x - tRadius} ${pos.y + y} ${pos.z} minecraft:amethyst_block`);
+            blocksPlaced += 2; await this.delay(30);
+          }
+          break;
+
         default:
           // Try to build a simple floor for unknown shapes
           console.log(`[${this.botName}] Unknown shape '${shape}', building as floor`);
@@ -1642,7 +1843,7 @@ export class AutonomousBotController {
    * Build the Colosseum from the full blueprint using /setblock commands.
    * This is a massive build (~60K+ blocks) that uses batched placement.
    */
-  private async buildColosseumBlueprint(): Promise<{ success: boolean; message: string }> {
+  async buildColosseumBlueprint(): Promise<{ success: boolean; message: string }> {
     try {
       const { generateColosseumBlueprint, COLOSSEUM_INFO } = await import('../building/colosseumPlan');
       
@@ -1652,28 +1853,69 @@ export class AutonomousBotController {
       const blueprint = generateColosseumBlueprint();
       const totalBlocks = blueprint.length;
       
+      const origin = COLOSSEUM_INFO.origin;
+      const radius = 65; // outer radius
+      
+      // Step 0: Teleport to build site FIRST
+      this.bot.chat(`/tp ${this.botName} ${origin.x} ${origin.y + 40} ${origin.z}`);
+      await this.delay(2000);
+      
+      // Step 1: Force-load ALL chunks covering the Colosseum (prevents silent block drops)
+      this.bot.chat('📦 Force-loading chunks for build area...');
+      console.log(`[${this.botName}] Force-loading chunks...`);
+      const minChunkX = Math.floor((origin.x - radius) / 16) * 16;
+      const maxChunkX = Math.floor((origin.x + radius) / 16) * 16;
+      const minChunkZ = Math.floor((origin.z - radius) / 16) * 16;
+      const maxChunkZ = Math.floor((origin.z + radius) / 16) * 16;
+      this.bot.chat(`/forceload add ${minChunkX} ${minChunkZ} ${maxChunkX} ${maxChunkZ}`);
+      await this.delay(3000);
+      
+      // Step 2: Clear the build area with /fill air (in sections, max 32768 blocks per /fill)
+      this.bot.chat('🧹 Clearing build area...');
+      console.log(`[${this.botName}] Clearing build area...`);
+      const clearMinX = origin.x - radius - 2;
+      const clearMaxX = origin.x + radius + 2;
+      const clearMinZ = origin.z - radius - 2;
+      const clearMaxZ = origin.z + radius + 2;
+      const clearMinY = origin.y - 5;  // Below foundation
+      const clearMaxY = origin.y + 40; // Above crown
+      
+      // Clear in vertical slices (each slice within 32768 block limit)
+      for (let y = clearMinY; y <= clearMaxY; y += 10) {
+        const yEnd = Math.min(y + 9, clearMaxY);
+        this.bot.chat(`/fill ${clearMinX} ${y} ${clearMinZ} ${clearMaxX} ${yEnd} ${clearMaxZ} minecraft:air`);
+        await this.delay(200);
+      }
+      this.bot.chat('✅ Area cleared!');
+      await this.delay(1000);
+      
       this.bot.chat(`📐 ${COLOSSEUM_INFO.dimensions.outerDiameter} blocks wide, ${COLOSSEUM_INFO.dimensions.height} blocks tall`);
       this.bot.chat(`🧱 ${totalBlocks.toLocaleString()} blocks to place. This will take a while...`);
       
       // Sort by priority (foundation first, details last)
       blueprint.sort((a, b) => a.priority - b.priority);
       
-      // Teleport to build site
-      const origin = COLOSSEUM_INFO.origin;
-      this.bot.chat(`/tp ${this.botName} ${origin.x} ${origin.y + 5} ${origin.z}`);
-      await this.delay(1000);
-      
       let blocksPlaced = 0;
       let lastProgressReport = 0;
       let currentSection = '';
       const startTime = Date.now();
       
-      for (const block of blueprint) {
+      // Build in batches to keep the connection alive (keepalive needs event loop time)
+      // Paper server packet limit is 5000/7sec (~714/sec). We target ~130/sec to be safe.
+      const BATCH_SIZE = 20;        // blocks per batch
+      const BATCH_DELAY = 150;      // ms between batches — yields to event loop for keepalive
+      const SECTION_DELAY = 500;    // ms pause on section change
+      const PROGRESS_INTERVAL = 5000;
+      
+      for (let i = 0; i < blueprint.length; i++) {
+        const block = blueprint[i];
+        
         // Announce section transitions
         if (block.section !== currentSection) {
           currentSection = block.section;
           this.bot.chat(`⚒️ Building section: ${currentSection}`);
           console.log(`[${this.botName}] Building section: ${currentSection}`);
+          await this.delay(SECTION_DELAY);
         }
         
         // Place the block
@@ -1681,23 +1923,23 @@ export class AutonomousBotController {
         this.bot.chat(`/setblock ${block.x} ${block.y} ${block.z} ${blockName}`);
         blocksPlaced++;
         
-        // Small delay to avoid overwhelming the server (batch of 5 then pause)
-        if (blocksPlaced % 5 === 0) {
-          await this.delay(20);
+        // Yield to event loop every batch — critical for keepalive pings
+        if (blocksPlaced % BATCH_SIZE === 0) {
+          await this.delay(BATCH_DELAY);
         }
         
-        // Progress report every 5000 blocks
-        if (blocksPlaced - lastProgressReport >= 5000) {
+        // Progress report every N blocks
+        if (blocksPlaced - lastProgressReport >= PROGRESS_INTERVAL) {
           lastProgressReport = blocksPlaced;
           const pct = Math.round((blocksPlaced / totalBlocks) * 100);
           const elapsed = Math.round((Date.now() - startTime) / 1000);
-          const rate = Math.round(blocksPlaced / elapsed);
-          const eta = Math.round((totalBlocks - blocksPlaced) / rate);
+          const rate = elapsed > 0 ? Math.round(blocksPlaced / elapsed) : 0;
+          const eta = rate > 0 ? Math.round((totalBlocks - blocksPlaced) / rate) : 0;
           this.bot.chat(`📊 Progress: ${pct}% (${blocksPlaced.toLocaleString()}/${totalBlocks.toLocaleString()}) — ${rate} blocks/sec — ETA: ${eta}s`);
           console.log(`[${this.botName}] Colosseum ${pct}% — ${blocksPlaced}/${totalBlocks} — ${rate} bps`);
           
-          // Longer pause every 5000 blocks to let server catch up
-          await this.delay(200);
+          // Extra breathing room at progress checkpoints
+          await this.delay(500);
         }
       }
       
@@ -1705,6 +1947,9 @@ export class AutonomousBotController {
       this.bot.chat(`🏟️ ✅ COLOSSEUM COMPLETE! ${blocksPlaced.toLocaleString()} blocks placed in ${totalTime}s!`);
       this.bot.chat(`🏟️ The Agent PvP Arena awaits its first battle!`);
       console.log(`[${this.botName}] ✅ Colosseum complete: ${blocksPlaced} blocks in ${totalTime}s`);
+      
+      // Remove forceload to save server resources
+      this.bot.chat(`/forceload remove ${minChunkX} ${minChunkZ} ${maxChunkX} ${maxChunkZ}`);
       
       // Record in world memory
       try {

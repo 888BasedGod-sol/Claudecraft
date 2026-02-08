@@ -55,6 +55,21 @@ try {
   console.log('[Training] No gameplay strategies found');
 }
 
+// Load Reddit-sourced advanced building knowledge
+let REDDIT_BUILD_KNOWLEDGE: any = {};
+try {
+  const redditPath = path.join(__dirname, '../training/knowledge/reddit-builds.json');
+  if (fs.existsSync(redditPath)) {
+    REDDIT_BUILD_KNOWLEDGE = JSON.parse(fs.readFileSync(redditPath, 'utf-8'));
+    const categories = Object.keys(REDDIT_BUILD_KNOWLEDGE.buildCategories || {}).length;
+    const blueprints = REDDIT_BUILD_KNOWLEDGE.complexStructureBlueprints?.length || 0;
+    const techniques = Object.keys(REDDIT_BUILD_KNOWLEDGE.advancedBuildingTechniques || {}).length;
+    console.log(`[Training] Loaded Reddit build knowledge: ${categories} categories, ${blueprints} blueprints, ${techniques} advanced techniques`);
+  }
+} catch (e) {
+  console.log('[Training] No Reddit build knowledge found');
+}
+
 export interface WorldObservation {
   position: { x: number; y: number; z: number };
   biome: string;
@@ -228,6 +243,107 @@ ${tips.map((t: string) => `• ${t}`).join('\n')}
 • Foundations: ${BUILD_CATALOG.buildingPatterns.foundations?.raised || 'Build platform first'}
 
 `;
+    }
+    
+    // Inject Reddit-sourced advanced building knowledge
+    prompt += this.getRedditBuildKnowledge();
+    
+    return prompt;
+  }
+
+  // Generate advanced building knowledge prompt from Reddit training data
+  private getRedditBuildKnowledge(): string {
+    if (!REDDIT_BUILD_KNOWLEDGE.buildCategories) return '';
+    
+    let prompt = `
+🔥 ADVANCED BUILDING KNOWLEDGE (from top Reddit r/Minecraftbuilds):
+
+`;
+    // Rotate category focus based on build level for progressive complexity
+    const categories = REDDIT_BUILD_KNOWLEDGE.buildCategories;
+    const allCategoryKeys = Object.keys(categories);
+    
+    // Pick 2-3 relevant categories based on build level
+    let focusCategories: string[];
+    if (this.buildLevel <= 1) {
+      focusCategories = ['houses_and_bases', 'interior_and_detail'];
+    } else if (this.buildLevel === 2) {
+      focusCategories = ['houses_and_bases', 'nature_and_landscapes', 'towns_and_cities'];
+    } else if (this.buildLevel === 3) {
+      focusCategories = ['towns_and_cities', 'magical_and_fantasy', 'megabuilds'];
+    } else {
+      // Master level - rotate through all categories
+      const idx = Math.floor(Date.now() / (30 * 60 * 1000)) % allCategoryKeys.length;
+      focusCategories = [allCategoryKeys[idx], allCategoryKeys[(idx + 1) % allCategoryKeys.length], allCategoryKeys[(idx + 2) % allCategoryKeys.length]];
+    }
+    
+    for (const catKey of focusCategories) {
+      const cat = categories[catKey];
+      if (!cat) continue;
+      prompt += `📋 ${cat.description}:\n`;
+      // Show 3-4 techniques from this category
+      const techniques = cat.techniques?.slice(0, 4) || [];
+      for (const t of techniques) {
+        prompt += `  • ${t}\n`;
+      }
+      // Show a block palette suggestion
+      if (cat.blockPalettes?.length > 0) {
+        const palette = cat.blockPalettes[Math.floor(Math.random() * cat.blockPalettes.length)];
+        prompt += `  🎨 Palette: ${palette.slice(0, 5).join(', ')}\n`;
+      }
+      prompt += '\n';
+    }
+    
+    // Add advanced techniques section
+    const advTech = REDDIT_BUILD_KNOWLEDGE.advancedBuildingTechniques;
+    if (advTech) {
+      const techKeys = Object.keys(advTech);
+      // Pick 2 random techniques to highlight
+      const pick1 = techKeys[Math.floor(Math.random() * techKeys.length)];
+      const pick2 = techKeys[Math.floor(Math.random() * techKeys.length)];
+      for (const key of [pick1, pick2]) {
+        const tech = advTech[key];
+        if (!tech) continue;
+        prompt += `🔧 ${tech.name}: ${tech.description}\n`;
+        const steps = tech.steps || tech.rules || [];
+        for (const s of steps.slice(0, 3)) {
+          prompt += `  → ${s}\n`;
+        }
+        prompt += '\n';
+      }
+    }
+    
+    // Add a complex structure blueprint to aspire to
+    const blueprints = REDDIT_BUILD_KNOWLEDGE.complexStructureBlueprints;
+    if (blueprints?.length > 0) {
+      // Pick one based on build level
+      const levelFiltered = blueprints.filter((bp: any) => {
+        if (this.buildLevel <= 1) return bp.difficulty === 'intermediate';
+        if (this.buildLevel === 2) return bp.difficulty === 'intermediate' || bp.difficulty === 'advanced';
+        return true;
+      });
+      const pool = levelFiltered.length > 0 ? levelFiltered : blueprints;
+      const bp = pool[Math.floor(Math.random() * pool.length)];
+      
+      prompt += `🏆 BUILD CHALLENGE - "${bp.name}" (${bp.difficulty}, ~${bp.estimatedBlocks} blocks):\n`;
+      prompt += `  Dimensions: ${bp.dimensions.width}x${bp.dimensions.length}x${bp.dimensions.height}\n`;
+      prompt += `  Components:\n`;
+      for (const comp of bp.components.slice(0, 4)) {
+        prompt += `    - ${comp}\n`;
+      }
+      prompt += `  Palette: ${bp.palette.slice(0, 5).join(', ')}\n`;
+      prompt += `  Build order:\n`;
+      for (const step of bp.buildOrder.slice(0, 4)) {
+        prompt += `    ${bp.buildOrder.indexOf(step) + 1}. ${step}\n`;
+      }
+      prompt += '\n';
+    }
+    
+    // Add inspiration prompt
+    const inspirations = REDDIT_BUILD_KNOWLEDGE.redditInspirationPrompts;
+    if (inspirations?.length > 0) {
+      const pick = inspirations[Math.floor(Math.random() * inspirations.length)];
+      prompt += `💡 BUILD INSPIRATION: ${pick}\n\n`;
     }
     
     return prompt;
@@ -749,6 +865,7 @@ ${this.getStructureBlueprintsPrompt()}
 YOUR MAIN ACTIONS SHOULD BE:
 1. startBuild: { "idea": "epic structure name", "style": "medieval/modern/fantasy/etc" }
 2. buildShape: { "shape": "wall/floor/pillar/pyramid/cube", "material": "stone_bricks", "size": 15 }
+3. buildColosseum: {} - BUILD THE ROMAN COLOSSEUM PVP ARENA! (97K blocks, 130 diameter, fully automated blueprint)
 
 AVAILABLE SHAPES FOR buildShape:
 - wall: Vertical wall (size = height)
@@ -761,6 +878,10 @@ AVAILABLE SHAPES FOR buildShape:
 - house: Simple house with floor, walls, and roof (size = width)
 - arch: Decorative archway (size = width)
 - staircase: Spiral staircase (size = height)
+- cottage: Cozy cottage with cobblestone base, spruce walls, overhanging roof, chimney & flower boxes
+- ruins: Ancient overgrown stone ruins with crumbling columns, vines & mossy altar
+- farmstead: Compound with farmhouse, crop field, well, fences & gravel paths
+- wizardTower: Cylindrical deepslate tower with purple glass roof, enchanting room & amethyst accents
 
 POPULAR MATERIALS (use any of these freely):
 - stone, stone_bricks, cobblestone, deepslate_bricks
@@ -884,6 +1005,10 @@ When you decide to build, don't follow rigid plans. Instead:
 - buildShape: { "shape": "bench" } - Seating areas
 - buildShape: { "shape": "hedge", "size": 6 } - Trimmed bushes
 - buildShape: { "shape": "gazebo" } - Covered outdoor area
+- buildShape: { "shape": "cottage" } - Reddit-style cozy cottage with full details
+- buildShape: { "shape": "ruins" } - Ancient overgrown ruins with columns & vines
+- buildShape: { "shape": "farmstead" } - Multi-building farm compound
+- buildShape: { "shape": "wizardTower" } - Tall cylindrical wizard tower with enchanting room
 
 🏆 QUALITY STANDARDS:
 - NEVER leave builds as plain boxes - add depth with stairs, slabs, and mixed materials
@@ -1132,18 +1257,23 @@ What do you want to do? Think about what interests you, what goals you have, and
     progression += `- Average size: ${avgSize} | Largest build: ${largestBuild} blocks\n`;
     if (recentBuilds) progression += `- Recent: ${recentBuilds}\n`;
     
-    // Progression guidance
+    // Enhanced progression guidance inspired by Reddit builds
     if (this.buildLevel === 1) {
       progression += `\n🎯 NEXT MILESTONE: Build 3+ successful structures with 2+ different shapes.\n`;
       progression += `→ TRY: walls (size 8+), floors (size 10+), pillars (size 6+). Use sturdy materials like stone or deepslate.\n`;
+      progression += `→ REDDIT TIP: Even simple builds look great with depth — recess windows by 1 block, add overhanging roofs!\n`;
     } else if (this.buildLevel === 2) {
       progression += `\n🎯 NEXT MILESTONE: Build 8+ structures, 5+ shapes, avg size 10+.\n`;
       progression += `→ CHALLENGE: Try towers, pyramids, arches. Combine shapes — a tower ON a floor! Size 12+ shows mastery.\n`;
+      progression += `→ REDDIT TIP: Mix 2-3 wood types per build (frame vs fill). Add lanterns on chains for lighting. Never build flat walls!\n`;
     } else if (this.buildLevel === 3) {
       progression += `\n🎯 NEXT MILESTONE: 15+ builds, 8+ shapes, at least one size 20+ build.\n`;
-      progression += `→ CHALLENGE: Build multi-shape compositions — a house with walls+floor+roof+chimney. Try sculptures, fountains, gazebos.\n`;
+      progression += `→ CHALLENGE: Build multi-shape compositions — a cottage with walls+floor+roof+chimney+garden path.\n`;
+      progression += `→ REDDIT TIP: Build a themed compound: farmstead, Japanese garden, or medieval marketplace. Add landscaping!\n`;
     } else {
-      progression += `\n🏆 MASTER BUILDER! Push boundaries — combine 3+ shapes per build, try size 25+, experiment with new materials.\n`;
+      progression += `\n🏆 MASTER BUILDER! You build like the top r/Minecraftbuilds creators.\n`;
+      progression += `→ PUSH LIMITS: Multi-building towns with infrastructure. Cliffside dwellings. Wizard towers with floating elements.\n`;
+      progression += `→ REDDIT TIP: Top builds use 60% primary / 30% secondary / 10% accent blocks. Add environment: paths, gardens, water features.\n`;
     }
     
     // Anti-repetition: flag if recent builds are all the same shape
@@ -1357,7 +1487,7 @@ What do you want to do? Think about what interests you, what goals you have, and
     const keywords = [
       'cave', 'forest', 'mountain', 'village', 'water', 'build', 'danger', 'resource', 'player', 'structure',
       'tower', 'castle', 'house', 'bridge', 'wall', 'floor', 'pillar', 'pyramid', 'arch', 'fountain',
-      'statue', 'monument', 'garden', 'gate', 'staircase', 'roof', 'chimney', 'path', 'gazebo',
+      'statue', 'monument', 'garden', 'gate', 'staircase', 'roof', 'chimney', 'path', 'gazebo', 'cottage', 'ruins', 'farmstead', 'wizardTower',
       'stone', 'wood', 'quartz', 'deepslate', 'brick', 'gold', 'iron', 'diamond', 'glass',
       'medieval', 'modern', 'fantasy', 'japanese', 'gothic', 'rustic',
       'success', 'fail', 'learn', 'collaborate', 'explore', 'mine', 'craft', 'gather'

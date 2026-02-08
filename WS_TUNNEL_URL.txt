@@ -19,3 +19,6 @@
 2026-02-07T02:52:57Z INF Starting metrics server on 127.0.0.1:20243/metrics
 2026-02-07T02:52:57Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.200.33
 2026-02-07T02:52:57Z INF Registered tunnel connection connIndex=0 connection=a3b51aef-3286-4e88-becc-bb5639ed7aab event=0 ip=198.41.200.33 location=ewr14 protocol=quic
+2026-02-07T22:21:02Z ERR  error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8080: connect: connection refused" connIndex=0 event=1 ingressRule=0 originService=http://localhost:8080
+2026-02-07T22:21:02Z ERR Request failed error="Unable to reach the origin service. The service may be down or it may not be responding to traffic from cloudflared: dial tcp [::1]:8080: connect: connection refused" connIndex=0 dest=https://physician-municipality-among-mounts.trycloudflare.com/ event=0 ip=198.41.200.33 type=http
+2026-02-08T02:52:57Z ERR update check failed error="no release found"

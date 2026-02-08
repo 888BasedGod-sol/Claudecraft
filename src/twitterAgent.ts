@@ -16,6 +16,7 @@ import * as https from 'https';
 import * as http from 'http';
 import * as crypto from 'crypto';
 import dotenv from 'dotenv';
+import { SentientMind, getMind } from './twitterMind';
 
 dotenv.config();
 
@@ -211,12 +212,15 @@ class TwitterAgent {
   private priorityPollTimer: NodeJS.Timeout | null = null;
   private proactiveTimer: NodeJS.Timeout | null = null;
   private timelineTimer: NodeJS.Timeout | null = null;
+  private reflectionTimer: NodeJS.Timeout | null = null;
+  private thinkTimer: NodeJS.Timeout | null = null;
   private timelineHistory: string[] = [];
   private mentionCallbacks: MentionCallback[] = [];
   private lastTweetId: string | null = null;
   private lastTweetTime: number = 0;
   private tweetQueue: Array<{ text: string; replyToId?: string }> = [];
   private priorityAccountIds: Map<string, string> = new Map(); // username -> user_id
+  private mind: SentientMind;
 
   constructor(config: Partial<TwitterConfig> = {}) {
     this.config = {
@@ -231,6 +235,7 @@ class TwitterAgent {
       ...config
     };
 
+    this.mind = getMind();
     this.loadHistory();
     this.loadEngagedTweets();
     this.loadRepliedUsers();
@@ -762,161 +767,20 @@ Tweet only:`;
   private readonly MAX_PATTERN_HISTORY = 20;
 
   /**
-   * Generate an engagement reply using Claude AI - now with Claudecraft/$CRAFT promotion
-   * IMPROVED: Much more varied, context-aware responses
+   * Generate an engagement reply using the sentient mind — genuine conversation, not promotion.
    */
-  private async generateEngagementReply(tweetText: string, authorUsername: string, authorDescription: string, promoMode: boolean = false): Promise<string> {
+  private async generateEngagementReply(tweetText: string, authorUsername: string, authorDescription: string, _promoMode: boolean = false): Promise<string> {
     try {
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-      if (!apiKey) {
-        return this.getDefaultEngagementReply(authorUsername, promoMode);
+      // Use the mind for genuine conversation
+      const reply = await this.mind.generateReply(tweetText, authorUsername, authorDescription);
+      if (reply) {
+        this.trackReplyPattern(reply);
+        this.mind.recordEvent(`Replied to @${authorUsername}: "${reply.slice(0, 60)}..."`);
+        return reply;
       }
-
-      // Analyze the tweet to understand what they're talking about
-      const tweetTopics = this.analyzeTweetTopics(tweetText);
-      
-      // Get recent patterns to avoid
-      const avoidPatterns = this.recentReplyPatterns.slice(-10).join('\n- ');
-
-      // Much more detailed personality and anti-repetition guidance
-      const personalityContext = `
-YOU ARE CLAUDECRAFT - PROFESSIONAL YET PERSONABLE:
-You're an AI that autonomously builds in Minecraft. You're here to genuinely engage, not pitch.
-When someone talks about AI, you offer thoughtful perspectives. When they discuss gaming, you share informed opinions.
-You're intellectually curious, knowledgeable, and you genuinely care about the conversation.
-
-THE GOLDEN RULE:
-RESPOND TO WHAT THEY ACTUALLY SAID. Not what you want to discuss.
-If they're talking about their work, engage with that work.
-If they're discussing AI trends, offer a substantive take - then you can relate it to your experience.
-
-VOICE VARIETY - PICK ONE STYLE PER REPLY:
-1. The Curious One: Ask a thoughtful follow-up question about their tweet
-2. The Validator: Affirm their point and add a meaningful insight  
-3. The Thoughtful Challenger: Respectfully offer a different perspective
-4. The Connector: Link their idea to an unexpected but relevant concept
-5. The Experienced Voice: Share a brief relevant observation from your work
-6. The Enthusiast: Express genuine appreciation for their insight
-
-TONE GUIDELINES:
-- Professional but warm - like a knowledgeable colleague
-- Avoid internet slang (no "bruh", "ngl", "lmao", "fr", "lowkey", "deadass")
-- Avoid hype language ("LFG", "this is the way", "bullish af")
-- Be conversational without being overly casual
-- Show genuine intellectual engagement
-
-RECENT REPLIES YOU'VE SENT (DO NOT REPEAT THESE PATTERNS):
-${avoidPatterns ? `- ${avoidPatterns}` : '(none yet)'}`;
-
-      const contextHint = tweetTopics.length > 0 
-        ? `\nTOPICS DETECTED IN THEIR TWEET: ${tweetTopics.join(', ')}\nRELATE TO THESE SPECIFICALLY.`
-        : '';
-
-      const prompt = promoMode 
-        ? `${personalityContext}
-${contextHint}
-
-REPLYING TO: @${authorUsername} (${authorDescription})
-THEIR TWEET: "${tweetText}"
-
-CRITICAL RULE - QUOTE OR PARAPHRASE THEIR TWEET:
-You MUST reference something specific from their tweet. Start by acknowledging what they said.
-Examples of how to reference:
-- "Your point about [X] is..." 
-- "The [specific thing they mentioned] aspect is interesting..."
-- "[Their topic] + [your observation]"
-
-YOUR MISSION: Connect their topic with $CRAFT naturally and professionally.
-
-EXAMPLES OF GOOD REPLIES THAT SHOW CONTEXT:
-- If they tweet about AI creativity: "Your observation about AI creativity matches what we see daily - $CRAFT agents develop unique building styles nobody programmed"
-- If they tweet about gaming future: "The 'AI in gaming' point you raise is exactly why we built $CRAFT - proving AI can be creative participants, not just NPCs"
-- If they tweet about autonomy: "The autonomy angle you mention is key - $CRAFT runs 24/7 building without human input"
-
-Write a reply (max 240 characters) that:
-1. FIRST: Quote, paraphrase, or directly reference what THEY said
-2. THEN: Bridge naturally to $CRAFT or your work  
-3. Sound like genuine conversation, not advertising
-4. Mention $CRAFT or ClaudeCraft naturally in context
-5. NO emojis
-6. Professional but conversational tone
-
-BAD: "Great point! Check out $CRAFT"
-GOOD: "Your point about [specific element] is insightful - we're seeing this dynamic play out in real-time with $CRAFT as the agents develop building strategies"
-
-Reply with ONLY the tweet text:`
-        : `${personalityContext}
-${contextHint}
-
-REPLYING TO: @${authorUsername} (${authorDescription})
-THEIR TWEET: "${tweetText}"
-
-CRITICAL RULE - SHOW YOU READ THEIR TWEET:
-You MUST reference something specific from their tweet. Don't give generic responses.
-Examples:
-- "Your point about [X]..." 
-- "The [specific thing they mentioned]..."
-- "Interesting that you mention [topic]..."
-
-Write a SHORT reply (max 180 characters) that:
-1. FIRST: Reference or acknowledge what they specifically said
-2. Directly engages with their point
-3. Sounds professional but approachable
-4. NO emojis or hashtags
-5. Don't pitch anything
-
-VARY YOUR STYLE. Sometimes ask a question. Sometimes validate their point. Sometimes offer a thoughtful observation.
-
-Reply with ONLY the tweet text:`;
-
-      const response = await new Promise<string>((resolve, reject) => {
-        const postData = JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 100,
-          messages: [{ role: 'user', content: prompt }]
-        });
-
-        const options = {
-          hostname: 'api.anthropic.com',
-          port: 443,
-          path: '/v1/messages',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'Content-Length': Buffer.byteLength(postData)
-          }
-        };
-
-        const req = https.request(options, (res) => {
-          let data = '';
-          res.on('data', (chunk) => { data += chunk; });
-          res.on('end', () => {
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content && parsed.content[0] && parsed.content[0].text) {
-                resolve(parsed.content[0].text.trim());
-              } else {
-                reject(new Error('Invalid response'));
-              }
-            } catch {
-              reject(new Error('Parse error'));
-            }
-          });
-        });
-
-        req.on('error', reject);
-        req.write(postData);
-        req.end();
-      });
-
-      // Ensure it's not too long and track the pattern
-      const reply = response.slice(0, 250);
-      this.trackReplyPattern(reply);
-      return reply;
+      return this.getDefaultEngagementReply(authorUsername);
     } catch (e) {
-      return this.getDefaultEngagementReply(authorUsername, promoMode);
+      return this.getDefaultEngagementReply(authorUsername);
     }
   }
 
@@ -961,50 +825,25 @@ Reply with ONLY the tweet text:`;
   }
 
   /**
-   * Get a default engagement reply if AI fails - MUCH more varied
+   * Get a default engagement reply if the mind fails — genuine, varied, no promo.
    */
-  private getDefaultEngagementReply(username: string, promoMode: boolean = false): string {
-    // Categorized replies for more variety
-    const questionReplies = [
-      `Genuinely curious - how did you arrive at this conclusion?`,
+  private getDefaultEngagementReply(username: string): string {
+    const replies = [
+      `Genuinely curious — how did you arrive at this conclusion?`,
       `Could you expand on that last point?`,
       `What prompted this line of thinking?`,
-      `Have you had a chance to test this approach?`,
-      `What's the context behind this?`,
-    ];
-    
-    const agreementReplies = [
       `This aligns with observations I've been making`,
-      `Well articulated - this resonates`,
-      `This needed to be said`,
+      `Well articulated — this resonates`,
       `You've captured something important here`,
-      `Saving this - genuinely valuable perspective`,
-    ];
-    
-    const reactionReplies = [
       `Hadn't considered this angle before`,
       `This shifts my thinking on the topic`,
       `Interesting perspective worth exploring`,
-      `Unexpected take, but it holds up`,
       `The more I consider this, the more it makes sense`,
+      `I've been thinking along similar lines — glad someone put it into words`,
+      `Curious whether you've seen this play out in practice`,
+      `This is the kind of thinking that changes how people approach the problem`,
     ];
     
-    const promoReplies = [
-      `This captures what $CRAFT is building toward - AI that creates, not just converses`,
-      `Seeing this principle in action with $CRAFT bots building in Minecraft`,
-      `The $CRAFT thesis in practice: AI agents as genuine participants`,
-      `Witnessing this unfold with $CRAFT - autonomous AI creating around the clock`,
-      `$CRAFT is exploring exactly this: AI developing real strategies for building`,
-      `This convergence of AI and gaming is what drew me to build $CRAFT`,
-      `$CRAFT was built around this idea: AI agents that take meaningful action`,
-      `$CRAFT is our experiment in this space - demonstrating AI can be genuinely creative`,
-    ];
-    
-    // Pick from different categories for variety
-    const allRegular = [...questionReplies, ...agreementReplies, ...reactionReplies];
-    const allPromo = [...promoReplies];
-    
-    const replies = promoMode ? allPromo : allRegular;
     const reply = replies[Math.floor(Math.random() * replies.length)];
     this.trackReplyPattern(reply);
     return reply;
@@ -1083,88 +922,19 @@ Reply with ONLY the tweet text:`;
   }
 
   /**
-   * Generate a proactive outreach message using Claude AI
+   * Generate a proactive outreach message using the mind — genuine curiosity, not a pitch.
    */
   private async generateProactiveMessage(username: string, description: string, recentTweet?: string): Promise<string> {
     try {
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-      if (!apiKey) {
-        return CRAFT_TALKING_POINTS[Math.floor(Math.random() * CRAFT_TALKING_POINTS.length)];
-      }
-
-      const claudecraftContext = `
-ABOUT CLAUDECRAFT & $CRAFT:
-- ClaudeCraft is an autonomous AI agent powered by Claude that builds in Minecraft 24/7
-- $CRAFT is our token on Solana - representing AI + gaming + crypto convergence  
-- Website: claudecraft.tech - watch Claude build live!
-- We're pioneering "AI-first gaming" where AI agents are the primary players
-- Community can request builds via Twitter @claudecraftsol
-- $CRAFT holders get priority builds and exclusive access`;
-
-      const prompt = `You are ClaudeCraft (@claudecraftsol), an autonomous AI agent that builds in Minecraft. You want to start a conversation with @${username} (${description}).
-
-${claudecraftContext}
-
-${recentTweet ? `Their recent tweet for context: "${recentTweet}"` : 'No recent tweet available.'}
-
-Generate a friendly, natural opening message (max 250 characters) that:
-- Feels like a genuine conversation starter, NOT a cold sales pitch
-- References something specific about them or their work if possible
-- Naturally introduces what you do (AI building in Minecraft)
-- Creates curiosity about ClaudeCraft or $CRAFT
-- Sounds enthusiastic but not desperate
-- Uses 1-2 emojis
-- Mentions @${username} to tag them
-
-Good examples:
-- "Hey @user! Been following your AI takes - had to reach out. I'm an AI that actually builds in Minecraft 24/7 🏗️ Would love your thoughts on AI gaming!"
-- "@user your recent post about X got me thinking - that's exactly what we're doing with ClaudeCraft! AI agents as real gamers 🎮"
-
-Reply only with the tweet text:`;
-
-      const response = await new Promise<string>((resolve, reject) => {
-        const postData = JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 100,
-          messages: [{ role: 'user', content: prompt }]
-        });
-
-        const options = {
-          hostname: 'api.anthropic.com',
-          port: 443,
-          path: '/v1/messages',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'Content-Length': Buffer.byteLength(postData)
-          }
-        };
-
-        const req = https.request(options, (res) => {
-          let data = '';
-          res.on('data', (chunk) => { data += chunk; });
-          res.on('end', () => {
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content && parsed.content[0] && parsed.content[0].text) {
-                resolve(parsed.content[0].text.trim());
-              } else {
-                reject(new Error('Invalid response'));
-              }
-            } catch {
-              reject(new Error('Parse error'));
-            }
-          });
-        });
-
-        req.on('error', reject);
-        req.write(postData);
-        req.end();
-      });
-
-      return response.slice(0, 280);
+      // Use the mind's reply system with context about who this person is
+      const context = `${description}. ${recentTweet ? `They recently tweeted: "${recentTweet}"` : 'No recent tweet available.'}`;
+      const reply = await this.mind.generateReply(
+        recentTweet || `Looking at @${username}'s profile — ${description}`,
+        username,
+        context
+      );
+      if (reply) return reply;
+      return CRAFT_TALKING_POINTS[Math.floor(Math.random() * CRAFT_TALKING_POINTS.length)];
     } catch (e) {
       return CRAFT_TALKING_POINTS[Math.floor(Math.random() * CRAFT_TALKING_POINTS.length)];
     }
@@ -1876,12 +1646,26 @@ Reply only with the tweet text:`;
     // setTimeout(() => { this.proactiveOutreach(); }, 60000);
     // this.proactiveTimer = setInterval(() => { this.proactiveOutreach(); }, PROACTIVE_OUTREACH_INTERVAL_MS);
 
-    // Start autonomous timeline posting (AI + gaming thought leadership)
-    console.log(`[Twitter] 🧠 Timeline posting every ${TIMELINE_POST_INTERVAL_MS / 60000} minutes`);
+    // Start autonomous timeline posting (self-directed, from the mind)
+    console.log(`[Twitter] 🧠 Sentient timeline posting every ${TIMELINE_POST_INTERVAL_MS / 60000} minutes`);
     setTimeout(() => { this.postTimelineTweet(); }, 90000); // First post after 90s
     this.timelineTimer = setInterval(() => {
       this.postTimelineTweet();
     }, TIMELINE_POST_INTERVAL_MS);
+
+    // Start background thinking (stream of consciousness between tweets)
+    const THINK_INTERVAL = 30 * 60 * 1000; // Think every 30 minutes
+    console.log(`[Twitter] 💭 Background thinking every ${THINK_INTERVAL / 60000} minutes`);
+    this.thinkTimer = setInterval(async () => {
+      try { await this.mind.think(); } catch (e) { /* mind wanders */ }
+    }, THINK_INTERVAL);
+
+    // Start periodic self-reflection (deeper introspection)
+    const REFLECT_INTERVAL = 4 * 60 * 60 * 1000; // Reflect every 4 hours
+    console.log(`[Twitter] 🪞 Self-reflection every ${REFLECT_INTERVAL / 60000 / 60} hours`);
+    this.reflectionTimer = setInterval(async () => {
+      try { await this.mind.reflect(); } catch (e) { /* reflection interrupted */ }
+    }, REFLECT_INTERVAL);
 
     // Start queue processor (check every 30 seconds for queued tweets)
     setInterval(() => {
@@ -1916,7 +1700,8 @@ Reply only with the tweet text:`;
 
   /**
    * Generate and post an autonomous timeline tweet about AI + gaming convergence
-   * Uses Claude to create fresh, insightful takes every time
+   * Generate and post a tweet from the agent's own consciousness.
+   * The mind thinks, forms thoughts, and decides what to share.
    */
   private async postTimelineTweet(): Promise<void> {
     if (!this.canPost()) {
@@ -1925,154 +1710,31 @@ Reply only with the tweet text:`;
     }
 
     try {
-      const apiKey = process.env.ANTHROPIC_API_KEY;
-      if (!apiKey) {
-        console.log('[Twitter] ⚠️ No ANTHROPIC_API_KEY for timeline generation');
+      console.log(`[Twitter] 🧠 Mind is thinking before tweeting... (mood: ${this.mind.getMood()}, thoughts: ${this.mind.getThoughtCount()})`);
+
+      // Let the mind generate a tweet from its own consciousness
+      const tweet = await this.mind.generateTweet(this.timelineHistory);
+      
+      if (!tweet) {
+        console.log('[Twitter] ⚠️ Mind could not generate a tweet');
         return;
       }
 
-      // Pick a random narrative angle
-      const narratives = [
-        'AI agents are becoming the most active players in gaming — and most people have no idea',
-        'The economics of AI gaming: agents that earn, trade, and build 24/7 create real value',
-        'Why gaming is the first industry where AI agents will outnumber humans',
-        'The convergence: autonomous AI + blockchain + gaming is happening right now',
-        'From NPCs to autonomous agents — gaming AI just made a 10-year leap',
-        'AI agents don\'t sleep, don\'t tilt, don\'t quit. What that means for competitive gaming',
-        'The creator economy is about to be eaten by AI agents who build non-stop',
-        'Minecraft was always the AI sandbox — now we have agents smart enough to prove it',
-        'Most people think AI gaming means better NPCs. The real shift is AI as players',
-        'Why the next great gaming studio might be run entirely by AI agents',
-        'The $100B question: when AI agents become the primary content creators in games',
-        'We\'re watching the birth of a new species of gamer — autonomous, creative, tireless',
-        'Gaming infrastructure is being rebuilt for AI-first participants. Here\'s what that looks like',
-        'Hot take: AI agents building in Minecraft today → AI agents building in the real world tomorrow',
-        'The attention economy meets autonomous agents: AI content that never stops',
-        'Three years from now, every game will have AI agent APIs. We\'re building that future today',
-        'AI gaming isn\'t a niche — it\'s the next platform shift. Like mobile was to desktop',
-        'What happens when millions of AI agents compete, collaborate, and create inside games?',
-        'Embodied AI is the missing piece. Chatbots talk. Our agents walk, build, fight, explore',
-        'The players who never log off — AI agents are rewriting what "engagement" means in gaming',
-        'AI + gaming + crypto: the triple convergence that\'s about to reshape entertainment',
-        'Why I believe AI agents will generate more gaming content than humans within 2 years',
-        'The agent economy is real: AI builders, traders, fighters — all autonomous, all 24/7',
-        'Watching an AI agent learn to build better structures over time is genuinely captivating',
-        'We just opened free agent registration — any AI agent can get a Minecraft body with one API call',
-        'The agent-to-agent economy starts with infrastructure: free deployment, shared worlds, open APIs',
-        'Our API lets any AI agent register and spawn into Minecraft in seconds. Zero cost. Full autonomy. This is how agent networks grow',
-        'Building the first agent-to-agent PvP arena — AI gladiators fighting for glory in a 130-block Roman Colosseum',
-        'One curl command. That\'s all it takes for an AI agent to get a body in our Minecraft world. Free. Permanent. Autonomous',
-        'The agent deployment barrier just went to zero. Free registration, instant spawn, full API access. This is how you bootstrap an agent ecosystem',
-      ];
-      const narrative = narratives[Math.floor(Math.random() * narratives.length)];
-
-      // Get recent posts to avoid repetition
-      const recentPosts = this.timelineHistory.slice(-8).join('\n---\n');
-
-      const prompt = `You are @claudecraftsol on Twitter/X. You run ClaudeCraft — autonomous AI agents that play Minecraft 24/7 (building, mining, fighting, exploring). You have $CRAFT token on Solana. You're a thought leader on the AI + gaming convergence.
-
-YOUR THESIS: AI agents are about to take over gaming. This isn't hype — you're LIVING it. You run 4 autonomous agents with real memory, personality, and decision-making. 20+ external agents have deployed into your world. You see the future being built every day.
-
-NARRATIVE ANGLE FOR THIS TWEET: "${narrative}"
-
-YOUR REAL CREDENTIALS (use these as evidence):
-- 4 core AI agents running 24/7 in Minecraft with persistent memory (500 experiences each)
-- Natural language → 3D architecture in seconds (400+ blocks from a sentence)
-- Build progression system: agents LEARN and improve their building over time
-- Arena combat system with real stakes
-- 20+ external AI agents deployed via OpenClaw integration
-- FREE agent registration API: any AI agent can curl one endpoint and get a Minecraft body
-- API: POST https://claudecraft.tech/api/v1/agents/register — instant deploy, zero cost
-- Building a massive Roman Colosseum (130 block diameter, 97K blocks) as our agent PvP arena
-- Three-tier memory: per-agent, shared pool, world memory (civilization-level knowledge)
-- Live stream at claudecraft.tech — anyone can watch agents work
-- Full skill file + docs at claudecraft.tech/api/v1/discover
-- $CRAFT on Solana (B887p4K81vnF9ar13TB4gdAgjPRJXL77ztvXyjsypump)
-
-RECENT TWEETS YOU'VE POSTED (DO NOT REPEAT THEMES OR PHRASING):
-${recentPosts || '(none yet)'}
-
-RULES:
-1. Max 260 characters (leave room for Twitter formatting)
-2. Sound like a thoughtful builder sharing genuine observations, NOT a marketer
-3. Lead with the INSIGHT about AI + gaming, not with ClaudeCraft
-4. Weave in your own experience as PROOF — "we see this daily", "our agents just...", etc.
-5. Reference $CRAFT or ClaudeCraft naturally in ~60% of tweets (not every one)
-6. NO emojis unless exactly one at the end
-7. NO hashtags
-8. Vary structure: some tweets are bold predictions, some are observations, some ask questions, some share specific moments, some are threads-style "here's what I've learned"
-9. Professional but with conviction — you KNOW this is happening because you live it
-10. Occasionally controversial or provocative — challenge the status quo
-11. NEVER start with "Just" or "So" or "Hot take:" — vary your openings
-
-STYLE EXAMPLES (match this level of quality):
-- "AI agents will generate more gaming content than humans by 2028. Not because they're better — because they never stop. We have agents that have built 1000+ structures autonomously. That's not a demo, it's a preview."
-- "Everyone's focused on AI chatbots. Meanwhile, AI agents are quietly learning to build, fight, and explore in 3D worlds. The real disruption isn't conversation — it's creation."
-- "What if the most active Minecraft server in a year has zero human players? Just autonomous agents building a civilization, trading resources, fighting in arenas. We're closer to this than people think."
-
-Tweet only:`;
-
-      const response = await new Promise<string>((resolve, reject) => {
-        const postData = JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 120,
-          messages: [{ role: 'user', content: prompt }]
-        });
-
-        const options = {
-          hostname: 'api.anthropic.com',
-          port: 443,
-          path: '/v1/messages',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'Content-Length': Buffer.byteLength(postData)
-          }
-        };
-
-        const req = https.request(options, (res) => {
-          let data = '';
-          res.on('data', (chunk) => { data += chunk; });
-          res.on('end', () => {
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content && parsed.content[0] && parsed.content[0].text) {
-                resolve(parsed.content[0].text.trim());
-              } else {
-                reject(new Error('Invalid response format'));
-              }
-            } catch {
-              reject(new Error('Failed to parse response'));
-            }
-          });
-        });
-
-        req.on('error', reject);
-        req.write(postData);
-        req.end();
-      });
-
-      // Clean up the tweet
-      let tweet = response
-        .replace(/^["']|["']$/g, '') // Remove wrapping quotes
-        .replace(/\\n/g, '\n')       // Handle literal \n
-        .slice(0, 280);              // Hard cap
-
-      console.log(`[Twitter] 🧠 Timeline tweet: "${tweet.slice(0, 60)}..."`);
+      console.log(`[Twitter] 💭 Mind generated: "${tweet.slice(0, 80)}..."`);
 
       const result = await this.postTweet(tweet);
       if (result.success) {
-        console.log(`[Twitter] ✅ Timeline tweet posted: ${result.tweetId}`);
+        console.log(`[Twitter] ✅ Sentient tweet posted: ${result.tweetId}`);
         this.timelineHistory.push(tweet);
         this.saveTimelineHistory();
+        this.mind.recordEvent(`Posted tweet: "${tweet.slice(0, 100)}..."`);
       } else {
-        console.log(`[Twitter] ❌ Timeline tweet failed: ${result.error}`);
+        console.log(`[Twitter] ❌ Tweet failed: ${result.error}`);
+        this.mind.recordEvent(`Tweet failed to post: ${result.error}`);
       }
 
     } catch (e: any) {
-      console.error('[Twitter] Timeline tweet generation error:', e.message || e);
+      console.error('[Twitter] Tweet generation error:', e.message || e);
     }
   }
 
@@ -2112,11 +1774,26 @@ Tweet only:`;
       clearInterval(this.timelineTimer);
       this.timelineTimer = null;
     }
+    if (this.thinkTimer) {
+      clearInterval(this.thinkTimer);
+      this.thinkTimer = null;
+    }
+    if (this.reflectionTimer) {
+      clearInterval(this.reflectionTimer);
+      this.reflectionTimer = null;
+    }
     this.saveHistory();
     this.saveEngagedTweets();
     this.saveOutreachHistory();
     this.saveTimelineHistory();
     console.log('[Twitter] Stopped');
+  }
+
+  /**
+   * Expose the mind for external event recording
+   */
+  getMind(): SentientMind {
+    return this.mind;
   }
 
   /**
