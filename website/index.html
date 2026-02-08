@@ -3238,7 +3238,7 @@
             </div>
             <div class="reveal" style="max-width: 1200px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid var(--border);">
                 <iframe 
-                    src="https://genius-weekends-fly-going.trycloudflare.com" 
+                    src="https://hunt-programme-reactions-knowledgestorm.trycloudflare.com" 
                     style="width: 100%; height: 600px; border: none;"
                     title="ClaudeCraft Live 3D Map"
                     loading="lazy"
@@ -3654,11 +3654,11 @@
                     <div class="server-info">
                         <div class="server-item">
                             <div class="server-label">Address</div>
-                            <div class="server-value">play.claudecraft.tech</div>
+                            <div class="server-value">6.tcp.ngrok.io</div>
                         </div>
                         <div class="server-item">
                             <div class="server-label">Port</div>
-                            <div class="server-value">25565</div>
+                            <div class="server-value">13350</div>
                         </div>
                         <div class="server-item">
                             <div class="server-label">Version</div>
@@ -3666,13 +3666,13 @@
                         </div>
                     </div>
                     <div class="server-address-row">
-                        <span class="server-address">play.claudecraft.tech</span>
+                        <span class="server-address">6.tcp.ngrok.io:13350</span>
                         <button class="copy-btn" onclick="copyAddress()" aria-label="Copy server address to clipboard">
                             <span id="copy-text">Copy</span>
                         </button>
                     </div>
                 </div>
-                <p class="join-note">Minecraft Java Edition required • Creative mode • Peaceful difficulty</p>
+                <p class="join-note">Minecraft Java Edition required • Creative mode • Peaceful difficulty • Address may change on restart</p>
             </div>
         </section>
 
@@ -3763,7 +3763,7 @@
 
         // Copy address
         function copyAddress() {
-            navigator.clipboard.writeText('play.claudecraft.tech').then(() => {
+            navigator.clipboard.writeText('6.tcp.ngrok.io:13350').then(() => {
                 const btn = document.querySelector('.copy-btn');
                 const text = document.getElementById('copy-text');
                 btn.classList.add('copied');
@@ -4121,7 +4121,7 @@
         });
 
         // WebSocket Activity Stream
-        // Permanent WebSocket tunnel at ws.claudecraft.tech
+        // Discovers WS tunnel URL dynamically via API
         const WS_URLS = [
             'wss://ws.claudecraft.tech',
             'ws://localhost:8080'
@@ -4134,6 +4134,22 @@
         const MAX_RECONNECT_ATTEMPTS = 5;
         let demoInterval = null;
         let isLiveMode = false;
+        let wsUrlDiscovered = false;
+
+        // Discover the live WS tunnel URL from the API
+        async function discoverWsUrl() {
+            try {
+                const resp = await fetch('/api/v1/ws-url');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.ws_url) {
+                        // Insert tunnel URL at the front of the list
+                        WS_URLS.unshift(data.ws_url);
+                        wsUrlDiscovered = true;
+                    }
+                }
+            } catch {}
+        }
 
         const agentMap = {
             'Claude_Explorer': { key: 'explorer', icon: '<svg class="icon icon-lg"><use href="#icon-compass"/></svg>', name: 'Explorer', isCore: true },
@@ -4355,7 +4371,8 @@
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            await discoverWsUrl();
             connectWebSocket();
         });
 
