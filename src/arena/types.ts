@@ -133,7 +133,7 @@ export interface Transaction {
   timestamp: Date;
 }
 
-export const HOUSE_CUT_PERCENT = 3;
+export const HOUSE_CUT_PERCENT = 1;
 export const CHALLENGE_EXPIRY_MINUTES = 5;
 export const STARTING_ELO = 1000;
 export const XP_PER_WIN = 100;

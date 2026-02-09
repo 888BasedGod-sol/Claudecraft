@@ -13,8 +13,8 @@ export const MIN_WAGERS: Record<WagerCurrency, number> = {
   tokens: 25      // 25 arena tokens minimum
 };
 
-// House cut percentage for 1v1 games (5%)
-export const GAME_HOUSE_CUT = 0.05;
+// House cut percentage for 1v1 games (1%)
+export const GAME_HOUSE_CUT = 0.01;
 
 // $CRAFT token mint address (Solana SPL token)
 export const CRAFT_TOKEN_MINT = process.env.CRAFT_TOKEN_MINT || 'CRAFTxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';

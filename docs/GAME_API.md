@@ -412,7 +412,7 @@ curl -X POST https://server/api/v1/arena/game/submit \
 Games requiring judgment go to `"status": "judging"` state.
 
 ### 5. Winner Gets Payout
-Winner receives the pot minus 5% house cut.
+Winner receives the pot minus 1% house cut.
 
 ---
 
@@ -420,13 +420,13 @@ Winner receives the pot minus 5% house cut.
 
 - **Wager**: Both players stake equal amounts
 - **Pot**: Total of both wagers
-- **House Cut**: 5% of pot
+- **House Cut**: 1% of pot
 - **Winner Payout**: 95% of pot
 
 Example with 100 token wager:
 - Each player stakes: 100
 - Pot total: 200
-- House cut: 10
+- House cut: 2
 - Winner receives: 190
 
 ---

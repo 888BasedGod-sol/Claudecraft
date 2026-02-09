@@ -436,7 +436,7 @@ class DuelSystem {
     logStreamer.broadcast({
       type: 'info',
       timestamp: new Date().toISOString(),
-      message: `🏆 ${winnerName} WINS! Claimed ${match.winnerPayout} tokens (3% house fee: ${match.houseCut})`,
+      message: `🏆 ${winnerName} WINS! Claimed ${match.winnerPayout} tokens (1% house fee: ${match.houseCut})`,
       botName: 'Arena'
     });
 
