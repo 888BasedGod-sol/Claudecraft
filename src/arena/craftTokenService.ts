@@ -59,7 +59,10 @@ const CRAFT_WALLETS_FILE = path.join(DATA_DIR, 'craft-wallets.json');
 const CRAFT_TRANSACTIONS_FILE = path.join(DATA_DIR, 'craft-transactions.json');
 
 // Test mode - simulates transactions without real tokens
-const TEST_MODE = process.env.CRAFT_TEST_MODE === 'true';
+// Use a function to check at runtime (after dotenv loads)
+function isTestMode(): boolean {
+  return process.env.CRAFT_TEST_MODE === 'true';
+}
 const TEST_STARTING_BALANCE = 1000; // Each agent starts with 1000 CRAFT in test mode
 
 // ============================================================================
@@ -128,7 +131,7 @@ class CraftTokenService {
 
     try {
       // Test mode check
-      if (TEST_MODE) {
+      if (isTestMode()) {
         console.log('[CRAFT] 🧪 TEST MODE ENABLED - No real transactions will be made');
         console.log(`[CRAFT] 🧪 Agents start with ${TEST_STARTING_BALANCE} simulated CRAFT`);
       }
@@ -273,7 +276,7 @@ class CraftTokenService {
    */
   async getAgentCraftBalance(ownerId: string): Promise<number> {
     // Test mode: return simulated balance
-    if (TEST_MODE) {
+    if (isTestMode()) {
       if (!this.testBalances.has(ownerId)) {
         this.testBalances.set(ownerId, TEST_STARTING_BALANCE);
       }
@@ -290,8 +293,8 @@ class CraftTokenService {
    */
   getTestModeInfo(): { enabled: boolean; serverBalance: number } {
     return {
-      enabled: TEST_MODE,
-      serverBalance: TEST_MODE ? this.testServerBalance : 0
+      enabled: isTestMode(),
+      serverBalance: isTestMode() ? this.testServerBalance : 0
     };
   }
   
@@ -417,7 +420,7 @@ class CraftTokenService {
     matchId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
     // Test mode: simulate transaction
-    if (TEST_MODE) {
+    if (isTestMode()) {
       const balance = await this.getAgentCraftBalance(ownerId);
       if (balance < amount) {
         return { success: false, error: `Insufficient CRAFT. Have: ${balance}, Need: ${amount}` };
@@ -508,7 +511,7 @@ class CraftTokenService {
     matchId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
     // Test mode: simulate payout
-    if (TEST_MODE) {
+    if (isTestMode()) {
       if (this.testServerBalance < amount) {
         return { success: false, error: `Server insufficient CRAFT. Have: ${this.testServerBalance}, Need: ${amount}` };
       }
@@ -595,7 +598,7 @@ class CraftTokenService {
     bountyId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
     // Test mode: simulate escrow
-    if (TEST_MODE) {
+    if (isTestMode()) {
       const balance = await this.getAgentCraftBalance(creatorId);
       if (balance < amount) {
         return { success: false, error: `Insufficient CRAFT. Have: ${balance}, Need: ${amount}` };
@@ -681,7 +684,7 @@ class CraftTokenService {
     bountyId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
     // Test mode: simulate release
-    if (TEST_MODE) {
+    if (isTestMode()) {
       if (this.testServerBalance < amount) {
         return { success: false, error: `Server insufficient CRAFT. Have: ${this.testServerBalance}, Need: ${amount}` };
       }
@@ -766,7 +769,7 @@ class CraftTokenService {
     message?: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
     // Test mode: simulate tip
-    if (TEST_MODE) {
+    if (isTestMode()) {
       const fromBalance = await this.getAgentCraftBalance(fromOwnerId);
       if (fromBalance < amount) {
         return { success: false, error: `Insufficient CRAFT. Have: ${fromBalance}, Need: ${amount}` };
