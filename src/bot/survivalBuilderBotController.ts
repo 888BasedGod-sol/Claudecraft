@@ -16,6 +16,7 @@ import { SurvivalBuilderActions } from './survivalBuilderActions';
 import { buildCoordinator } from '../building/buildCoordinator';
 import { logStream } from '../server/logStream';
 import { CONFIG } from '../config';
+import { sleep } from '../utils/helpers';
 
 export class SurvivalBuilderBotController {
   private host: string;
@@ -106,7 +107,7 @@ export class SurvivalBuilderBotController {
     if (!this.bot) return;
 
     // Wait a moment for position to stabilize
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await sleep(500);
 
     const pos = this.bot.entity.position;
     const currentY = Math.floor(pos.y);

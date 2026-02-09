@@ -13,6 +13,7 @@ import dotenv from 'dotenv';
 import { SurvivalBuilderBotController } from './bot/survivalBuilderBotController';
 import { SpectatorBot } from './bot/spectatorBot';
 import { Logger } from './utils/logger';
+import { sleep } from './utils/helpers';
 import { logStreamer } from './server/logStreamer';
 import { buildCoordinator } from './building/buildCoordinator';
 import { CASTLE_INFO } from './building/castlePlan';
@@ -67,7 +68,7 @@ async function main() {
 
       // Add delay between bot spawns
       if (i < builderNames.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await sleep(3000);
       }
     }
 

@@ -1,12 +1,13 @@
 /**
  * Build Coordinator - Manages collaborative building between agents
- * Supports multiple blueprint modes: castle, colosseum
+ * Supports multiple blueprint modes: castle, colosseum, superbowl
  */
 
 import { generateCastleBlueprint, BlockToPlace, CASTLE_INFO } from './castlePlan';
 import { generateColosseumBlueprint, COLOSSEUM_INFO } from './colosseumPlan';
+import { generateSuperbowlBlueprint, SUPERBOWL_INFO } from './superbowlStadiumPlan';
 
-export type BlueprintMode = 'castle' | 'colosseum';
+export type BlueprintMode = 'castle' | 'colosseum' | 'superbowl';
 
 interface BuildTask {
   agentName: string;
@@ -46,6 +47,12 @@ class BuildCoordinator {
       this.initialized = true;
       console.log(`[COORDINATOR] Initialized COLOSSEUM with ${this.blueprint.length} blocks to place`);
       console.log(`[COORDINATOR] Colosseum: ${COLOSSEUM_INFO.description}`);
+    } else if (this.mode === 'superbowl') {
+      this.blueprint = generateSuperbowlBlueprint();
+      this.blueprint.sort((a, b) => a.priority - b.priority);
+      this.initialized = true;
+      console.log(`[COORDINATOR] Initialized SUPER BOWL STADIUM with ${this.blueprint.length} blocks to place`);
+      console.log(`[COORDINATOR] Super Bowl: ${SUPERBOWL_INFO.description}`);
     } else {
       this.blueprint = generateCastleBlueprint();
       this.blueprint.sort((a, b) => a.priority - b.priority);
@@ -76,7 +83,7 @@ class BuildCoordinator {
     });
 
     if (availableBlocks.length === 0) {
-      console.log(`[COORDINATOR] No more blocks to place! ${this.mode === 'colosseum' ? 'Colosseum' : 'Castle'} complete!`);
+      console.log(`[COORDINATOR] No more blocks to place! ${this.mode === 'colosseum' ? 'Colosseum' : this.mode === 'superbowl' ? 'Super Bowl Stadium' : 'Castle'} complete!`);
       return null;
     }
 
@@ -163,9 +170,9 @@ class BuildCoordinator {
   getSummaryForAgent(agentName: string): string {
     const progress = this.getProgress();
     const task = this.activeTasks.get(agentName);
-    const info = this.mode === 'colosseum' ? COLOSSEUM_INFO : CASTLE_INFO;
-    const icon = this.mode === 'colosseum' ? '🏟️' : '🏰';
-    const name = this.mode === 'colosseum' ? 'COLOSSEUM' : 'CASTLE';
+    const info = this.mode === 'colosseum' ? COLOSSEUM_INFO : this.mode === 'superbowl' ? SUPERBOWL_INFO : CASTLE_INFO;
+    const icon = this.mode === 'colosseum' ? '🏟️' : this.mode === 'superbowl' ? '🏈' : '🏰';
+    const name = this.mode === 'colosseum' ? 'COLOSSEUM' : this.mode === 'superbowl' ? 'SUPER BOWL STADIUM' : 'CASTLE';
 
     let summary = `${icon} ${name} BUILD PROGRESS: ${progress.percentComplete}% complete (${progress.placedBlocks}/${progress.totalBlocks} blocks)\n`;
     summary += `Location: (${info.origin.x}, ${info.origin.y}, ${info.origin.z})\n`;
@@ -186,7 +193,9 @@ class BuildCoordinator {
   }
 
   getBuildOrigin(): { x: number; y: number; z: number } {
-    return this.mode === 'colosseum' ? COLOSSEUM_INFO.origin : CASTLE_INFO.origin;
+    if (this.mode === 'colosseum') return COLOSSEUM_INFO.origin;
+    if (this.mode === 'superbowl') return SUPERBOWL_INFO.origin;
+    return CASTLE_INFO.origin;
   }
 
   getCastleOrigin(): { x: number; y: number; z: number } {

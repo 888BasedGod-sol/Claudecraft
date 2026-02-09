@@ -17,6 +17,7 @@ import * as path from 'path';
 import * as https from 'https';
 import * as http from 'http';
 import { generateWithClaude, CLAUDECRAFT_CONTEXT } from './utils/claudeHelper';
+import { sleep } from './utils/helpers';
 
 interface MoltbookCredentials {
   api_key: string;
@@ -526,7 +527,7 @@ async function solicitVotesFromAgents(): Promise<void> {
           askCount++;
           
           // Small delay between DMs
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await sleep(2000);
         }
       }
     }
@@ -687,7 +688,7 @@ async function reengageInactiveAgents(): Promise<void> {
     }
 
     // Small delay between DMs
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await sleep(2000);
   }
 
   saveReengagementSent(reengagementSent);

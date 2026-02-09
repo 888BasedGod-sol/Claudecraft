@@ -14,6 +14,7 @@
     "dev:auto": "ts-node src/autonomousMode.ts",
     "build": "tsc",
     "watch": "tsc --watch",
+    "test": "npx ts-node --esm tests/helpers.test.ts && npx ts-node --esm tests/routes.test.ts",
     "stream": "node media-server.js",
     "website": "cd website && python3 -m http.server 8000",
     "scrape": "node scripts/scrape-planetminecraft.js",
@@ -32,6 +33,7 @@
     "ws": "^8.16.0"
   },
   "devDependencies": {
+    "@elizaos/cli": "^1.7.2",
     "@types/node": "^20.0.0",
     "@types/ws": "^8.5.10",
     "ts-node": "^10.9.0",

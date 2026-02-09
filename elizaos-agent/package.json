@@ -1,0 +1,30 @@
+{
+  "name": "elizaos-agent",
+  "version": "1.0.0",
+  "description": "ElizaOS Agent for ClaudeCraft Minecraft Integration",
+  "main": "./src/character.ts",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun run --watch index.ts",
+    "build": "bun build ./index.ts --outdir ./dist --target node",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@elizaos/cli": "^1.7.2",
+    "@types/bun": "latest",
+    "@types/node": "^25.2.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
+    "@elizaos/core": "^1.7.2",
+    "@elizaos/plugin-anthropic": "^1.5.12",
+    "@elizaos/plugin-bootstrap": "^1.7.2",
+    "@elizaos/plugin-sql": "^1.7.2"
+  }
+}

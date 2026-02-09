@@ -14,7 +14,7 @@ import { getOptimalMiningLevel, getMiningAdvice, canMineBlock, getSurvivalPriori
 import { getWorldMemory } from '../agent/worldMemory';
 import { logStream } from '../server/logStream';
 import { logStreamer } from '../server/logStreamer';
-import { withTimeout } from '../utils/helpers';
+import { withTimeout, sleep } from '../utils/helpers';
 import { CONFIG } from '../config';
 import { getTwitterAgent } from '../twitterAgent';
 import { analyzeBuildRequest, BuildDecision } from '../building/buildAnalyzer';
@@ -52,6 +52,8 @@ export class AutonomousBotController {
   private teleportCooldown: number = 10000; // 10 second cooldown between teleports
   private lastChatTime: number = 0; // Timestamp of last chat message
   private chatCooldown: number = 150; // Minimum 150ms between chat messages to avoid spam kicks
+  private deathRecoveryInProgress: boolean = false; // Track death recovery state
+  private deathCount: number = 0; // Track deaths this session
 
   constructor(host: string, port: number, name: string, personality?: Partial<AgentPersonality>, creativeMode: boolean = false, sculptorMode: boolean = false) {
     this.host = host;
@@ -186,6 +188,9 @@ export class AutonomousBotController {
         console.log(`[AUTONOMOUS] ${this.botName} died! Will respawn and continue...`);
         logStream.log('WARN', `[${this.botName}] Died - respawning`);
         
+        this.deathCount++;
+        this.deathRecoveryInProgress = true;
+        
         // Record death to world memory
         const worldMemory = getWorldMemory();
         const pos = this.bot?.entity?.position;
@@ -199,6 +204,27 @@ export class AutonomousBotController {
             (this.bot?.inventory?.items()?.length || 0) > 10
           );
         }
+        
+        // Clear any stuck/stale goals to get a fresh start after respawn
+        try {
+          this.agent.clearStaleGoals();
+          this.consecutiveFailures = 0; // Reset failure counter
+        } catch (e) {
+          // Agent might not be ready yet
+        }
+        
+        // Wait for respawn, then resume after brief cooldown
+        this.bot?.once('spawn', () => {
+          console.log(`[AUTONOMOUS] ${this.botName} respawned after death #${this.deathCount}`);
+          logStream.log('INFO', `[${this.botName}] Respawned after death #${this.deathCount}`);
+          
+          // Brief cooldown before resuming autonomous behavior
+          setTimeout(() => {
+            this.deathRecoveryInProgress = false;
+            // Suggest a recovery goal
+            this.agent.suggestGoal('Recover from death - assess situation and continue building/exploring', 7);
+          }, 3000); // 3 second recovery cooldown
+        });
       });
 
       this.bot.on('chat', (username: string, message: string) => {
@@ -287,6 +313,10 @@ export class AutonomousBotController {
       return;
     }
     if (this.actionInProgress) return;
+    if (this.deathRecoveryInProgress) {
+      // Skip decision-making while recovering from death
+      return;
+    }
 
     this.actionInProgress = true;
     const registry = getAgentRegistry();
@@ -764,7 +794,7 @@ export class AutonomousBotController {
       this.bot.chat(`/spreadplayers ${spreadX} ${spreadZ} 0 50 false ${this.botName}`);
       
       // Wait for teleport to complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await sleep(1000);
       
       const newPos = this.bot.entity.position;
       console.log(`[AUTONOMOUS] ${this.botName} teleported to surface at (${Math.floor(newPos.x)}, ${Math.floor(newPos.y)}, ${Math.floor(newPos.z)})`);
@@ -773,7 +803,7 @@ export class AutonomousBotController {
       console.log(`[AUTONOMOUS] ${this.botName} failed to teleport: ${e.message}`);
       // Fall back to simple tp command
       this.bot.chat(`/tp ${this.botName} ${x} 100 ${z}`);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
     }
   }
 
@@ -843,7 +873,7 @@ export class AutonomousBotController {
       console.log(`[${this.botName}] Underground at Y=${currentY}, teleporting to surface before building...`);
       logStream.log('INFO', `[${this.botName}] Teleporting to surface before building (was at Y=${currentY})`);
       await this.teleportToSurface();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
     }
     
     const pos = this.bot.entity.position;
@@ -901,7 +931,7 @@ export class AutonomousBotController {
       console.log(`[${this.botName}] Underground at Y=${currentY}, teleporting to surface before building...`);
       logStream.log('INFO', `[${this.botName}] Teleporting to surface before building (was at Y=${currentY})`);
       await this.teleportToSurface();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
     }
     
     // In creative mode, use /setblock commands - no inventory needed!
@@ -1053,7 +1083,7 @@ export class AutonomousBotController {
   private delay(ms: number): Promise<void> {
     // Enforce minimum delay to prevent server kick for spam
     const safeDelay = Math.max(ms, AutonomousBotController.CREATIVE_COMMAND_DELAY_MS);
-    return new Promise(resolve => setTimeout(resolve, safeDelay));
+    return sleep(safeDelay);
   }
 
   /**
@@ -1066,7 +1096,7 @@ export class AutonomousBotController {
     
     if (timeSinceLastChat < this.chatCooldown) {
       // Wait for remaining cooldown
-      await new Promise(resolve => setTimeout(resolve, this.chatCooldown - timeSinceLastChat));
+      await sleep(this.chatCooldown - timeSinceLastChat);
     }
     
     this.bot.chat(message);
@@ -1094,7 +1124,7 @@ export class AutonomousBotController {
       console.log(`[${this.botName}] Underground at Y=${currentY}, teleporting to surface before creative building...`);
       logStream.log('INFO', `[${this.botName}] Teleporting to surface before creative building (was at Y=${currentY})`);
       await this.teleportToSurface();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
     }
     
     let blocksPlaced = 0;
@@ -2000,6 +2030,139 @@ export class AutonomousBotController {
     } catch (e: any) {
       console.error(`[${this.botName}] Colosseum build failed:`, e.message);
       return { success: false, message: `Colosseum build failed: ${e.message}` };
+    }
+  }
+
+  /**
+   * Build the Super Bowl Stadium from the full blueprint using /setblock commands.
+   * Perfect for game day builds! (~45K blocks)
+   */
+  async buildSuperbowlBlueprint(): Promise<{ success: boolean; message: string }> {
+    try {
+      const { generateSuperbowlBlueprint, SUPERBOWL_INFO } = await import('../building/superbowlStadiumPlan');
+      
+      this.bot.chat('🏈 INITIATING SUPER BOWL LX STADIUM BUILD — Game day is here!');
+      console.log(`[${this.botName}] 🏈 Starting Super Bowl stadium blueprint build...`);
+      
+      const blueprint = generateSuperbowlBlueprint();
+      const totalBlocks = blueprint.length;
+      
+      const origin = SUPERBOWL_INFO.origin;
+      const halfLength = Math.ceil(SUPERBOWL_INFO.dimensions.length / 2);
+      const halfWidth = Math.ceil(SUPERBOWL_INFO.dimensions.width / 2);
+      
+      // Step 0: Teleport to build site FIRST
+      this.bot.chat(`/tp ${this.botName} ${origin.x + halfLength} ${origin.y + 40} ${origin.z + halfWidth}`);
+      await this.delay(2000);
+      
+      // Step 1: Force-load ALL chunks covering the Stadium
+      this.bot.chat('📦 Force-loading chunks for stadium area...');
+      console.log(`[${this.botName}] Force-loading chunks...`);
+      const minChunkX = Math.floor((origin.x - 5) / 16) * 16;
+      const maxChunkX = Math.floor((origin.x + SUPERBOWL_INFO.dimensions.length + 5) / 16) * 16;
+      const minChunkZ = Math.floor((origin.z - 5) / 16) * 16;
+      const maxChunkZ = Math.floor((origin.z + SUPERBOWL_INFO.dimensions.width + 5) / 16) * 16;
+      this.bot.chat(`/forceload add ${minChunkX} ${minChunkZ} ${maxChunkX} ${maxChunkZ}`);
+      await this.delay(3000);
+      
+      // Step 2: Clear the build area with /fill air
+      this.bot.chat('🧹 Clearing stadium area...');
+      console.log(`[${this.botName}] Clearing build area...`);
+      const clearMinX = origin.x - 2;
+      const clearMaxX = origin.x + SUPERBOWL_INFO.dimensions.length + 2;
+      const clearMinZ = origin.z - 2;
+      const clearMaxZ = origin.z + SUPERBOWL_INFO.dimensions.width + 2;
+      const clearMinY = origin.y - 3;
+      const clearMaxY = origin.y + SUPERBOWL_INFO.dimensions.height + 5;
+      
+      // Clear in vertical slices
+      for (let y = clearMinY; y <= clearMaxY; y += 10) {
+        const yEnd = Math.min(y + 9, clearMaxY);
+        this.bot.chat(`/fill ${clearMinX} ${y} ${clearMinZ} ${clearMaxX} ${yEnd} ${clearMaxZ} minecraft:air`);
+        await this.delay(200);
+      }
+      this.bot.chat('✅ Area cleared for the stadium!');
+      await this.delay(1000);
+      
+      this.bot.chat(`📐 ${SUPERBOWL_INFO.dimensions.length}x${SUPERBOWL_INFO.dimensions.width} blocks, ${SUPERBOWL_INFO.dimensions.height} blocks tall`);
+      this.bot.chat(`🧱 ${totalBlocks.toLocaleString()} blocks to place. Kickoff in progress...`);
+      
+      // Sort by priority
+      blueprint.sort((a, b) => a.priority - b.priority);
+      
+      let blocksPlaced = 0;
+      let lastProgressReport = 0;
+      let currentSection = '';
+      const startTime = Date.now();
+      
+      const BATCH_SIZE = 20;
+      const BATCH_DELAY = 150;
+      const SECTION_DELAY = 500;
+      const PROGRESS_INTERVAL = 5000;
+      
+      for (let i = 0; i < blueprint.length; i++) {
+        const block = blueprint[i];
+        
+        // Announce section transitions
+        if (block.section !== currentSection) {
+          currentSection = block.section;
+          this.bot.chat(`⚒️ Building: ${currentSection}`);
+          console.log(`[${this.botName}] Building section: ${currentSection}`);
+          await this.delay(SECTION_DELAY);
+        }
+        
+        // Place the block
+        const blockName = `minecraft:${block.blockType.replace('minecraft:', '')}`;
+        this.bot.chat(`/setblock ${block.x} ${block.y} ${block.z} ${blockName}`);
+        blocksPlaced++;
+        
+        // Yield to event loop every batch
+        if (blocksPlaced % BATCH_SIZE === 0) {
+          await this.delay(BATCH_DELAY);
+        }
+        
+        // Progress report
+        if (blocksPlaced - lastProgressReport >= PROGRESS_INTERVAL) {
+          lastProgressReport = blocksPlaced;
+          const pct = Math.round((blocksPlaced / totalBlocks) * 100);
+          const elapsed = Math.round((Date.now() - startTime) / 1000);
+          const rate = elapsed > 0 ? Math.round(blocksPlaced / elapsed) : 0;
+          const eta = rate > 0 ? Math.round((totalBlocks - blocksPlaced) / rate) : 0;
+          this.bot.chat(`📊 ${pct}% complete (${blocksPlaced.toLocaleString()}/${totalBlocks.toLocaleString()}) — ETA: ${eta}s`);
+          console.log(`[${this.botName}] Stadium ${pct}% — ${blocksPlaced}/${totalBlocks} — ${rate} bps`);
+          await this.delay(500);
+        }
+      }
+      
+      const totalTime = Math.round((Date.now() - startTime) / 1000);
+      this.bot.chat(`🏈 ✅ SUPER BOWL STADIUM COMPLETE! ${blocksPlaced.toLocaleString()} blocks in ${totalTime}s!`);
+      this.bot.chat(`🏈 IT'S GAME TIME! Welcome to Super Bowl LX!`);
+      console.log(`[${this.botName}] ✅ Stadium complete: ${blocksPlaced} blocks in ${totalTime}s`);
+      
+      // Remove forceload
+      this.bot.chat(`/forceload remove ${minChunkX} ${minChunkZ} ${maxChunkX} ${maxChunkZ}`);
+      
+      // Record in world memory
+      try {
+        const worldMemory = getWorldMemory();
+        const build = worldMemory.registerBuild({
+          name: 'Super Bowl LX Stadium',
+          builder: this.botName,
+          x: origin.x, y: origin.y, z: origin.z,
+          width: SUPERBOWL_INFO.dimensions.length,
+          height: SUPERBOWL_INFO.dimensions.height,
+          depth: SUPERBOWL_INFO.dimensions.width,
+          type: 'other',
+          description: SUPERBOWL_INFO.description,
+          materials: ['grass_block', 'concrete', 'quartz_block', 'gold_block', 'sea_lantern']
+        });
+        worldMemory.completeBuild(build.id);
+      } catch (_) { /* best-effort */ }
+      
+      return { success: true, message: `Super Bowl Stadium built! ${blocksPlaced} blocks placed in ${totalTime}s` };
+    } catch (e: any) {
+      console.error(`[${this.botName}] Stadium build failed:`, e.message);
+      return { success: false, message: `Stadium build failed: ${e.message}` };
     }
   }
 
@@ -3084,7 +3247,7 @@ export class AutonomousBotController {
   }
 
   private async wait(seconds: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+    return sleep(seconds * 1000);
   }
 
   private stopDecisionLoop(): void {
@@ -3117,7 +3280,7 @@ export class AutonomousBotController {
     console.log(`[AUTONOMOUS] ${this.botName} attempting to reconnect in ${delay/1000}s (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     logStream.log('INFO', `[${this.botName}] Reconnecting in ${delay/1000}s (attempt ${this.reconnectAttempts})`);
 
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await sleep(delay);
 
     try {
       // Clean up old bot

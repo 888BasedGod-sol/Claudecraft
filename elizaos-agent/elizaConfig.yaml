@@ -1,0 +1,8 @@
+# ElizaOS Configuration for ClaudeCraft
+# This tells ElizaOS to use our custom character
+
+agents:
+  - name: Eliza_Crafter
+    character: ./src/character.ts
+    plugins:
+      - "@elizaos/plugin-bootstrap"

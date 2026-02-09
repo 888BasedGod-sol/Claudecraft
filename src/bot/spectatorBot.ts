@@ -12,6 +12,7 @@ import mineflayer, { Bot } from 'mineflayer';
 import { pathfinder, Movements, goals } from 'mineflayer-pathfinder';
 import { Logger } from '../utils/logger';
 import { CONFIG } from '../config';
+import { sleep } from '../utils/helpers';
 
 // Camera configuration
 const CAMERA_CONFIG = {
@@ -174,7 +175,7 @@ export class SpectatorBot {
     const delay = Math.min(Math.pow(2, this.reconnectAttempts) * 1000, 30000);
     Logger.info(`[Spectator] Reconnecting in ${delay/1000}s (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
 
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await sleep(delay);
 
     try {
       if (this.bot) {

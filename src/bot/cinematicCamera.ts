@@ -1,6 +1,7 @@
 import mineflayer, { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { Logger } from '../utils/unifiedLogger';
+import { sleep } from '../utils/helpers';
 
 // ============================================================================
 // PROFESSIONAL CINEMATIC CAMERA SYSTEM
@@ -1538,7 +1539,7 @@ export class CinematicCamera {
         }
         if (attempt < maxRetries) {
           this.log(`⏳ Retrying in 5 seconds...`);
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          await sleep(5000);
         } else {
           throw error;
         }

@@ -13,6 +13,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { CONFIG } from '../config';
+import { sleep } from '../utils/helpers';
 
 // ============ TOKEN USAGE TRACKING ============
 
@@ -263,7 +264,7 @@ export async function callClaude(
         const delay = Math.pow(2, attempt) * 1000;
         console.log(`[API] ⚠️ ${agentName} retry ${attempt + 1}/${MAX_RETRIES} after ${status || 'timeout'} (waiting ${delay}ms)`);
         tokenUsage.total.retries++;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await sleep(delay);
         continue;
       }
 

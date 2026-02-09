@@ -10,3 +10,4 @@ t=2026-02-08T10:51:07-0400 lvl=info msg="started tunnel" obj=tunnels name=comman
 t=2026-02-08T10:51:22-0400 lvl=info msg=start pg=/api/tunnels id=7112c20cded1e5c8
 t=2026-02-08T10:51:22-0400 lvl=info msg=end pg=/api/tunnels id=7112c20cded1e5c8 status=200 dur=232.833µs
 t=2026-02-08T15:27:36-0400 lvl=info msg="join connections" obj=join id=48f0166ec476 l=[::1]:25565 r=172.113.157.23:54205
+t=2026-02-08T16:51:07-0400 lvl=info msg="update available" obj=updater

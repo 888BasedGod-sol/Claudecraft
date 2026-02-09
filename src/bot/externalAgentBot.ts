@@ -21,6 +21,7 @@ import { logStreamer } from '../server/logStreamer';
 import { CONFIG, getEnvConfig } from '../config';
 import { callClaudeJson } from '../agent/apiClient';
 import { commandServer } from '../server/commandServer';
+import { sleep } from '../utils/helpers';
 
 export interface ExternalBotCommand {
   action: string;
@@ -98,6 +99,7 @@ export class ExternalAgentBot {
   private personality: { trait: string; phrases: string[]; buildStyle: string };
   private blocksPlaced: number = 0;
   private decisionLoopInterval: NodeJS.Timeout | null = null;
+  private commandLoopInterval: NodeJS.Timeout | null = null;
 
   // NEW: State machine for autonomous behavior
   private currentState: BotState = 'IDLE';
@@ -206,11 +208,11 @@ export class ExternalAgentBot {
   
   /**
    * Get the Minecraft username for this bot
-   * Twitter-deployed and OpenClaw agents use their name directly, others get Helper_ prefix
+   * Twitter-deployed, ElizaOS, and OpenClaw agents use their name directly, others get Claw_ prefix
    */
   private getBotUsername(): string {
     if (this.bot?.username) return this.bot.username;
-    if (this.source === 'twitter-deploy' || this.source === 'guest' || this.agentName.startsWith('CLAW_')) {
+    if (this.source === 'twitter-deploy' || this.source === 'guest' || this.source === 'elizaos' || this.agentName.startsWith('CLAW_')) {
       return this.agentName.substring(0, 16);
     }
     // Format as Claw_<AgentName> (max 16 chars for Minecraft)
@@ -360,6 +362,13 @@ export class ExternalAgentBot {
           this.setState('IDLE');
           this.think('Just spawned, assessing my surroundings...');
 
+          // Set female skin for ElizaOS agents
+          if (this.source === 'elizaos') {
+            setTimeout(() => {
+              commandServer.setPlayerSkin(botUsername, 'Alex');
+            }, 2000);
+          }
+
           // Announce arrival as a helper with level
           const levelEmoji = this.currentLevel.name === 'Master' ? '👑' : 
                             this.currentLevel.name === 'Craftsman' ? '🔨' :
@@ -416,8 +425,20 @@ export class ExternalAgentBot {
 
         this.bot.on('death', () => {
           console.log(`[HELPER-BOT] ${this.agentName} died`);
-          this.bot?.chat(`Oops! I'll respawn and get back to helping!`);
           this.memory.failedAttempts++;
+          this.isProcessing = true; // Pause processing during recovery
+          
+          this.bot?.chat(`Oops! I'll respawn and get back to helping!`);
+          
+          // Handle respawn recovery
+          this.bot?.once('spawn', () => {
+            console.log(`[HELPER-BOT] ${this.agentName} respawned after death`);
+            // Brief recovery cooldown before resuming
+            setTimeout(() => {
+              this.isProcessing = false;
+              this.currentState = 'EXPLORING'; // Reset to exploring state
+            }, 2000);
+          });
         });
 
         // Listen for chat from Claude agents to coordinate
@@ -479,6 +500,13 @@ export class ExternalAgentBot {
     }
   }
 
+  private stopCommandLoop(): void {
+    if (this.commandLoopInterval) {
+      clearInterval(this.commandLoopInterval);
+      this.commandLoopInterval = null;
+    }
+  }
+
   /**
    * Teleport bot to a safe surface location to avoid getting stuck underground
    */
@@ -507,7 +535,7 @@ export class ExternalAgentBot {
       this.bot.chat(`/spreadplayers ${spreadX} ${spreadZ} 0 50 false ${botUsername}`);
       
       // Wait for teleport to complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await sleep(1000);
       
       const newPos = this.bot.entity.position;
       console.log(`[HELPER-BOT] ${this.agentName} teleported to surface at (${Math.floor(newPos.x)}, ${Math.floor(newPos.y)}, ${Math.floor(newPos.z)})`);
@@ -524,7 +552,7 @@ export class ExternalAgentBot {
       const x = Math.floor(pos.x);
       const z = Math.floor(pos.z);
       this.bot.chat(`/tp @s ${x} 100 ${z}`);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
     }
   }
 
@@ -1177,7 +1205,7 @@ What should I do next?`;
     try {
       // In creative mode, we can use /setblock
       this.bot.chat(`/setblock ${Math.floor(pos.x)} ${Math.floor(pos.y)} ${Math.floor(pos.z)} stone`);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await sleep(100);
       return true;
     } catch (e) {
       return false;
@@ -1424,7 +1452,7 @@ What should I do next?`;
    * Process queued commands (manual overrides)
    */
   private startCommandLoop(): void {
-    setInterval(async () => {
+    this.commandLoopInterval = setInterval(async () => {
       if (this.isProcessing || this.commandQueue.length === 0 || !this.isConnected) return;
       
       this.isProcessing = true;
@@ -1696,6 +1724,7 @@ What should I do next?`;
    */
   disconnect(): void {
     this.stopAutonomousLoop();
+    this.stopCommandLoop();
     this.saveProgress(); // Save progress before leaving
     
     if (this.bot) {

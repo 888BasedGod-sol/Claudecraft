@@ -12,6 +12,7 @@ import mineflayer, { Bot } from 'mineflayer';
 import { pathfinder, Movements } from 'mineflayer-pathfinder';
 import { logStream } from '../server/logStream';
 import { CONFIG } from '../config';
+import { sleep } from '../utils/helpers';
 
 export interface BotControllerOptions {
   host: string;
@@ -206,7 +207,7 @@ export abstract class BaseBotController {
       this.botName
     );
 
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await sleep(delay);
 
     try {
       this.cleanupBot();

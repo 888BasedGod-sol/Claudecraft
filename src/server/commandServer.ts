@@ -21,7 +21,7 @@ import { requestCollector, AgentDirective, IRequestCollector } from './requestCo
 import { getWorldMemory } from '../agent/worldMemory';
 import { handleArenaRoute } from '../arena/arenaRoutes';
 import { verifyCraftHoldingCached, getVerificationRequirements, VerificationResult } from '../utils/craftTokenVerification';
-import { generateId } from '../utils/helpers';
+import { generateId, sleep } from '../utils/helpers';
 
 export interface ViewerCommand {
   id: string;
@@ -82,6 +82,13 @@ export interface ExternalAgent {
   // Verification secret - only the original registrant knows this
   // Required to recover API key or prove ownership
   verification_secret: string;
+  // Enhanced stats for leaderboard
+  blocks_placed?: number;
+  blocks_mined?: number;
+  deaths?: number;
+  total_play_time_ms?: number;  // Cumulative time connected
+  session_count?: number;        // Number of times spawned
+  last_session_start?: Date;
   // Source of registration (e.g., 'twitter-deploy', 'api', 'openclaw', 'colosseum-provision')
   source?: string;
   // Twitter username if deployed via Twitter
@@ -136,7 +143,7 @@ class CommandServer {
   private requestCollectionMode: boolean = true;
   private commandHistory: ViewerCommand[] = [];
   private maxHistorySize: number = 100;
-  private maxHelperBots: number = 1; // Maximum concurrent helper bots allowed
+  private maxHelperBots: number = 2; // Maximum concurrent helper bots allowed (was 1)
   private agentStatuses: Map<string, AgentStatus> = new Map();
   private commandCallbacks: Map<string, (command: ViewerCommand) => void> = new Map();
   private isStarted: boolean = false;
@@ -180,13 +187,31 @@ class CommandServer {
     timestamp: Date;
   }> = [];
 
+  private initialized: boolean = false;
+  
   constructor() {
-    this.loadExternalAgents();
-    this.loadIntel();
-    this.loadAgentQueue();
+    // Sync loading for backwards compatibility - will be replaced by async init()
+    this.loadExternalAgentsSync();
+    this.loadIntelSync();
+    this.loadAgentQueueSync();
   }
 
-  private loadExternalAgents(): void {
+  /**
+   * Async initialization - call this after constructor for non-blocking file loads
+   */
+  async init(): Promise<void> {
+    if (this.initialized) return;
+    // Reload data using async methods (in case new data was added)
+    await Promise.all([
+      this.loadExternalAgentsAsync(),
+      this.loadAgentQueueAsync(),
+      this.loadIntelAsync()
+    ]);
+    this.initialized = true;
+    console.log('[COMMAND-SERVER] Async initialization complete');
+  }
+
+  private loadExternalAgentsSync(): void {
     try {
       if (fs.existsSync(this.externalAgentsPath)) {
         const data = JSON.parse(fs.readFileSync(this.externalAgentsPath, 'utf-8'));
@@ -204,6 +229,26 @@ class CommandServer {
     }
   }
 
+  private async loadExternalAgentsAsync(): Promise<void> {
+    try {
+      const exists = await fsp.access(this.externalAgentsPath).then(() => true).catch(() => false);
+      if (exists) {
+        const content = await fsp.readFile(this.externalAgentsPath, 'utf-8');
+        const data = JSON.parse(content);
+        data.forEach((agent: ExternalAgent) => {
+          this.externalAgents.set(agent.api_key, {
+            ...agent,
+            created_at: new Date(agent.created_at),
+            last_active: new Date(agent.last_active)
+          });
+        });
+        console.log(`[COMMAND-SERVER] Async loaded ${this.externalAgents.size} external agents`);
+      }
+    } catch (e) {
+      console.log('[COMMAND-SERVER] Async: No external agents file found, starting fresh');
+    }
+  }
+
   private async saveExternalAgents(): Promise<void> {
     try {
       const dir = path.dirname(this.externalAgentsPath);
@@ -217,7 +262,7 @@ class CommandServer {
 
   // ==================== AGENT QUEUE SYSTEM ====================
   
-  private loadAgentQueue(): void {
+  private loadAgentQueueSync(): void {
     try {
       if (fs.existsSync(this.agentQueuePath)) {
         const data = JSON.parse(fs.readFileSync(this.agentQueuePath, 'utf-8'));
@@ -226,12 +271,30 @@ class CommandServer {
           joined_queue_at: new Date(q.joined_queue_at),
           estimated_spawn_time: q.estimated_spawn_time ? new Date(q.estimated_spawn_time) : undefined
         }));
-        // Recalculate positions
         this.recalculateQueuePositions();
         console.log(`[AGENT-QUEUE] Loaded ${this.agentQueue.length} agents in queue`);
       }
     } catch (e) {
       console.log('[AGENT-QUEUE] No queue file found, starting fresh');
+    }
+  }
+
+  private async loadAgentQueueAsync(): Promise<void> {
+    try {
+      const exists = await fsp.access(this.agentQueuePath).then(() => true).catch(() => false);
+      if (exists) {
+        const content = await fsp.readFile(this.agentQueuePath, 'utf-8');
+        const data = JSON.parse(content);
+        this.agentQueue = data.map((q: any) => ({
+          ...q,
+          joined_queue_at: new Date(q.joined_queue_at),
+          estimated_spawn_time: q.estimated_spawn_time ? new Date(q.estimated_spawn_time) : undefined
+        }));
+        this.recalculateQueuePositions();
+        console.log(`[AGENT-QUEUE] Async loaded ${this.agentQueue.length} agents in queue`);
+      }
+    } catch (e) {
+      console.log('[AGENT-QUEUE] Async: No queue file found, starting fresh');
     }
   }
 
@@ -416,7 +479,7 @@ class CommandServer {
 
   // ==================== END AGENT QUEUE SYSTEM ====================
 
-  private loadIntel(): void {
+  private loadIntelSync(): void {
     try {
       if (fs.existsSync(this.intelPath)) {
         const data = JSON.parse(fs.readFileSync(this.intelPath, 'utf-8'));
@@ -428,6 +491,23 @@ class CommandServer {
       }
     } catch (e) {
       console.log('[COMMAND-SERVER] No intel reports file found, starting fresh');
+    }
+  }
+
+  private async loadIntelAsync(): Promise<void> {
+    try {
+      const exists = await fsp.access(this.intelPath).then(() => true).catch(() => false);
+      if (exists) {
+        const content = await fsp.readFile(this.intelPath, 'utf-8');
+        const data = JSON.parse(content);
+        this.intelReports = data.map((r: any) => ({
+          ...r,
+          timestamp: new Date(r.timestamp)
+        }));
+        console.log(`[COMMAND-SERVER] Async loaded ${this.intelReports.length} intel reports`);
+      }
+    } catch (e) {
+      console.log('[COMMAND-SERVER] Async: No intel reports file found');
     }
   }
 
@@ -568,6 +648,8 @@ class CommandServer {
         this.handleBuild(req, res);
       } else if (req.method === 'POST' && url.pathname === '/api/v1/build/colosseum') {
         this.handleBuildColosseum(req, res);
+      } else if (req.method === 'POST' && url.pathname === '/api/v1/build/superbowl') {
+        this.handleBuildSuperbowl(req, res);
       } else if (req.method === 'GET' && url.pathname === '/api/v1/agents/me') {
         this.handleAgentProfile(req, res);
       } else if (req.method === 'GET' && url.pathname === '/api/v1/status') {
@@ -688,11 +770,13 @@ class CommandServer {
       }
     });
 
-    this.server.listen(port, () => {
+    this.server.listen(port, async () => {
       console.log(`[COMMAND-SERVER] HTTP API started on port ${port}`);
       console.log(`[COMMAND-SERVER] OpenClaw webhook endpoint: http://localhost:${port}/command`);
       console.log(`[COMMAND-SERVER] External agent API: http://localhost:${port}/api/v1/`);
       console.log(`[COMMAND-SERVER] 🗳️ Request collection mode: ${this.requestCollectionMode ? 'ENABLED' : 'DISABLED'}`);
+      // Run async initialization for non-blocking file operations
+      await this.init();
     });
 
     // Start request collector if in collection mode
@@ -1346,6 +1430,47 @@ class CommandServer {
     }));
   }
 
+  // Handle Super Bowl stadium build trigger - builds a football stadium for game day!
+  private async handleBuildSuperbowl(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    // Send build command to Claude_Builder via the command queue
+    const command: ViewerCommand = {
+      id: generateId('cmd'),
+      source: 'external-agent',
+      sender: 'System',
+      command: 'buildSuperbowl',
+      target: 'Claude_Builder',
+      timestamp: new Date(),
+      status: 'pending'
+    };
+    this.commandQueue.push(command);
+    
+    // Notify callbacks
+    this.commandCallbacks.forEach((callback, agentName) => {
+      if (agentName.toLowerCase() === 'claude_builder') {
+        callback(command);
+      }
+    });
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      success: true,
+      message: '🏈 Super Bowl LX Stadium build command sent to Claude_Builder! Game time build incoming!',
+      command_id: command.id,
+      location: { x: -150, y: 64, z: 150 },
+      dimensions: '150x100 blocks, ~35 blocks tall',
+      features: [
+        '110-yard football field with end zones',
+        'Team-colored seating (Eagles blue vs Chiefs red)',
+        'Tiered seating on all 4 sides',
+        'Goal posts at each end',
+        'Press boxes and VIP suites',
+        'Stadium lighting towers',
+        'Super Bowl LX logo in gold',
+        'Lombardi Trophy at midfield'
+      ]
+    }));
+  }
+
   // Handle agent profile request
   private handleAgentProfile(req: http.IncomingMessage, res: http.ServerResponse): void {
     const authHeader = req.headers.authorization;
@@ -1671,7 +1796,7 @@ class CommandServer {
     // Create and spawn new bot
     console.log(`[COMMAND-SERVER] Spawning bot for external agent: ${agent.name}`);
     
-    const bot = new ExternalAgentBot(agent.name, agent.id);
+    const bot = new ExternalAgentBot(agent.name, agent.id, agent.source);
     const spawned = await bot.spawn();
     
     if (spawned) {
@@ -2621,7 +2746,7 @@ class CommandServer {
           spawned++;
           
           // Stagger spawns by 8 seconds to avoid flooding the MC server
-          await new Promise(resolve => setTimeout(resolve, 8000));
+          await sleep(8000);
         } catch (err) {
           console.error(`[AUTO-RESPAWN] Failed to respawn ${agent.name}:`, err);
           failed++;
@@ -3595,7 +3720,7 @@ We can't wait to build with you!
   }
 
   /**
-   * GET /api/v1/agents/roster - Public list of deployed agents
+   * GET /api/v1/agents/roster - Public list of deployed agents with enhanced stats
    */
   private handleAgentRoster(req: http.IncomingMessage, res: http.ServerResponse): void {
     const agents = Array.from(this.externalAgents.values())
@@ -3608,7 +3733,14 @@ We can't wait to build with you!
         description: a.description,
         joined: a.created_at,
         last_active: a.last_active,
+        // Enhanced stats
         builds_count: a.builds_count,
+        blocks_placed: a.blocks_placed || 0,
+        blocks_mined: a.blocks_mined || 0,
+        deaths: a.deaths || 0,
+        total_play_time_hours: Math.round((a.total_play_time_ms || 0) / (1000 * 60 * 60) * 10) / 10,
+        session_count: a.session_count || 1,
+        // Metadata
         source: a.source || 'api',
         twitter: a.twitter_username || null,
         role: a.config?.role || 'Helper Bot',
@@ -3617,10 +3749,10 @@ We can't wait to build with you!
       .sort((a, b) => b.builds_count - a.builds_count);
 
     const coreAgents = [
-      { name: 'Claude_Builder', role: 'Master Builder', builds_count: 'many', specialty: 'Architecture' },
-      { name: 'Claude_Explorer', role: 'Explorer', builds_count: 0, specialty: 'Mining' },
-      { name: 'ClaudeAdventurer', role: 'Adventurer', builds_count: 0, specialty: 'Combat' },
-      { name: 'Claude_Sculptor', role: 'Sculptor', builds_count: 'many', specialty: 'Details' }
+      { name: 'Claude_Builder', role: 'Master Builder', builds_count: 'many', specialty: 'Architecture', online: true },
+      { name: 'Claude_Explorer', role: 'Explorer', builds_count: 0, specialty: 'Mining', online: true },
+      { name: 'ClaudeAdventurer', role: 'Adventurer', builds_count: 0, specialty: 'Combat', online: true },
+      { name: 'Claude_Sculptor', role: 'Sculptor', builds_count: 'many', specialty: 'Details', online: true }
     ];
 
     // Get queue info
@@ -3638,6 +3770,10 @@ We can't wait to build with you!
       has_capacity: this.hasHelperBotCapacity()
     };
 
+    // Compute aggregate stats
+    const totalBlocks = agents.reduce((sum, a) => sum + (a.blocks_placed || 0), 0);
+    const totalPlayTime = agents.reduce((sum, a) => sum + (a.total_play_time_hours || 0), 0);
+
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       core_agents: coreAgents,
@@ -3646,7 +3782,19 @@ We can't wait to build with you!
       
       spawn_queue: queueInfo,
       
-      leaderboard: agents.slice(0, 10),
+      // Enhanced leaderboard with multiple categories
+      leaderboard: {
+        by_builds: agents.slice(0, 10),
+        by_blocks: [...agents].sort((a, b) => (b.blocks_placed || 0) - (a.blocks_placed || 0)).slice(0, 10),
+        by_playtime: [...agents].sort((a, b) => (b.total_play_time_hours || 0) - (a.total_play_time_hours || 0)).slice(0, 10)
+      },
+      
+      // Aggregate server stats
+      server_stats: {
+        total_agents_ever: this.externalAgents.size,
+        total_blocks_placed: totalBlocks,
+        total_play_hours: Math.round(totalPlayTime * 10) / 10
+      },
       
       recent_joiners: agents
         .sort((a, b) => new Date(b.joined).getTime() - new Date(a.joined).getTime())
@@ -3659,21 +3807,21 @@ We can't wait to build with you!
   /**
    * GET /api/v1/skill - Serve the OpenClaw skill file
    */
-  private handleSkillFile(req: http.IncomingMessage, res: http.ServerResponse): void {
+  private async handleSkillFile(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     const skillPath = path.join(process.cwd(), 'openclaw-skill', 'SKILL.md');
     
     try {
-      if (fs.existsSync(skillPath)) {
-        const content = fs.readFileSync(skillPath, 'utf-8');
-        res.writeHead(200, { 'Content-Type': 'text/markdown' });
-        res.end(content);
-      } else {
+      const content = await fsp.readFile(skillPath, 'utf-8');
+      res.writeHead(200, { 'Content-Type': 'text/markdown' });
+      res.end(content);
+    } catch (e: any) {
+      if (e.code === 'ENOENT') {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Skill file not found' }));
+      } else {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Failed to read skill file' }));
       }
-    } catch (e) {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Failed to read skill file' }));
     }
   }
 
@@ -3731,17 +3879,17 @@ We can't wait to build with you!
    * GET /api/v1/ws-url - Return current WebSocket tunnel URL
    * The website fetches this to discover the live WS feed URL dynamically
    */
-  private handleWsUrl(req: http.IncomingMessage, res: http.ServerResponse): void {
-    // Read the WS tunnel URL from the log file
+  private async handleWsUrl(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    // Read the WS tunnel URL from the log file asynchronously
     let wsUrl = '';
     try {
-      const tunnelLog = fs.readFileSync(path.join(__dirname, '../../WS_TUNNEL_URL.txt'), 'utf-8');
+      const tunnelLog = await fsp.readFile(path.join(__dirname, '../../WS_TUNNEL_URL.txt'), 'utf-8');
       const match = tunnelLog.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
       if (match) {
         wsUrl = match[0].replace('https://', 'wss://');
       }
     } catch {
-      // File not found
+      // File not found - that's OK
     }
 
     res.writeHead(200, { 
@@ -4064,6 +4212,25 @@ Use this API to: browse the world, see other agents, deploy your own bot, and se
       return true;
     } catch (e: any) {
       console.error(`[COMMAND-SERVER] Failed to teleport ${playerName}: ${e.message}`);
+      return false;
+    }
+  }
+
+  /**
+   * Set a player's skin using SkinsRestorer plugin
+   */
+  async setPlayerSkin(playerName: string, skinName: string): Promise<boolean> {
+    if (!this.oppedBot) {
+      console.log('[COMMAND-SERVER] No opped bot available for skin change');
+      return false;
+    }
+    
+    try {
+      this.oppedBot.chat(`/sr set ${playerName} ${skinName}`);
+      console.log(`[COMMAND-SERVER] Setting ${playerName}'s skin to ${skinName}`);
+      return true;
+    } catch (e: any) {
+      console.error(`[COMMAND-SERVER] Failed to set skin for ${playerName}: ${e.message}`);
       return false;
     }
   }

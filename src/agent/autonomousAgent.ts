@@ -1206,6 +1206,30 @@ What do you want to do? Think about what interests you, what goals you have, and
     }
   }
 
+  /**
+   * Clear stale or stuck goals - useful for recovery after death or getting stuck
+   */
+  clearStaleGoals(): void {
+    const now = Date.now();
+    const staleThreshold = 10 * 60 * 1000; // 10 minutes
+    
+    // Remove goals older than threshold or with no progress
+    this.currentGoals = this.currentGoals.filter(g => {
+      const age = now - g.createdAt;
+      // Keep fresh goals
+      if (age < staleThreshold) return true;
+      // Keep goals with recent progress
+      if (g.progress > 0) return true;
+      // Remove stale goals
+      console.log(`[${this.name}] Clearing stale goal: ${g.description}`);
+      return false;
+    });
+    
+    // Clear action plan queue as well
+    this.actionPlanQueue = [];
+    this.currentPlanGoal = null;
+  }
+
   private extractTags(content: string): string[] {
     const lower = content.toLowerCase();
     const words = lower.split(/\s+/);

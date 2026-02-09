@@ -13,6 +13,7 @@ import dotenv from 'dotenv';
 import { AutonomousBotController } from './bot/autonomousBotController';
 import { CinematicCamera } from './bot/cinematicCamera';
 import { Logger } from './utils/logger';
+import { sleep } from './utils/helpers';
 import { logStreamer } from './server/logStreamer';
 import { commandServer, ViewerCommand } from './server/commandServer';
 import { AgentDirective } from './server/requestCollector';
@@ -161,6 +162,14 @@ async function main() {
               return;
             }
             
+            // Special command: buildSuperbowl — route directly to Super Bowl stadium builder
+            if (command.command === 'buildSuperbowl') {
+              Logger.info(`🏈 [${agent.name}] SUPER BOWL STADIUM BUILD COMMAND — game time!`);
+              const result = await botController.buildSuperbowlBlueprint();
+              commandServer.completeCommand(command.id, result.success, result.message);
+              return;
+            }
+            
             // For creative mode agents (Claude_Builder), execute ANY build/create request immediately
             if (agent.creativeMode) {
               // Execute immediately - don't wait for decision loop
@@ -192,7 +201,7 @@ async function main() {
           if (retries > 0) {
             const delay = 8000 + (5 - retries) * 2000; // Increasing backoff: 8s, 10s, 12s, 14s
             Logger.warn(`Failed to spawn ${agent.name}, retrying in ${delay/1000}s... (${retries} retries left)`);
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await sleep(delay);
           } else {
             Logger.error(`Failed to spawn ${agent.name} after all retries: ${error}`);
           }
@@ -202,7 +211,7 @@ async function main() {
       // Longer delay between spawns to avoid protocol issues
       if (i < agentCount - 1) {
         Logger.info(`Waiting 20 seconds before spawning next agent...`);
-        await new Promise(resolve => setTimeout(resolve, 20000));
+        await sleep(20000);
       }
     }
 
