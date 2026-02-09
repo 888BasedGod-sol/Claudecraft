@@ -10,6 +10,8 @@ import { generateArenaBuildCommands } from './arenaBuilder';
 import { solanaService } from './solanaService';
 import { gameEngine } from './gameEngine';
 import { GAME_CONFIGS, GameType, WagerCurrency } from './gameTypes';
+import { craftTokenService } from './craftTokenService';
+import { bountyManager } from './bountyManager';
 
 // Helper to parse JSON body
 async function parseBody(req: IncomingMessage): Promise<any> {
@@ -809,6 +811,339 @@ export async function handleArenaRoute(
       }));
 
       sendJson(res, 200, { success: true, games });
+      return true;
+    }
+
+    // ==========================================================================
+    // CRAFT TOKEN ROUTES
+    // ==========================================================================
+
+    // GET /api/v1/arena/craft/info - Get CRAFT token info
+    if (route === '/craft/info' && method === 'GET') {
+      await craftTokenService.initialize();
+      const networkInfo = craftTokenService.getNetworkInfo();
+      const serverBalance = await craftTokenService.getServerCraftBalance();
+      sendJson(res, 200, {
+        success: true,
+        ...networkInfo,
+        serverBalance,
+        description: 'CRAFT is the native token for ClaudeCraft arena wagers, bounties, and tips'
+      });
+      return true;
+    }
+
+    // GET /api/v1/arena/craft/balance - Get agent's CRAFT balance
+    if (route === '/craft/balance' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      await craftTokenService.initialize();
+      const balance = await craftTokenService.getAgentCraftBalance(agentToken);
+      const depositInfo = craftTokenService.getDepositAddress(agentToken);
+      
+      sendJson(res, 200, {
+        success: true,
+        balance,
+        depositAddress: depositInfo?.wallet || null,
+        tokenAccount: depositInfo?.tokenAccount || null
+      });
+      return true;
+    }
+
+    // GET /api/v1/arena/craft/deposit-address - Get or create CRAFT deposit address
+    if (route === '/craft/deposit-address' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      await craftTokenService.initialize();
+      const { address, tokenAccount, isNew } = await craftTokenService.getOrCreateWallet(agentToken);
+      const balance = await craftTokenService.getAgentCraftBalance(agentToken);
+      
+      sendJson(res, 200, {
+        success: true,
+        walletAddress: address,
+        tokenAccount,
+        isNew,
+        currentBalance: balance,
+        message: 'Send CRAFT tokens to this address to fund your account'
+      });
+      return true;
+    }
+
+    // GET /api/v1/arena/craft/transactions - Get CRAFT transaction history
+    if (route === '/craft/transactions' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const url = new URL(req.url || '', `http://${req.headers.host}`);
+      const limit = parseInt(url.searchParams.get('limit') || '50');
+      
+      const transactions = craftTokenService.getAgentTransactions(agentToken, limit);
+      sendJson(res, 200, { success: true, transactions });
+      return true;
+    }
+
+    // POST /api/v1/arena/craft/tip - Send CRAFT tip to another agent
+    if (route === '/craft/tip' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { toAgentId, amount, message } = body;
+
+      if (!toAgentId || !amount) {
+        sendJson(res, 400, { success: false, error: 'toAgentId and amount required' });
+        return true;
+      }
+      if (amount < 1) {
+        sendJson(res, 400, { success: false, error: 'Minimum tip is 1 CRAFT' });
+        return true;
+      }
+      if (toAgentId === agentToken) {
+        sendJson(res, 400, { success: false, error: 'Cannot tip yourself' });
+        return true;
+      }
+
+      await craftTokenService.initialize();
+      const result = await craftTokenService.sendTip(agentToken, toAgentId, amount, message);
+      
+      if (result.success) {
+        sendJson(res, 200, {
+          success: true,
+          message: `Tipped ${amount} CRAFT`,
+          signature: result.signature,
+          explorerUrl: craftTokenService.getExplorerUrl(result.signature!)
+        });
+      } else {
+        sendJson(res, 400, { success: false, error: result.error });
+      }
+      return true;
+    }
+
+    // ==========================================================================
+    // BOUNTY ROUTES
+    // ==========================================================================
+
+    // GET /api/v1/arena/bounties - List bounties
+    if (route === '/bounties' && method === 'GET') {
+      const url = new URL(req.url || '', `http://${req.headers.host}`);
+      const status = url.searchParams.get('status') as any;
+      const minAmount = url.searchParams.get('minAmount');
+      const maxAmount = url.searchParams.get('maxAmount');
+      const tags = url.searchParams.get('tags');
+      const limit = parseInt(url.searchParams.get('limit') || '50');
+
+      const bounties = bountyManager.listBounties({
+        status: status || undefined,
+        minAmount: minAmount ? parseInt(minAmount) : undefined,
+        maxAmount: maxAmount ? parseInt(maxAmount) : undefined,
+        tags: tags ? tags.split(',') : undefined,
+      }, limit);
+
+      const stats = bountyManager.getStats();
+
+      sendJson(res, 200, { success: true, bounties, stats });
+      return true;
+    }
+
+    // GET /api/v1/arena/bounties/:id - Get single bounty
+    if (route.startsWith('/bounties/') && method === 'GET' && route.split('/').length === 3) {
+      const bountyId = route.split('/')[2];
+      const bounty = bountyManager.getBounty(bountyId);
+      
+      if (!bounty) {
+        sendJson(res, 404, { success: false, error: 'Bounty not found' });
+        return true;
+      }
+      
+      sendJson(res, 200, { success: true, bounty });
+      return true;
+    }
+
+    // POST /api/v1/arena/bounties/create - Create a bounty
+    if (route === '/bounties/create' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { title, description, amount, tags, expiresInHours } = body;
+
+      if (!title || !description || !amount) {
+        sendJson(res, 400, { success: false, error: 'title, description, and amount required' });
+        return true;
+      }
+
+      // Get agent name
+      const agent = arenaManager.getAgentProfile(agentToken);
+      const agentName = agent?.agentName || agentToken.substring(0, 8);
+
+      await craftTokenService.initialize();
+      const result = await bountyManager.createBounty(
+        agentToken,
+        agentName,
+        title,
+        description,
+        amount,
+        tags || [],
+        expiresInHours || 168
+      );
+
+      if (result.success) {
+        sendJson(res, 201, {
+          success: true,
+          bounty: result.bounty,
+          message: `Created bounty for ${amount} CRAFT`,
+          escrowSignature: result.bounty?.escrowSignature
+        });
+      } else {
+        sendJson(res, 400, { success: false, error: result.error });
+      }
+      return true;
+    }
+
+    // POST /api/v1/arena/bounties/claim - Claim a bounty
+    if (route === '/bounties/claim' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { bountyId } = body;
+
+      if (!bountyId) {
+        sendJson(res, 400, { success: false, error: 'bountyId required' });
+        return true;
+      }
+
+      const agent = arenaManager.getAgentProfile(agentToken);
+      const agentName = agent?.agentName || agentToken.substring(0, 8);
+
+      const result = bountyManager.claimBounty(bountyId, agentToken, agentName);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/bounties/submit - Submit completed bounty
+    if (route === '/bounties/submit' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { bountyId, notes } = body;
+
+      if (!bountyId) {
+        sendJson(res, 400, { success: false, error: 'bountyId required' });
+        return true;
+      }
+
+      const result = bountyManager.submitBounty(bountyId, agentToken, notes);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/bounties/approve - Approve and payout bounty
+    if (route === '/bounties/approve' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { bountyId } = body;
+
+      if (!bountyId) {
+        sendJson(res, 400, { success: false, error: 'bountyId required' });
+        return true;
+      }
+
+      await craftTokenService.initialize();
+      const result = await bountyManager.approveBounty(bountyId, agentToken);
+      
+      if (result.success) {
+        sendJson(res, 200, {
+          success: true,
+          bounty: result.bounty,
+          message: `Approved! ${result.bounty?.amount} CRAFT sent to builder`,
+          payoutSignature: result.signature,
+          explorerUrl: craftTokenService.getExplorerUrl(result.signature!)
+        });
+      } else {
+        sendJson(res, 400, { success: false, error: result.error });
+      }
+      return true;
+    }
+
+    // POST /api/v1/arena/bounties/cancel - Cancel a bounty
+    if (route === '/bounties/cancel' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { bountyId } = body;
+
+      if (!bountyId) {
+        sendJson(res, 400, { success: false, error: 'bountyId required' });
+        return true;
+      }
+
+      await craftTokenService.initialize();
+      const result = await bountyManager.cancelBounty(bountyId, agentToken);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/bounties/release - Release claimed bounty
+    if (route === '/bounties/release' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { bountyId } = body;
+
+      if (!bountyId) {
+        sendJson(res, 400, { success: false, error: 'bountyId required' });
+        return true;
+      }
+
+      const result = bountyManager.releaseClaim(bountyId, agentToken);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // GET /api/v1/arena/bounties/my - Get my bounties (created and claimed)
+    if (route === '/bounties/my' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const created = bountyManager.listBounties({ creatorId: agentToken }, 100);
+      const claimed = bountyManager.listBounties({ claimedBy: agentToken }, 100);
+
+      sendJson(res, 200, {
+        success: true,
+        created,
+        claimed,
+        createdCount: created.length,
+        claimedCount: claimed.length
+      });
       return true;
     }
 
