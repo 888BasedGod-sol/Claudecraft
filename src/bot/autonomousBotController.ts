@@ -19,6 +19,7 @@ import { CONFIG } from '../config';
 import { getTwitterAgent } from '../twitterAgent';
 import { analyzeBuildRequest, BuildDecision } from '../building/buildAnalyzer';
 import { SCULPTURES, buildSculptureCommands, getSculptureNames, listSculpturesForPrompt } from '../building/sculptures';
+import { processArenaCommand } from '../arena/arenaChatCommands';
 
 const { GoalNear, GoalBlock, GoalXZ, GoalY } = goals;
 
@@ -227,9 +228,26 @@ export class AutonomousBotController {
         });
       });
 
-      this.bot.on('chat', (username: string, message: string) => {
+      this.bot.on('chat', async (username: string, message: string) => {
         if (username === this.botName) return;
         logStream.log('CHAT', `<${username}> ${message}`);
+        
+        // Process arena commands (e.g., !wager, !games, !join)
+        if (message.startsWith('!')) {
+          try {
+            const responses = await processArenaCommand(username, message);
+            if (responses && responses.length > 0) {
+              // Send responses with a small delay between each to avoid spam
+              for (const response of responses) {
+                await this.safeChat(response);
+                await sleep(100);
+              }
+              return; // Don't process as regular chat
+            }
+          } catch (err: any) {
+            console.error('[ARENA-CMD] Error processing command:', err.message);
+          }
+        }
         
         // Agent can respond to players talking to it
         if (message.toLowerCase().includes(this.botName.toLowerCase())) {
