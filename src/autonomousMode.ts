@@ -16,6 +16,7 @@ import { Logger } from './utils/logger';
 import { sleep } from './utils/helpers';
 import { logStreamer } from './server/logStreamer';
 import { commandServer, ViewerCommand } from './server/commandServer';
+import { arenaEventStream } from './arena/arenaEventStream';
 import { AgentDirective } from './server/requestCollector';
 import { AgentPersonality } from './agent/autonomousAgent';
 import { startMoltbookAgent } from './moltbookAgent';
@@ -93,6 +94,10 @@ async function main() {
 
   // Start the log streaming server
   logStreamer.start(logStreamPort);
+
+  // Start the arena event WebSocket server
+  const arenaWsPort = parseInt(process.env.ARENA_WS_PORT || '8082');
+  arenaEventStream.start(arenaWsPort);
 
   // Start the command server for OpenClaw/Telegram integration
   const commandPort = parseInt(process.env.COMMAND_PORT || '8081');

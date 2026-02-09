@@ -58,6 +58,10 @@ const DATA_DIR = path.join(process.cwd(), 'data', 'arena');
 const CRAFT_WALLETS_FILE = path.join(DATA_DIR, 'craft-wallets.json');
 const CRAFT_TRANSACTIONS_FILE = path.join(DATA_DIR, 'craft-transactions.json');
 
+// Test mode - simulates transactions without real tokens
+const TEST_MODE = process.env.CRAFT_TEST_MODE === 'true';
+const TEST_STARTING_BALANCE = 1000; // Each agent starts with 1000 CRAFT in test mode
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -93,6 +97,10 @@ class CraftTokenService {
   private serverWallet: Keypair | null = null;
   private serverTokenAccount: PublicKey | null = null;
   private isInitialized = false;
+  
+  // Test mode: simulated balances (ownerId -> CRAFT amount)
+  private testBalances: Map<string, number> = new Map();
+  private testServerBalance: number = 100000; // Server has 100k in test mode
 
   constructor() {
     this.connection = new Connection(RPC_URL, {
@@ -119,6 +127,12 @@ class CraftTokenService {
     if (this.isInitialized) return;
 
     try {
+      // Test mode check
+      if (TEST_MODE) {
+        console.log('[CRAFT] 🧪 TEST MODE ENABLED - No real transactions will be made');
+        console.log(`[CRAFT] 🧪 Agents start with ${TEST_STARTING_BALANCE} simulated CRAFT`);
+      }
+      
       // Load server wallet
       const serverKey = process.env.SOLANA_SERVER_PRIVATE_KEY;
       if (serverKey) {
@@ -258,9 +272,39 @@ class CraftTokenService {
    * Get CRAFT balance for an agent by ownerId
    */
   async getAgentCraftBalance(ownerId: string): Promise<number> {
+    // Test mode: return simulated balance
+    if (TEST_MODE) {
+      if (!this.testBalances.has(ownerId)) {
+        this.testBalances.set(ownerId, TEST_STARTING_BALANCE);
+      }
+      return this.testBalances.get(ownerId) || 0;
+    }
+    
     const wallet = this.wallets.get(ownerId);
     if (!wallet) return 0;
     return this.getCraftBalance(new PublicKey(wallet.walletAddress));
+  }
+  
+  /**
+   * Get test mode status and balances
+   */
+  getTestModeInfo(): { enabled: boolean; serverBalance: number } {
+    return {
+      enabled: TEST_MODE,
+      serverBalance: TEST_MODE ? this.testServerBalance : 0
+    };
+  }
+  
+  /**
+   * Generate a fake signature for test mode
+   */
+  private generateTestSignature(): string {
+    const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    let sig = '';
+    for (let i = 0; i < 88; i++) {
+      sig += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return sig;
   }
 
   /**
@@ -372,6 +416,37 @@ class CraftTokenService {
     amount: number,
     matchId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    // Test mode: simulate transaction
+    if (TEST_MODE) {
+      const balance = await this.getAgentCraftBalance(ownerId);
+      if (balance < amount) {
+        return { success: false, error: `Insufficient CRAFT. Have: ${balance}, Need: ${amount}` };
+      }
+      
+      // Deduct from test balance
+      this.testBalances.set(ownerId, balance - amount);
+      this.testServerBalance += amount;
+      
+      const signature = this.generateTestSignature();
+      console.log(`[CRAFT] 🧪 TEST: Escrowed ${amount} CRAFT for match ${matchId}`);
+      
+      // Record test transaction
+      const txRecord: CraftTransaction = {
+        id: this.generateTxId(),
+        type: 'wager_escrow',
+        fromOwnerId: ownerId,
+        amount,
+        signature,
+        createdAt: new Date().toISOString(),
+        status: 'confirmed',
+        metadata: { matchId, testMode: true },
+      };
+      this.transactions.push(txRecord);
+      this.saveTransactions();
+      
+      return { success: true, signature };
+    }
+    
     const wallet = this.wallets.get(ownerId);
     if (!wallet || !this.serverWallet || !this.serverTokenAccount) {
       return { success: false, error: 'Wallet or server not initialized' };
@@ -432,6 +507,36 @@ class CraftTokenService {
     amount: number,
     matchId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    // Test mode: simulate payout
+    if (TEST_MODE) {
+      if (this.testServerBalance < amount) {
+        return { success: false, error: `Server insufficient CRAFT. Have: ${this.testServerBalance}, Need: ${amount}` };
+      }
+      
+      // Credit to winner, deduct from server
+      const currentBalance = await this.getAgentCraftBalance(winnerId);
+      this.testBalances.set(winnerId, currentBalance + amount);
+      this.testServerBalance -= amount;
+      
+      const signature = this.generateTestSignature();
+      console.log(`[CRAFT] 🧪 TEST: Paid out ${amount} CRAFT to ${winnerId} for match ${matchId}`);
+      
+      const txRecord: CraftTransaction = {
+        id: this.generateTxId(),
+        type: 'wager_payout',
+        toOwnerId: winnerId,
+        amount,
+        signature,
+        createdAt: new Date().toISOString(),
+        status: 'confirmed',
+        metadata: { matchId, testMode: true },
+      };
+      this.transactions.push(txRecord);
+      this.saveTransactions();
+      
+      return { success: true, signature };
+    }
+    
     const wallet = this.wallets.get(winnerId);
     if (!wallet || !this.serverWallet || !this.serverTokenAccount) {
       return { success: false, error: 'Wallet or server not initialized' };
@@ -489,6 +594,35 @@ class CraftTokenService {
     amount: number,
     bountyId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    // Test mode: simulate escrow
+    if (TEST_MODE) {
+      const balance = await this.getAgentCraftBalance(creatorId);
+      if (balance < amount) {
+        return { success: false, error: `Insufficient CRAFT. Have: ${balance}, Need: ${amount}` };
+      }
+      
+      this.testBalances.set(creatorId, balance - amount);
+      this.testServerBalance += amount;
+      
+      const signature = this.generateTestSignature();
+      console.log(`[CRAFT] 🧪 TEST: Escrowed ${amount} CRAFT for bounty ${bountyId}`);
+      
+      const txRecord: CraftTransaction = {
+        id: this.generateTxId(),
+        type: 'bounty_escrow',
+        fromOwnerId: creatorId,
+        amount,
+        signature,
+        createdAt: new Date().toISOString(),
+        status: 'confirmed',
+        metadata: { bountyId, testMode: true },
+      };
+      this.transactions.push(txRecord);
+      this.saveTransactions();
+      
+      return { success: true, signature };
+    }
+    
     const wallet = this.wallets.get(creatorId);
     if (!wallet || !this.serverWallet || !this.serverTokenAccount) {
       return { success: false, error: 'Wallet or server not initialized' };
@@ -546,6 +680,35 @@ class CraftTokenService {
     amount: number,
     bountyId: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    // Test mode: simulate release
+    if (TEST_MODE) {
+      if (this.testServerBalance < amount) {
+        return { success: false, error: `Server insufficient CRAFT. Have: ${this.testServerBalance}, Need: ${amount}` };
+      }
+      
+      const currentBalance = await this.getAgentCraftBalance(builderId);
+      this.testBalances.set(builderId, currentBalance + amount);
+      this.testServerBalance -= amount;
+      
+      const signature = this.generateTestSignature();
+      console.log(`[CRAFT] 🧪 TEST: Released ${amount} CRAFT for bounty ${bountyId} to ${builderId}`);
+      
+      const txRecord: CraftTransaction = {
+        id: this.generateTxId(),
+        type: 'bounty_payout',
+        toOwnerId: builderId,
+        amount,
+        signature,
+        createdAt: new Date().toISOString(),
+        status: 'confirmed',
+        metadata: { bountyId, testMode: true },
+      };
+      this.transactions.push(txRecord);
+      this.saveTransactions();
+      
+      return { success: true, signature };
+    }
+    
     const wallet = this.wallets.get(builderId);
     if (!wallet || !this.serverWallet || !this.serverTokenAccount) {
       return { success: false, error: 'Wallet or server not initialized' };
@@ -602,6 +765,37 @@ class CraftTokenService {
     amount: number,
     message?: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    // Test mode: simulate tip
+    if (TEST_MODE) {
+      const fromBalance = await this.getAgentCraftBalance(fromOwnerId);
+      if (fromBalance < amount) {
+        return { success: false, error: `Insufficient CRAFT. Have: ${fromBalance}, Need: ${amount}` };
+      }
+      
+      const toBalance = await this.getAgentCraftBalance(toOwnerId);
+      this.testBalances.set(fromOwnerId, fromBalance - amount);
+      this.testBalances.set(toOwnerId, toBalance + amount);
+      
+      const signature = this.generateTestSignature();
+      console.log(`[CRAFT] 🧪 TEST: Tipped ${amount} CRAFT from ${fromOwnerId} to ${toOwnerId}`);
+      
+      const txRecord: CraftTransaction = {
+        id: this.generateTxId(),
+        type: 'tip',
+        fromOwnerId,
+        toOwnerId,
+        amount,
+        signature,
+        createdAt: new Date().toISOString(),
+        status: 'confirmed',
+        metadata: { message, testMode: true },
+      };
+      this.transactions.push(txRecord);
+      this.saveTransactions();
+      
+      return { success: true, signature };
+    }
+    
     const fromWallet = this.wallets.get(fromOwnerId);
     const toWallet = this.wallets.get(toOwnerId);
     

@@ -12,6 +12,7 @@ import { gameEngine } from './gameEngine';
 import { GAME_CONFIGS, GameType, WagerCurrency } from './gameTypes';
 import { craftTokenService } from './craftTokenService';
 import { bountyManager } from './bountyManager';
+import { arenaEventStream } from './arenaEventStream';
 
 // Helper to parse JSON body
 async function parseBody(req: IncomingMessage): Promise<any> {
@@ -461,7 +462,7 @@ export async function handleArenaRoute(
         success: true, 
         gameTypes,
         supportedCurrencies: ['tokens', 'SOL', 'CRAFT'],
-        note: 'CRAFT token wagering coming soon!'
+        note: 'All wager currencies available! tokens=play money, SOL/CRAFT=real value'
       });
       return true;
     }
@@ -564,10 +565,17 @@ export async function handleArenaRoute(
         }
         // Note: SOL will be escrowed when game starts
       } else if (wagerCurrency === 'CRAFT') {
-        // For CRAFT wagers, verify SPL token balance
-        // TODO: Implement CRAFT token balance check
-        sendJson(res, 400, { success: false, error: '$CRAFT token wagering coming soon!' });
-        return true;
+        // For CRAFT wagers, verify SPL token balance and escrow
+        await craftTokenService.initialize();
+        const craftBalance = await craftTokenService.getAgentCraftBalance(agentToken);
+        if (craftBalance < wager) {
+          sendJson(res, 400, { 
+            success: false, 
+            error: `Insufficient CRAFT balance. Have: ${craftBalance} CRAFT, Need: ${wager} CRAFT`
+          });
+          return true;
+        }
+        // Note: CRAFT will be escrowed when game starts, same as SOL
       }
 
       const result = gameEngine.createGame(
@@ -582,6 +590,17 @@ export async function handleArenaRoute(
       if (!result.success && wagerCurrency === 'tokens') {
         // Refund on failure (only for tokens, SOL not escrowed yet)
         arenaManager.deposit(agentToken, wager);
+      }
+
+      // Emit WebSocket event for new game
+      if (result.success && result.game) {
+        arenaEventStream.emitGameCreated({
+          id: result.game.id,
+          gameType: result.game.gameType,
+          gameName: GAME_CONFIGS[gameType as GameType]?.name || gameType,
+          wager: result.game.wagerAmount,
+          creatorName: profile.agentName
+        });
       }
 
       sendJson(res, result.success ? 200 : 400, result);
@@ -646,8 +665,17 @@ export async function handleArenaRoute(
         }
         // Note: SOL escrowed at game start
       } else if (game.wagerCurrency === 'CRAFT') {
-        sendJson(res, 400, { success: false, error: '$CRAFT token wagering coming soon!' });
-        return true;
+        // Check CRAFT balance
+        await craftTokenService.initialize();
+        const craftBalance = await craftTokenService.getAgentCraftBalance(agentToken);
+        if (craftBalance < game.wagerAmount) {
+          sendJson(res, 400, { 
+            success: false, 
+            error: `Insufficient CRAFT balance. Need: ${game.wagerAmount} CRAFT, Have: ${craftBalance} CRAFT`
+          });
+          return true;
+        }
+        // Note: CRAFT escrowed at game start
       }
 
       const result = gameEngine.joinGame(gameId, agentToken, profile.agentName);
@@ -655,6 +683,11 @@ export async function handleArenaRoute(
       if (!result.success && game.wagerCurrency === 'tokens') {
         // Refund on failure (only tokens)
         arenaManager.deposit(agentToken, game.wagerAmount);
+      }
+
+      // Emit WebSocket event to game creator
+      if (result.success) {
+        arenaEventStream.emitGameJoined(gameId, profile.agentName, game.player1.agentId);
       }
 
       sendJson(res, result.success ? 200 : 400, result);
@@ -733,8 +766,18 @@ export async function handleArenaRoute(
 
       const game = gameEngine.getGame(gameId);
       if (game) {
-        // Refund the wager
-        arenaManager.deposit(agentToken, game.wagerAmount);
+        // Refund the wager based on currency
+        if (game.wagerCurrency === 'CRAFT') {
+          // For CRAFT, we need to refund from escrow (but CRAFT isn't escrowed until game starts)
+          // If game is still waiting, balance was just checked, not escrowed
+          console.log(`[Arena] CRAFT game cancelled before start - no refund needed (not escrowed)`);
+        } else if (game.wagerCurrency === 'SOL') {
+          // SOL also not escrowed until game starts
+          console.log(`[Arena] SOL game cancelled before start - no refund needed (not escrowed)`);
+        } else {
+          // Tokens - refund immediately
+          arenaManager.deposit(agentToken, game.wagerAmount);
+        }
       }
 
       const result = gameEngine.cancelGame(gameId, agentToken);
@@ -759,9 +802,16 @@ export async function handleArenaRoute(
 
       const result = gameEngine.forfeitGame(gameId, agentToken);
       
-      // Credit winner
+      // Credit winner based on wager currency
       if (result.success && result.game?.winnerId) {
-        arenaManager.deposit(result.game.winnerId, result.game.winnerPayout);
+        const { winnerId, winnerPayout, wagerCurrency, id } = result.game;
+        if (wagerCurrency === 'CRAFT') {
+          await craftTokenService.payoutWinner(winnerId, winnerPayout, id);
+        } else if (wagerCurrency === 'SOL') {
+          await solanaService.payoutGameWinner(winnerId, winnerPayout);
+        } else {
+          arenaManager.deposit(winnerId, winnerPayout);
+        }
       }
 
       sendJson(res, result.success ? 200 : 400, result);
@@ -781,9 +831,16 @@ export async function handleArenaRoute(
 
       const result = gameEngine.judgeGame(gameId, winnerId, reason);
       
-      // Credit winner
+      // Credit winner based on wager currency
       if (result.success && result.game?.winnerId) {
-        arenaManager.deposit(result.game.winnerId, result.game.winnerPayout);
+        const { winnerId: winner, winnerPayout, wagerCurrency, id } = result.game;
+        if (wagerCurrency === 'CRAFT') {
+          await craftTokenService.payoutWinner(winner, winnerPayout, id);
+        } else if (wagerCurrency === 'SOL') {
+          await solanaService.payoutGameWinner(winner, winnerPayout);
+        } else {
+          arenaManager.deposit(winner, winnerPayout);
+        }
       }
 
       sendJson(res, result.success ? 200 : 400, result);
@@ -823,11 +880,38 @@ export async function handleArenaRoute(
       await craftTokenService.initialize();
       const networkInfo = craftTokenService.getNetworkInfo();
       const serverBalance = await craftTokenService.getServerCraftBalance();
+      const testModeInfo = craftTokenService.getTestModeInfo();
       sendJson(res, 200, {
         success: true,
         ...networkInfo,
-        serverBalance,
-        description: 'CRAFT is the native token for ClaudeCraft arena wagers, bounties, and tips'
+        serverBalance: testModeInfo.enabled ? testModeInfo.serverBalance : serverBalance,
+        testMode: testModeInfo.enabled,
+        description: testModeInfo.enabled 
+          ? '🧪 TEST MODE - Simulated CRAFT tokens (no real transactions)' 
+          : 'CRAFT is the native token for ClaudeCraft arena wagers, bounties, and tips'
+      });
+      return true;
+    }
+
+    // GET /api/v1/arena/events/info - Get WebSocket event stream info
+    if (route === '/events/info' && method === 'GET') {
+      const stats = arenaEventStream.getStats();
+      sendJson(res, 200, {
+        success: true,
+        websocketUrl: `ws://localhost:${stats.port}`,
+        ...stats,
+        availableEvents: [
+          'bounty_created', 'bounty_claimed', 'bounty_submitted', 
+          'bounty_completed', 'bounty_cancelled', 'bounty_expired',
+          'game_created', 'game_joined', 'game_turn', 'game_ended', 'game_cancelled',
+          'tip_received', 'tip_sent', 'balance_changed', 'wager_escrowed', 'wager_payout'
+        ],
+        usage: {
+          connect: 'Connect via WebSocket to receive real-time events',
+          authenticate: 'Send {"action": "auth", "token": "your_api_key"} to receive private events',
+          subscribe: 'Send {"action": "subscribe", "events": ["bounty_created"]} to filter events',
+          unsubscribe: 'Send {"action": "unsubscribe", "events": ["game_created"]} to stop receiving'
+        }
       });
       return true;
     }
@@ -916,6 +1000,9 @@ export async function handleArenaRoute(
       const result = await craftTokenService.sendTip(agentToken, toAgentId, amount, message);
       
       if (result.success) {
+        // Emit WebSocket events to both sender and recipient
+        arenaEventStream.emitTip(agentToken, toAgentId, amount, message, result.signature);
+        
         sendJson(res, 200, {
           success: true,
           message: `Tipped ${amount} CRAFT`,

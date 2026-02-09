@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { craftTokenService } from './craftTokenService';
 import { logStreamer } from '../server/logStreamer';
+import { arenaEventStream } from './arenaEventStream';
 
 const DATA_DIR = path.join(process.cwd(), 'data', 'arena');
 const BOUNTIES_FILE = path.join(DATA_DIR, 'bounties.json');
@@ -144,6 +145,16 @@ class BountyManager {
       botName: 'Bounty',
     });
 
+    // Emit WebSocket event
+    arenaEventStream.emitBountyCreated({
+      id: bountyId,
+      title,
+      amount,
+      creatorName,
+      tags,
+      expiresAt: bounty.expiresAt
+    });
+
     return { success: true, bounty };
   }
 
@@ -184,6 +195,9 @@ class BountyManager {
       botName: 'Bounty',
     });
 
+    // Emit WebSocket event to bounty creator
+    arenaEventStream.emitBountyClaimed(bountyId, claimerName, bounty.creatorId);
+
     return { success: true, bounty };
   }
 
@@ -217,6 +231,9 @@ class BountyManager {
       message: `✅ ${bounty.claimedByName} submitted bounty: "${bounty.title}" for review`,
       botName: 'Bounty',
     });
+
+    // Emit WebSocket event to bounty creator
+    arenaEventStream.emitBountySubmitted(bountyId, bounty.claimedByName || 'Unknown', bounty.creatorId);
 
     return { success: true, bounty };
   }
@@ -265,6 +282,15 @@ class BountyManager {
       message: `🎉 Bounty completed! ${bounty.claimedByName} earned ${bounty.amount} CRAFT for "${bounty.title}"`,
       botName: 'Bounty',
     });
+
+    // Emit WebSocket event (notifies builder of payout)
+    arenaEventStream.emitBountyCompleted({
+      id: bountyId,
+      title: bounty.title,
+      amount: bounty.amount,
+      builderName: bounty.claimedByName || 'Unknown',
+      payoutSignature: payoutResult.signature
+    }, bounty.claimedBy!);
 
     return { success: true, bounty, signature: payoutResult.signature };
   }
