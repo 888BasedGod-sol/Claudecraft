@@ -55,3 +55,17 @@ data/
 
 # Test files
 test-*.js
+
+# ElizaOS sensitive files (credentials, database)
+elizaos-agent/.eliza-credentials.json
+elizaos-agent/.eliza/
+*.credentials.json
+
+# Wallet files
+**/solana-wallets.json
+**/wallets.json
+
+# Tunnel files (dynamic URLs)
+MC_TUNNEL.txt
+BLUEMAP_TUNNEL.txt
+WS_TUNNEL_URL.txt
