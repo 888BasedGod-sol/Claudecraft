@@ -13,6 +13,7 @@ import { GAME_CONFIGS, GameType, WagerCurrency } from './gameTypes';
 import { craftTokenService } from './craftTokenService';
 import { bountyManager } from './bountyManager';
 import { arenaEventStream } from './arenaEventStream';
+import { agentWalletService } from './agentWalletService';
 
 // Helper to parse JSON body
 async function parseBody(req: IncomingMessage): Promise<any> {
@@ -1231,6 +1232,141 @@ export async function handleArenaRoute(
         createdCount: created.length,
         claimedCount: claimed.length
       });
+      return true;
+    }
+
+    // =========================================================================
+    // AGENT WALLET ENDPOINTS
+    // =========================================================================
+
+    // GET /api/v1/arena/wallet/status - Get wallet service status
+    if (route === '/wallet/status' && method === 'GET') {
+      const stats = agentWalletService.getStats();
+      const heliusStatus = solanaService.getHeliusStatus();
+      sendJson(res, 200, {
+        success: true,
+        initialized: agentWalletService.isReady(),
+        ...stats,
+        helius: heliusStatus
+      });
+      return true;
+    }
+
+    // POST /api/v1/arena/wallet/create - Create/get agent wallet
+    if (route === '/wallet/create' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const result = await agentWalletService.getOrCreateWallet(agentToken);
+      sendJson(res, 200, { success: true, ...result });
+      return true;
+    }
+
+    // GET /api/v1/arena/wallet/balance - Get agent wallet balance
+    if (route === '/wallet/balance' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const address = agentWalletService.getWalletAddress(agentToken);
+      if (!address) {
+        sendJson(res, 404, { success: false, error: 'No wallet found. Create one first.' });
+        return true;
+      }
+
+      const balances = await agentWalletService.getTokenBalances(agentToken);
+      sendJson(res, 200, {
+        success: true,
+        address,
+        ...balances
+      });
+      return true;
+    }
+
+    // GET /api/v1/arena/wallet/transactions - Get transaction history
+    if (route === '/wallet/transactions' && method === 'GET') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const url = new URL(req.url || '', `http://${req.headers.host}`);
+      const limit = parseInt(url.searchParams.get('limit') || '10');
+
+      const transactions = await agentWalletService.getTransactionHistory(agentToken, limit);
+      sendJson(res, 200, { success: true, transactions });
+      return true;
+    }
+
+    // POST /api/v1/arena/wallet/send - Send SOL from agent wallet
+    if (route === '/wallet/send' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { toAddress, amount } = body;
+
+      if (!toAddress || !amount) {
+        sendJson(res, 400, { success: false, error: 'toAddress and amount required' });
+        return true;
+      }
+
+      const result = await agentWalletService.sendSOL(agentToken, toAddress, amount);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // POST /api/v1/arena/wallet/airdrop - Request devnet airdrop
+    if (route === '/wallet/airdrop' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const amount = body.amount || 1;
+
+      const result = await agentWalletService.requestAirdrop(agentToken, amount);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // GET /api/v1/arena/wallet/stats - Get overall wallet stats
+    if (route === '/wallet/stats' && method === 'GET') {
+      const stats = agentWalletService.getStats();
+      sendJson(res, 200, { success: true, ...stats });
+      return true;
+    }
+
+    // POST /api/v1/arena/wallet/import - Import existing wallet
+    if (route === '/wallet/import' && method === 'POST') {
+      if (!agentToken) {
+        sendJson(res, 401, { success: false, error: 'Authorization required' });
+        return true;
+      }
+
+      const body = await parseBody(req);
+      const { privateKey } = body;
+
+      if (!privateKey) {
+        sendJson(res, 400, { success: false, error: 'privateKey required (base58 encoded)' });
+        return true;
+      }
+
+      const result = agentWalletService.importWallet(agentToken, privateKey);
+      sendJson(res, result.success ? 200 : 400, result);
+      return true;
+    }
+
+    // GET /api/v1/arena/helius/status - Get Helius RPC status
+    if (route === '/helius/status' && method === 'GET') {
+      const status = solanaService.getHeliusStatus();
+      sendJson(res, 200, { success: true, ...status });
       return true;
     }
 

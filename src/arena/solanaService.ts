@@ -39,14 +39,23 @@ const DEPOSITS_FILE = path.join(DATA_DIR, 'deposits.json');
 // Network selection: devnet (testing) or mainnet-beta (production)
 const NETWORK = process.env.SOLANA_NETWORK || 'devnet';
 
-// RPC endpoints - prefer dedicated RPC for production
+// Helius RPC support - enhanced Solana RPC with additional features
+const HELIUS_API_KEY = process.env.HELIUS_API_KEY || '';
+
+function getHeliusRpcUrl(network: string): string | null {
+  if (!HELIUS_API_KEY) return null;
+  const heliusNetwork = network === 'mainnet-beta' ? 'mainnet' : network;
+  return `https://${heliusNetwork}.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;
+}
+
+// RPC endpoints - prefer Helius if API key provided, else fallback to public
 const RPC_ENDPOINTS: Record<string, { http: string; ws: string }> = {
   'mainnet-beta': {
-    http: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
+    http: getHeliusRpcUrl('mainnet-beta') || process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
     ws: process.env.SOLANA_WS_URL || 'wss://api.mainnet-beta.solana.com',
   },
   'devnet': {
-    http: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+    http: getHeliusRpcUrl('devnet') || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
     ws: process.env.SOLANA_WS_URL || 'wss://api.devnet.solana.com',
   },
 };
@@ -748,6 +757,101 @@ class SolanaService {
     return NETWORK === 'mainnet-beta'
       ? `https://explorer.solana.com/tx/${signature}`
       : `https://explorer.solana.com/tx/${signature}?cluster=${NETWORK}`;
+  }
+
+  // ============================================================================
+  // HELIUS ENHANCED METHODS
+  // ============================================================================
+
+  /**
+   * Check if Helius RPC is enabled
+   */
+  isHeliusEnabled(): boolean {
+    return !!HELIUS_API_KEY;
+  }
+
+  /**
+   * Get Helius status info
+   */
+  getHeliusStatus(): { enabled: boolean; network: string; rpcEndpoint: string } {
+    return {
+      enabled: this.isHeliusEnabled(),
+      network: NETWORK,
+      rpcEndpoint: this.isHeliusEnabled() ? 'Helius RPC' : 'Public RPC',
+    };
+  }
+
+  /**
+   * Get parsed transaction history using Helius (enhanced data)
+   */
+  async getParsedTransactionHistory(address: string, limit: number = 10): Promise<any[]> {
+    if (!HELIUS_API_KEY) {
+      console.log('[SOLANA] Helius not configured, using standard getSignaturesForAddress');
+      return [];
+    }
+
+    try {
+      const heliusUrl = `https://api.helius.xyz/v0/addresses/${address}/transactions?api-key=${HELIUS_API_KEY}&limit=${limit}`;
+      const response = await fetch(heliusUrl);
+      const data = await response.json();
+      return data as any[];
+    } catch (error) {
+      console.error('[SOLANA] Helius transaction history error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get token balances for an address using Helius
+   */
+  async getTokenBalances(address: string): Promise<{ nativeBalance: number; tokens: any[] }> {
+    if (!HELIUS_API_KEY) {
+      // Fallback to basic balance
+      const balance = await this.connection.getBalance(new PublicKey(address));
+      return { nativeBalance: balance / LAMPORTS_PER_SOL, tokens: [] };
+    }
+
+    try {
+      const heliusUrl = `https://api.helius.xyz/v0/addresses/${address}/balances?api-key=${HELIUS_API_KEY}`;
+      const response = await fetch(heliusUrl);
+      const data = await response.json() as { nativeBalance?: number; tokens?: any[] };
+      return {
+        nativeBalance: (data.nativeBalance || 0) / LAMPORTS_PER_SOL,
+        tokens: data.tokens || [],
+      };
+    } catch (error) {
+      console.error('[SOLANA] Helius token balances error:', error);
+      const balance = await this.connection.getBalance(new PublicKey(address));
+      return { nativeBalance: balance / LAMPORTS_PER_SOL, tokens: [] };
+    }
+  }
+
+  /**
+   * Get priority fee estimate from Helius
+   */
+  async getPriorityFeeEstimate(): Promise<{ low: number; medium: number; high: number }> {
+    if (!HELIUS_API_KEY) {
+      return { low: 1000, medium: 50000, high: 100000 };
+    }
+
+    try {
+      const heliusUrl = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`;
+      const response = await fetch(heliusUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 'priority-fee',
+          method: 'getPriorityFeeEstimate',
+          params: [{ accountKeys: [], options: { recommended: true } }],
+        }),
+      });
+      const data = await response.json() as any;
+      return data.result?.priorityFeeEstimate || { low: 1000, medium: 50000, high: 100000 };
+    } catch (error) {
+      console.error('[SOLANA] Helius priority fee error:', error);
+      return { low: 1000, medium: 50000, high: 100000 };
+    }
   }
 }
 

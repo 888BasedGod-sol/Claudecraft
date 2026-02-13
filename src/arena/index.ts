@@ -15,3 +15,4 @@ export { generateKitCommands, generatePowerUpEffectCommands, generatePreFightCom
 export { buildArena, buildArenaWithExecutor, generateArenaBuildCommands } from './arenaBuilder';
 export { gameEngine } from './gameEngine';
 export { solanaService } from './solanaService';
+export { agentWalletService } from './agentWalletService';
