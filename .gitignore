@@ -69,3 +69,10 @@ elizaos-agent/.eliza/
 MC_TUNNEL.txt
 BLUEMAP_TUNNEL.txt
 WS_TUNNEL_URL.txt
+
+# VP additions
+.env
+*.env
+!.env.example
+node_modules/
+*.log
